@@ -438,98 +438,96 @@ function formUtils() {
     });
   });
 }
-(function main() {
-  MemberstackInterceptor(window.$memberstackDom);
-  const authService = new AuthService();
-  const EXCLUDED_URL_PATTERNS = "/default".split(",").map((pattern) => new RegExp(pattern));
-  const isExcludedPage = (url) => {
-    return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
-  };
-  document.addEventListener(MemberstackEvents.GET_APP, async () => {
-    if (isExcludedPage(location.href)) {
-      console.log("Avoided verification on excluded page");
+MemberstackInterceptor(window.$memberstackDom);
+const authService = new AuthService();
+const EXCLUDED_URL_PATTERNS = "/default".split(",").map((pattern) => new RegExp(pattern));
+const isExcludedPage = (url) => {
+  return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
+};
+document.addEventListener(MemberstackEvents.GET_APP, async () => {
+  if (isExcludedPage(location.href)) {
+    console.log("Avoided verification on excluded page");
+    return;
+  }
+  console.log("getApp");
+  if (!isMemberLoggedIn()) {
+    dispatchValidationEvent("unauthenticated");
+    return;
+  }
+  try {
+    const isStatusValid = await authService.validateSessionStatus();
+    if (isStatusValid === false) {
+      await window.$memberstackDom.logout();
       return;
     }
-    console.log("getApp");
-    if (!isMemberLoggedIn()) {
-      dispatchValidationEvent("unauthenticated");
-      return;
-    }
-    try {
-      const isStatusValid = await authService.validateSessionStatus();
-      if (isStatusValid === false) {
-        await window.$memberstackDom.logout();
-        return;
+    dispatchValidationEvent(true);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      if (error.status === 401 || error.status === 403) {
+        await window.$memberstackDom.logout({ isExpired: true });
       }
-      dispatchValidationEvent(true);
+      return;
+    }
+  }
+}, { once: true });
+document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
+  const { detail } = ev;
+  console.log("logout");
+  if (!isMemberLoggedIn()) {
+    console.log("Member is not logged in.");
+    return;
+  }
+  if (detail == null ? void 0 : detail.isExpired) {
+    await window.$memberstackDom._showMessage("Forbidden. Please login again.", true);
+  } else {
+    try {
+      await window.$memberstackDom._showMessage("Your session has expired. Please login again.", true);
+      await authService.logout();
     } catch (error) {
       if (error instanceof AuthError) {
         if (error.status === 401 || error.status === 403) {
-          await window.$memberstackDom.logout({ isExpired: true });
+          console.log("Member is already logged out from the server.");
         }
-        return;
       }
     }
-  }, { once: true });
-  document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
-    const { detail } = ev;
-    console.log("logout");
-    if (!isMemberLoggedIn()) {
-      console.log("Member is not logged in.");
-      return;
-    }
-    if (detail == null ? void 0 : detail.isExpired) {
-      await window.$memberstackDom._showMessage("Forbidden. Please login again.", true);
+  }
+  await handleLogout(null, "/");
+});
+document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
+  console.log("login");
+  const detail = event.detail;
+  if (!detail && isMemberLoggedIn()) {
+    console.log("Member is already logged in.");
+    await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", true);
+    return;
+  }
+  try {
+    let isEmailPasswordAuth = function(detail2) {
+      return "email" in detail2 && "password" in detail2;
+    };
+    if (isEmailPasswordAuth(detail)) {
+      const res = await authService.login({ email: detail.email, password: detail.password });
+      localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
+      localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
+      window.location.href = res.data.redirect;
     } else {
-      try {
-        await window.$memberstackDom._showMessage("Your session has expired. Please login again.", true);
-        await authService.logout();
-      } catch (error) {
-        if (error instanceof AuthError) {
-          if (error.status === 401 || error.status === 403) {
-            console.log("Member is already logged out from the server.");
-          }
-        }
-      }
+      const res = await authService.loginWithProvider({ loginResponse: detail });
+      window.location.href = res.data.redirect;
     }
-    await handleLogout(null, "/");
-  });
-  document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
-    console.log("login");
-    const detail = event.detail;
-    if (!detail && isMemberLoggedIn()) {
-      console.log("Member is already logged in.");
-      await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", true);
+  } catch (error) {
+    if (error instanceof TwoFactorRequiredError) {
+      localStorage.removeItem("_ms-mid");
+      const SESSION_NAME = "_ms-2fa-session";
+      const session = JSON.stringify({ data: error.data, type: error.type });
+      sessionStorage.setItem(SESSION_NAME, session);
+      navigateTo("/src/pages/2factor-challenge/");
       return;
     }
-    try {
-      let isEmailPasswordAuth = function(detail2) {
-        return "email" in detail2 && "password" in detail2;
-      };
-      if (isEmailPasswordAuth(detail)) {
-        const res = await authService.login({ email: detail.email, password: detail.password });
-        localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
-        localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
-        window.location.href = res.data.redirect;
-      } else {
-        const res = await authService.loginWithProvider({ loginResponse: detail });
-        window.location.href = res.data.redirect;
-      }
-    } catch (error) {
-      if (error instanceof TwoFactorRequiredError) {
-        localStorage.removeItem("_ms-mid");
-        const SESSION_NAME = "_ms-2fa-session";
-        const session = JSON.stringify({ data: error.data, type: error.type });
-        sessionStorage.setItem(SESSION_NAME, session);
-        navigateTo("/src/pages/2factor-challenge/");
-        return;
-      }
-      throw error;
-    }
-  });
-  document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
-    const memberData = event.detail;
-    await authService.signup({ token: memberData.data.tokens.accessToken });
-  });
-  formUtils();
-})();
+    throw error;
+  }
+});
+document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
+  const memberData = event.detail;
+  await authService.signup({ token: memberData.data.tokens.accessToken });
+});
+formUtils();
