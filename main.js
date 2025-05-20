@@ -1,130 +1,130 @@
 var _ = Object.defineProperty;
-var D = (n, e, o) => e in n ? _(n, e, { enumerable: !0, configurable: !0, writable: !0, value: o }) : n[e] = o;
-var h = (n, e, o) => D(n, typeof e != "symbol" ? e + "" : e, o);
-const m = {
+var D = (r, e, t) => e in r ? _(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var b = (r, e, t) => D(r, typeof e != "symbol" ? e + "" : e, t);
+const w = {
   LOGOUT: "memberstack.logout",
   GET_APP: "memberstack.getApp",
   LOGIN: "memberstack.login",
   VALID_SESSION: "memberstack.validSession",
   SIGN_UP: "memberstack.signUp"
 };
-function T(n) {
-  if (!n)
+function T(r) {
+  if (!r)
     throw new Error("Memberstack instance is not defined");
   window._msConfig || (window._msConfig = {
     preventLogin: !0
-  }), window.$memberstackDom = new Proxy(n, {
-    get(e, o) {
-      const t = e[o];
-      return typeof t == "function" ? async function(...a) {
+  }), window.$memberstackDom = new Proxy(r, {
+    get(e, t) {
+      const s = e[t];
+      return typeof s == "function" ? async function(...o) {
         if (console.log(
-          `Method ${o} called with arguments: ${JSON.stringify(a)}`
-        ), o === "logout") {
-          const i = new CustomEvent(m.LOGOUT, {
+          `Method ${t} called with arguments: ${JSON.stringify(o)}`
+        ), t === "logout") {
+          const a = new CustomEvent(w.LOGOUT, {
             bubbles: !1,
             cancelable: !1,
-            detail: a[0]
+            detail: o[0]
           });
-          return document.dispatchEvent(i), !1;
+          return document.dispatchEvent(a), !1;
         }
-        if (o === "getApp") {
-          const i = new Event(m.GET_APP, {
+        if (t === "getApp") {
+          const a = new Event(w.GET_APP, {
             bubbles: !1,
             cancelable: !1
           });
-          document.dispatchEvent(i);
+          document.dispatchEvent(a);
         }
-        if (o === "loginMemberEmailPassword") {
-          const i = new CustomEvent(m.LOGIN, {
+        if (t === "loginMemberEmailPassword") {
+          const a = new CustomEvent(w.LOGIN, {
             bubbles: !1,
             cancelable: !1,
-            detail: a[0]
+            detail: o[0]
           });
-          return document.dispatchEvent(i), {
+          return document.dispatchEvent(a), {
             data: {}
           };
         }
-        if (o === "loginWithProvider") {
-          const i = await t.apply(e, a), c = new CustomEvent(m.LOGIN, {
+        if (t === "loginWithProvider") {
+          const a = await s.apply(e, o), c = new CustomEvent(w.LOGIN, {
             bubbles: !1,
             cancelable: !1,
-            detail: i
+            detail: a
           });
-          return document.dispatchEvent(c), i;
+          return document.dispatchEvent(c), a;
         }
-        if (o === "signupWithProvider") {
-          const i = await t.apply(e, a), c = new CustomEvent(m.SIGN_UP, {
+        if (t === "signupWithProvider") {
+          const a = await s.apply(e, o), c = new CustomEvent(w.SIGN_UP, {
             bubbles: !1,
             cancelable: !1,
-            detail: i
+            detail: a
           });
-          return document.dispatchEvent(c), i;
+          return document.dispatchEvent(c), a;
         }
-        if (o === "signupMemberEmailPassword") {
-          const i = await t.apply(e, a), c = new CustomEvent(m.SIGN_UP, {
+        if (t === "signupMemberEmailPassword") {
+          const a = await s.apply(e, o), c = new CustomEvent(w.SIGN_UP, {
             bubbles: !1,
             cancelable: !1,
-            detail: i
+            detail: a
           });
-          return document.dispatchEvent(c), i;
+          return document.dispatchEvent(c), a;
         }
-        return t.apply(e, a);
-      } : t;
+        return s.apply(e, o);
+      } : s;
     }
   });
 }
 function A() {
-  const n = "_ga_7T2LX34911", e = document.cookie.split("; ");
-  for (const o of e) {
-    const [t, a] = o.split("=");
-    if (t === n)
-      return a;
+  const r = "_ga_7T2LX34911", e = document.cookie.split("; ");
+  for (const t of e) {
+    const [s, o] = t.split("=");
+    if (s === r)
+      return o;
   }
   throw new Error("Device Id cookie not found");
 }
 const L = "https://staging-api.ordotype.fr/v1.0.0";
-class b extends Error {
-  constructor(o, t = 500) {
-    super(o);
-    h(this, "status");
-    this.name = "AuthError", this.status = t, Error.captureStackTrace && Error.captureStackTrace(this, b);
+class v extends Error {
+  constructor(t, s = 500) {
+    super(t);
+    b(this, "status");
+    this.name = "AuthError", this.status = s, Error.captureStackTrace && Error.captureStackTrace(this, v);
   }
 }
 class E extends Error {
-  constructor(o, t, a) {
-    super(o);
-    h(this, "data");
-    h(this, "type");
-    this.name = "TwoFactorRequiredError", this.data = t, this.type = a;
+  constructor(t, s, o) {
+    super(t);
+    b(this, "data");
+    b(this, "type");
+    this.name = "TwoFactorRequiredError", this.data = s, this.type = o;
   }
 }
 class I {
   constructor() {
-    h(this, "headers");
-    const e = "pk_sb_e80d8429a51c2ceb0530", o = window.localStorage.getItem("ms_session_id"), t = A();
+    b(this, "headers");
+    const e = "pk_sb_e80d8429a51c2ceb0530", t = window.localStorage.getItem("ms_session_id"), s = A();
     this.headers = {
       "X-Api-Key": e,
-      "X-Session-Id": o ?? void 0,
-      "X-Device-Id": t ?? void 0
+      "X-Session-Id": t ?? void 0,
+      "X-Device-Id": s ?? void 0
     };
   }
-  async request(e, o, t = "GET", a = null, i = {}) {
-    const c = `${L}/${o}/${e}`, p = {
+  async request(e, t, s = "GET", o = null, a = {}) {
+    const c = `${L}/${t}/${e}`, d = {
       "Content-Type": "application/json",
       ...this.headers,
-      ...i
-    }, v = {
-      method: t,
-      headers: p,
-      ...a && { body: JSON.stringify(a) }
+      ...a
+    }, h = {
+      method: s,
+      headers: d,
+      ...o && { body: JSON.stringify(o) }
     };
     try {
-      const d = await fetch(c, v);
-      if (!d.ok)
-        throw new b(d.statusText, d.status);
-      return d.status === 204 || !d.body ? null : await d.json();
-    } catch (d) {
-      throw console.error("API Request Failed:", d), d;
+      const u = await fetch(c, h);
+      if (!u.ok)
+        throw new v(u.statusText, u.status);
+      return u.status === 204 || !u.body ? null : await u.json();
+    } catch (u) {
+      throw console.error("API Request Failed:", u), u;
     }
   }
   async validateSessionStatus() {
@@ -156,7 +156,7 @@ class I {
     }
   }
   async signup(e) {
-    const o = {
+    const t = {
       ...e,
       device: this.headers["X-Device-Id"] ?? "unknown"
     };
@@ -164,62 +164,62 @@ class I {
       "signup",
       "auth",
       "POST",
-      o,
+      t,
       {}
     );
   }
   async login(e) {
-    const o = {
+    const t = {
       ...e,
       options: {
         includeContentGroups: !0,
         isWebflow: !0
       },
       device: this.headers["X-Device-Id"] ?? "unknown"
-    }, t = await this.request(
+    }, s = await this.request(
       "login",
       "auth",
       "POST",
-      o,
+      t,
       {}
     );
-    if (y(t))
-      throw new E("2fa required", t.data, t.type);
-    return t;
+    if (y(s))
+      throw new E("2fa required", s.data, s.type);
+    return s;
   }
   async loginWithProvider(e) {
-    const o = {
+    const t = {
       ...e,
       device: this.headers["X-Device-Id"] ?? "unknown"
-    }, t = await this.request(
+    }, s = await this.request(
       "validate-google-provider",
       "auth",
       "POST",
-      o,
+      t,
       {}
     );
-    if (y(t))
-      throw new E("2fa required", t.data, t.type);
-    return t;
+    if (y(s))
+      throw new E("2fa required", s.data, s.type);
+    return s;
   }
   // Helper to get a cookie
   getCookie(e) {
-    const o = document.cookie.match(new RegExp(`(^| )${e}=([^;]+)`));
-    return o ? decodeURIComponent(o[2]) : null;
+    const t = document.cookie.match(new RegExp(`(^| )${e}=([^;]+)`));
+    return t ? decodeURIComponent(t[2]) : null;
   }
   // Helper to set a cookie with expiration time
-  setCookie(e, o, t) {
-    const a = /* @__PURE__ */ new Date();
-    a.setTime(a.getTime() + t), document.cookie = `${e}=${encodeURIComponent(o)}; expires=${a.toUTCString()}; path=/`;
+  setCookie(e, t, s) {
+    const o = /* @__PURE__ */ new Date();
+    o.setTime(o.getTime() + s), document.cookie = `${e}=${encodeURIComponent(t)}; expires=${o.toUTCString()}; path=/`;
   }
   // Reusable throttle function
-  async throttle(e, o, t) {
-    const a = this.getCookie(o), i = Date.now();
-    if (a && i - parseInt(a, 10) < t)
-      return console.log(`Skipping execution of ${o}: Throttled.`), null;
-    console.log(`Executing ${o}...`);
+  async throttle(e, t, s) {
+    const o = this.getCookie(t), a = Date.now();
+    if (o && a - parseInt(o, 10) < s)
+      return console.log(`Skipping execution of ${t}: Throttled.`), null;
+    console.log(`Executing ${t}...`);
     const c = await e();
-    return this.setCookie(o, i.toString(), t), c;
+    return this.setCookie(t, a.toString(), s), c;
   }
   // Public wrapper for validateSessionStatus with throttling
   validateSessionStatusThrottled() {
@@ -231,117 +231,117 @@ class I {
     ) : Promise.resolve(null);
   }
 }
-function y(n) {
-  return "data" in n && typeof n.data == "object" && "type" in n;
+function y(r) {
+  return "data" in r && typeof r.data == "object" && "type" in r;
 }
 new I();
 function S() {
   return !!localStorage.getItem("_ms-mid");
 }
-function k(n) {
+function k(r) {
   window.$memberstackDom._showLoader(), setTimeout(() => {
-    window.location.href = n;
+    window.location.href = r;
   }, 500);
 }
-const $ = async (n, e = "/") => {
+const $ = async (r, e = "/") => {
   await window.$memberstackDom.logout(), localStorage.removeItem("_ms-mid"), localStorage.removeItem("_ms_mem"), k(e);
-}, P = (n) => {
-  const e = new CustomEvent(m.VALID_SESSION, {
+}, P = (r) => {
+  const e = new CustomEvent(w.VALID_SESSION, {
     bubbles: !1,
     cancelable: !1,
-    detail: { isStatusValid: n }
+    detail: { isStatusValid: r }
   });
   document.dispatchEvent(e);
 };
 function O() {
-  var v, d;
-  function n(s) {
-    return "provider" in s;
+  var h, u;
+  function r(n) {
+    return "provider" in n;
   }
-  function e(s) {
-    return "email" in s && "password" in s;
+  function e(n) {
+    return "email" in n && "password" in n;
   }
-  function o(s) {
-    const r = {};
-    return s.querySelectorAll("[data-ms-member]").forEach((u) => {
-      const w = u.getAttribute("data-ms-member");
-      w && !["email", "password", "new-password", "current-password"].includes(w) && (r[w] = u.value || "");
-    }), r;
+  function t(n) {
+    const i = {};
+    return n.querySelectorAll("[data-ms-member]").forEach((m) => {
+      const g = m.getAttribute("data-ms-member");
+      g && !["email", "password", "new-password", "current-password"].includes(g) && (i[g] = m.value || "");
+    }), i;
   }
-  function t(s) {
-    const r = s.getAttribute("data-ms-plan") || s.getAttribute("data-ms-plan:add") || s.getAttribute("data-ms-plan:update"), l = s.getAttribute("data-ms-price:add");
-    return { freePlan: r, paidPlan: l };
+  function s(n) {
+    const i = n.getAttribute("data-ms-plan") || n.getAttribute("data-ms-plan:add") || n.getAttribute("data-ms-plan:update"), l = n.getAttribute("data-ms-price:add");
+    return { freePlan: i, paidPlan: l };
   }
-  async function a(s, r) {
-    console.error(s, r), await window.$memberstackDom._showMessage((r == null ? void 0 : r.message) || "An error occurred", !0);
+  async function o(n, i) {
+    console.error(n, i), await window.$memberstackDom._showMessage((i == null ? void 0 : i.message) || "An error occurred", !0);
   }
-  async function i(s, r) {
-    var g, f;
-    s.preventDefault(), s.stopPropagation(), s.stopImmediatePropagation();
-    const l = s.target, u = (g = l.querySelector('[data-ms-member="email"]')) == null ? void 0 : g.value, w = (f = l.querySelector('[data-ms-member="password"]')) == null ? void 0 : f.value;
-    r === "signup" ? await p(l, { email: u, password: w }) : r === "login" && await c(l, { email: u, password: w });
+  async function a(n, i) {
+    var f, p;
+    n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation();
+    const l = n.target, m = (f = l.querySelector('[data-ms-member="email"]')) == null ? void 0 : f.value, g = (p = l.querySelector('[data-ms-member="password"]')) == null ? void 0 : p.value;
+    i === "signup" ? await d(l, { email: m, password: g }) : i === "login" && await c(l, { email: m, password: g });
   }
-  async function c(s, r) {
+  async function c(n, i) {
     let l;
-    if (n(r))
+    if (r(i))
       l = {
-        provider: r.provider
+        provider: i.provider
       };
-    else if (e(r))
+    else if (e(i))
       l = {
-        email: r.email,
-        password: r.password
+        email: i.email,
+        password: i.password
       };
     else
       throw new Error("Invalid form authentication options");
     try {
-      const u = n(r) ? await window.$memberstackDom.loginWithProvider(l) : await window.$memberstackDom.loginMemberEmailPassword(l);
-      console.log("Signin successful:", u);
-    } catch (u) {
-      await a("Login failed:", u);
+      const m = r(i) ? await window.$memberstackDom.loginWithProvider(l) : await window.$memberstackDom.loginMemberEmailPassword(l);
+      console.log("Signin successful:", m);
+    } catch (m) {
+      await o("Login failed:", m);
     }
   }
-  async function p(s, r) {
-    const l = o(s), { freePlan: u, paidPlan: w } = t(s);
-    let g = { customFields: l };
-    if (n(r))
-      g = {
+  async function d(n, i) {
+    const l = t(n), { freePlan: m, paidPlan: g } = s(n);
+    let f = { customFields: l };
+    if (r(i))
+      f = {
         allowLogin: !1,
-        provider: r.provider
+        provider: i.provider
       };
-    else if (e(r))
-      g = {
-        email: r.email,
-        password: r.password
+    else if (e(i))
+      f = {
+        email: i.email,
+        password: i.password
       };
     else
       throw new Error("Invalid form authentication options");
-    u && (g.plans = [{ planId: u }]);
+    m && (f.plans = [{ planId: m }]);
     try {
       window.$memberstackDom._showLoader();
-      const f = n(r) ? await window.$memberstackDom.signupWithProvider(g) : await window.$memberstackDom.signupMemberEmailPassword(g);
-      console.log("Signup successful:", f), w ? await window.$memberstackDom.purchasePlansWithCheckout({ priceId: w }) : k(f.data.redirect), window.$memberstackDom._hideLoader();
-    } catch (f) {
-      await a("Signup failed:", f), window.$memberstackDom._hideLoader();
+      const p = r(i) ? await window.$memberstackDom.signupWithProvider(f) : await window.$memberstackDom.signupMemberEmailPassword(f);
+      console.log("Signup successful:", p), g ? await window.$memberstackDom.purchasePlansWithCheckout({ priceId: g }) : k(p.data.redirect), window.$memberstackDom._hideLoader();
+    } catch (p) {
+      await o("Signup failed:", p), window.$memberstackDom._hideLoader();
     }
   }
-  (v = document.querySelector('[data-ms-form="signup"]')) == null || v.addEventListener("submit", async (s) => (s.preventDefault(), s.stopPropagation(), s.stopImmediatePropagation(), await i(s, "signup"), !1)), (d = document.querySelector('[data-ms-form="login"]')) == null || d.addEventListener("submit", async (s) => (s.preventDefault(), s.stopPropagation(), s.stopImmediatePropagation(), await i(s, "login"), !1)), document.querySelectorAll('[data-ms-auth-provider="google"]').forEach((s) => {
-    s.addEventListener("click", async (r) => {
-      r.preventDefault(), r.stopPropagation(), r.stopImmediatePropagation();
-      const l = s.closest("[data-ms-form]");
+  (h = document.querySelector('[data-ms-form="signup"]')) == null || h.addEventListener("submit", async (n) => (n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation(), await a(n, "signup"), !1)), (u = document.querySelector('[data-ms-form="login"]')) == null || u.addEventListener("submit", async (n) => (n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation(), await a(n, "login"), !1)), document.querySelectorAll('[data-ms-auth-provider="google"]').forEach((n) => {
+    n.addEventListener("click", async (i) => {
+      i.preventDefault(), i.stopPropagation(), i.stopImmediatePropagation();
+      const l = n.closest("[data-ms-form]");
       if (!l) {
         console.warn("No parent form with 'data-ms-form' found.");
         return;
       }
-      l.getAttribute("data-ms-form") === "signup" ? await p(l, { provider: "google" }) : await c(l, { provider: "google" });
+      l.getAttribute("data-ms-form") === "signup" ? await d(l, { provider: "google" }) : await c(l, { provider: "google" });
     });
   });
 }
-function C() {
+(function() {
   T(window.$memberstackDom);
-  const n = new I(), e = "/default".split(",").map((t) => new RegExp(t)), o = (t) => e.some((a) => a.test(t));
-  document.addEventListener(m.GET_APP, async () => {
-    if (o(location.href)) {
+  const e = new I(), t = "/default".split(",").map((o) => new RegExp(o)), s = (o) => t.some((a) => a.test(o));
+  document.addEventListener(w.GET_APP, async () => {
+    if (s(location.href)) {
       console.log("Avoided verification on excluded page");
       return;
     }
@@ -350,19 +350,19 @@ function C() {
       return;
     }
     try {
-      if (await n.validateSessionStatus() === !1) {
+      if (await e.validateSessionStatus() === !1) {
         await window.$memberstackDom.logout();
         return;
       }
       P(!0);
-    } catch (t) {
-      if (t instanceof b) {
-        (t.status === 401 || t.status === 403) && await window.$memberstackDom.logout({ isExpired: !0 });
+    } catch (o) {
+      if (o instanceof v) {
+        (o.status === 401 || o.status === 403) && await window.$memberstackDom.logout({ isExpired: !0 });
         return;
       }
     }
-  }, { once: !0 }), document.addEventListener(m.LOGOUT, async (t) => {
-    const { detail: a } = t;
+  }, { once: !0 }), document.addEventListener(w.LOGOUT, async (o) => {
+    const { detail: a } = o;
     if (console.log("logout"), !S()) {
       console.log("Member is not logged in.");
       return;
@@ -371,40 +371,39 @@ function C() {
       await window.$memberstackDom._showMessage("Forbidden. Please login again.", !0);
     else
       try {
-        await window.$memberstackDom._showMessage("Your session has expired. Please login again.", !0), await n.logout();
-      } catch (i) {
-        i instanceof b && (i.status === 401 || i.status === 403) && console.log("Member is already logged out from the server.");
+        await window.$memberstackDom._showMessage("Your session has expired. Please login again.", !0), await e.logout();
+      } catch (c) {
+        c instanceof v && (c.status === 401 || c.status === 403) && console.log("Member is already logged out from the server.");
       }
     await $(null, "/");
-  }), document.addEventListener(m.LOGIN, async (t) => {
+  }), document.addEventListener(w.LOGIN, async (o) => {
     console.log("login");
-    const a = t.detail;
+    const a = o.detail;
     if (!a && S()) {
       console.log("Member is already logged in."), await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", !0);
       return;
     }
     try {
-      if (function(c) {
-        return "email" in c && "password" in c;
+      if (function(d) {
+        return "email" in d && "password" in d;
       }(a)) {
-        const c = await n.login({ email: a.email, password: a.password });
-        localStorage.setItem("_ms-mid", c.data.tokens.accessToken), localStorage.setItem("_ms-mem", JSON.stringify(c.data.member)), window.location.href = c.data.redirect;
+        const d = await e.login({ email: a.email, password: a.password });
+        localStorage.setItem("_ms-mid", d.data.tokens.accessToken), localStorage.setItem("_ms-mem", JSON.stringify(d.data.member)), window.location.href = d.data.redirect;
       } else {
-        const c = await n.loginWithProvider({ loginResponse: a });
-        window.location.href = c.data.redirect;
+        const d = await e.loginWithProvider({ loginResponse: a });
+        window.location.href = d.data.redirect;
       }
-    } catch (i) {
-      if (i instanceof E) {
+    } catch (c) {
+      if (c instanceof E) {
         localStorage.removeItem("_ms-mid");
-        const c = "_ms-2fa-session", p = JSON.stringify({ data: i.data, type: i.type });
-        sessionStorage.setItem(c, p), k("/src/pages/2factor-challenge/");
+        const d = "_ms-2fa-session", h = JSON.stringify({ data: c.data, type: c.type });
+        sessionStorage.setItem(d, h), k("/src/pages/2factor-challenge/");
         return;
       }
-      throw i;
+      throw c;
     }
-  }), document.addEventListener(m.SIGN_UP, async (t) => {
-    const a = t.detail;
-    await n.signup({ token: a.data.tokens.accessToken });
+  }), document.addEventListener(w.SIGN_UP, async (o) => {
+    const a = o.detail;
+    await e.signup({ token: a.data.tokens.accessToken });
   }), O();
-}
-C();
+})();
