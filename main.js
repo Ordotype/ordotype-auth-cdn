@@ -83,7 +83,9 @@ function MemberstackInterceptor(memberstackInstance) {
             return signup;
           }
           if (propKey === "getMemberCookie") {
-            return await await originalMethod.apply(target, args);
+            let cookie;
+            cookie = await originalMethod.apply(target, args);
+            return cookie;
           }
           return originalMethod.apply(target, args);
         };
