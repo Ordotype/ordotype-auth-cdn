@@ -437,6 +437,14 @@ function formUtils() {
       }
     });
   });
+  document.querySelectorAll('[data-ms-action="logout"]').forEach((element) => {
+    element.addEventListener("click", async function(evt) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      evt.stopImmediatePropagation();
+      await window.$memberstackDom.logout();
+    });
+  });
 }
 MemberstackInterceptor(window.$memberstackDom);
 const authService = new AuthService();
