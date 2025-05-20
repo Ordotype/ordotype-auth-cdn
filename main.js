@@ -1,409 +1,535 @@
-var _ = Object.defineProperty;
-var D = (r, e, t) => e in r ? _(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
-var b = (r, e, t) => D(r, typeof e != "symbol" ? e + "" : e, t);
-const w = {
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+const MemberstackEvents = {
   LOGOUT: "memberstack.logout",
   GET_APP: "memberstack.getApp",
   LOGIN: "memberstack.login",
   VALID_SESSION: "memberstack.validSession",
   SIGN_UP: "memberstack.signUp"
 };
-function T(r) {
-  if (!r)
+function MemberstackInterceptor(memberstackInstance) {
+  if (!memberstackInstance) {
     throw new Error("Memberstack instance is not defined");
-  window._msConfig || (window._msConfig = {
-    preventLogin: !0
-  }), window.$memberstackDom = new Proxy(r, {
-    get(e, t) {
-      const s = e[t];
-      return typeof s == "function" ? async function(...o) {
-        if (console.log(
-          `Method ${t} called with arguments: ${JSON.stringify(o)}`
-        ), t === "logout") {
-          const a = new CustomEvent(w.LOGOUT, {
-            bubbles: !1,
-            cancelable: !1,
-            detail: o[0]
-          });
-          return document.dispatchEvent(a), !1;
-        }
-        if (t === "getApp") {
-          const a = new Event(w.GET_APP, {
-            bubbles: !1,
-            cancelable: !1
-          });
-          document.dispatchEvent(a);
-        }
-        if (t === "loginMemberEmailPassword") {
-          const a = new CustomEvent(w.LOGIN, {
-            bubbles: !1,
-            cancelable: !1,
-            detail: o[0]
-          });
-          return document.dispatchEvent(a), {
-            data: {}
-          };
-        }
-        if (t === "loginWithProvider") {
-          const a = await s.apply(e, o), c = new CustomEvent(w.LOGIN, {
-            bubbles: !1,
-            cancelable: !1,
-            detail: a
-          });
-          return document.dispatchEvent(c), a;
-        }
-        if (t === "signupWithProvider") {
-          const a = await s.apply(e, o), c = new CustomEvent(w.SIGN_UP, {
-            bubbles: !1,
-            cancelable: !1,
-            detail: a
-          });
-          return document.dispatchEvent(c), a;
-        }
-        if (t === "signupMemberEmailPassword") {
-          const a = await s.apply(e, o), c = new CustomEvent(w.SIGN_UP, {
-            bubbles: !1,
-            cancelable: !1,
-            detail: a
-          });
-          return document.dispatchEvent(c), a;
-        }
-        return s.apply(e, o);
-      } : s;
+  }
+  if (!window._msConfig) {
+    window._msConfig = {
+      preventLogin: true
+    };
+  }
+  window.$memberstackDom = new Proxy(memberstackInstance, {
+    get(target, propKey) {
+      const originalMethod = target[propKey];
+      if (typeof originalMethod === "function") {
+        return async function(...args) {
+          console.log(
+            `Method ${propKey} called with arguments: ${JSON.stringify(args)}`
+          );
+          if (propKey === "logout") {
+            const evt = new CustomEvent(MemberstackEvents.LOGOUT, {
+              bubbles: false,
+              cancelable: false,
+              detail: args[0]
+            });
+            document.dispatchEvent(evt);
+            return false;
+          }
+          if (propKey === "getApp") {
+            const evt = new Event(MemberstackEvents.GET_APP, {
+              bubbles: false,
+              cancelable: false
+            });
+            document.dispatchEvent(evt);
+          }
+          if (propKey === "loginMemberEmailPassword") {
+            const evt = new CustomEvent(MemberstackEvents.LOGIN, {
+              bubbles: false,
+              cancelable: false,
+              detail: args[0]
+            });
+            document.dispatchEvent(evt);
+            return {
+              data: {}
+            };
+          }
+          if (propKey === "loginWithProvider") {
+            const providerLogin = await originalMethod.apply(target, args);
+            const evt = new CustomEvent(MemberstackEvents.LOGIN, {
+              bubbles: false,
+              cancelable: false,
+              detail: providerLogin
+            });
+            document.dispatchEvent(evt);
+            return providerLogin;
+          }
+          if (propKey === "signupWithProvider") {
+            const signup = await originalMethod.apply(target, args);
+            const evt = new CustomEvent(MemberstackEvents.SIGN_UP, {
+              bubbles: false,
+              cancelable: false,
+              detail: signup
+            });
+            document.dispatchEvent(evt);
+            return signup;
+          }
+          if (propKey === "signupMemberEmailPassword") {
+            const signup = await originalMethod.apply(target, args);
+            const evt = new CustomEvent(MemberstackEvents.SIGN_UP, {
+              bubbles: false,
+              cancelable: false,
+              detail: signup
+            });
+            document.dispatchEvent(evt);
+            return signup;
+          }
+          return originalMethod.apply(target, args);
+        };
+      }
+      return originalMethod;
     }
   });
 }
-function A() {
-  const r = "_ga_7T2LX34911", e = document.cookie.split("; ");
-  for (const t of e) {
-    const [s, o] = t.split("=");
-    if (s === r)
-      return o;
+function getDeviceId() {
+  const cookieName = "_ga_7T2LX34911";
+  const cookies = document.cookie.split("; ");
+  for (const cookie of cookies) {
+    const [name, value] = cookie.split("=");
+    if (name === cookieName) {
+      return value;
+    }
   }
   throw new Error("Device Id cookie not found");
 }
-const L = "https://staging-api.ordotype.fr/v1.0.0";
-class v extends Error {
-  constructor(t, s = 500) {
-    super(t);
-    b(this, "status");
-    this.name = "AuthError", this.status = s, Error.captureStackTrace && Error.captureStackTrace(this, v);
+const BASE_URL = "https://staging-api.ordotype.fr/v1.0.0";
+class AuthError extends Error {
+  constructor(message, status = 500) {
+    super(message);
+    __publicField(this, "status");
+    this.name = "AuthError";
+    this.status = status;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AuthError);
+    }
   }
 }
-class E extends Error {
-  constructor(t, s, o) {
-    super(t);
-    b(this, "data");
-    b(this, "type");
-    this.name = "TwoFactorRequiredError", this.data = s, this.type = o;
+class TwoFactorRequiredError extends Error {
+  constructor(message, data, type) {
+    super(message);
+    __publicField(this, "data");
+    __publicField(this, "type");
+    this.name = "TwoFactorRequiredError";
+    this.data = data;
+    this.type = type;
   }
 }
-class I {
+class AuthService {
   constructor() {
-    b(this, "headers");
-    const e = "pk_sb_e80d8429a51c2ceb0530", t = window.localStorage.getItem("ms_session_id"), s = A();
+    __publicField(this, "headers");
+    const apiKey = "pk_sb_e80d8429a51c2ceb0530";
+    const sessionId = window.localStorage.getItem("ms_session_id");
+    const deviceId = getDeviceId();
     this.headers = {
-      "X-Api-Key": e,
-      "X-Session-Id": t ?? void 0,
-      "X-Device-Id": s ?? void 0
+      "X-Api-Key": apiKey,
+      "X-Session-Id": sessionId ?? void 0,
+      "X-Device-Id": deviceId ?? void 0
     };
   }
-  async request(e, t, s = "GET", o = null, a = {}) {
-    const c = `${L}/${t}/${e}`, d = {
+  async request(endpoint, entity, method = "GET", body = null, additionalHeaders = {}) {
+    const url = `${BASE_URL}/${entity}/${endpoint}`;
+    const headers = {
       "Content-Type": "application/json",
       ...this.headers,
-      ...a
-    }, h = {
-      method: s,
-      headers: d,
-      ...o && { body: JSON.stringify(o) }
+      ...additionalHeaders
+    };
+    const options = {
+      method,
+      headers,
+      ...body && { body: JSON.stringify(body) }
     };
     try {
-      const u = await fetch(c, h);
-      if (!u.ok)
-        throw new v(u.statusText, u.status);
-      return u.status === 204 || !u.body ? null : await u.json();
-    } catch (u) {
-      throw console.error("API Request Failed:", u), u;
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new AuthError(response.statusText, response.status);
+      }
+      if (response.status === 204 || !response.body) {
+        return null;
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("API Request Failed:", error);
+      throw error;
     }
   }
   async validateSessionStatus() {
     try {
-      const e = localStorage.getItem("_ms-mid");
+      const memberToken = localStorage.getItem("_ms-mid");
       return await this.request(
         "validate-session-status",
         "auth",
         "POST",
         null,
-        { Authorization: `Bearer ${e}` }
+        { Authorization: `Bearer ${memberToken}` }
       );
-    } catch (e) {
-      throw console.error("Session validation failed:", e), e;
+    } catch (error) {
+      console.error("Session validation failed:", error);
+      throw error;
     }
   }
   async logout() {
     try {
-      const e = localStorage.getItem("_ms-mid");
+      const memberToken = localStorage.getItem("_ms-mid");
       await this.request(
         "logout",
         "auth",
         "POST",
         null,
-        { Authorization: `Bearer ${e}` }
-      ), localStorage.removeItem("_ms-mid");
-    } catch (e) {
-      throw console.error("Session logout failed:", e), e;
+        { Authorization: `Bearer ${memberToken}` }
+      );
+      localStorage.removeItem("_ms-mid");
+    } catch (error) {
+      console.error("Session logout failed:", error);
+      throw error;
     }
   }
-  async signup(e) {
-    const t = {
-      ...e,
+  async signup(params) {
+    const payload = {
+      ...params,
       device: this.headers["X-Device-Id"] ?? "unknown"
     };
     return await this.request(
       "signup",
       "auth",
       "POST",
-      t,
+      payload,
       {}
     );
   }
-  async login(e) {
-    const t = {
-      ...e,
+  async login(params) {
+    const payload = {
+      ...params,
       options: {
-        includeContentGroups: !0,
-        isWebflow: !0
+        includeContentGroups: true,
+        isWebflow: true
       },
       device: this.headers["X-Device-Id"] ?? "unknown"
-    }, s = await this.request(
+    };
+    const res = await this.request(
       "login",
       "auth",
       "POST",
-      t,
+      payload,
       {}
     );
-    if (y(s))
-      throw new E("2fa required", s.data, s.type);
-    return s;
+    if (isTwoFactorRequiredResponse(res)) {
+      throw new TwoFactorRequiredError("2fa required", res.data, res.type);
+    }
+    return res;
   }
-  async loginWithProvider(e) {
-    const t = {
-      ...e,
+  async loginWithProvider(params) {
+    const payload = {
+      ...params,
       device: this.headers["X-Device-Id"] ?? "unknown"
-    }, s = await this.request(
+    };
+    const res = await this.request(
       "validate-google-provider",
       "auth",
       "POST",
-      t,
+      payload,
       {}
     );
-    if (y(s))
-      throw new E("2fa required", s.data, s.type);
-    return s;
+    if (isTwoFactorRequiredResponse(res)) {
+      throw new TwoFactorRequiredError("2fa required", res.data, res.type);
+    }
+    return res;
   }
   // Helper to get a cookie
-  getCookie(e) {
-    const t = document.cookie.match(new RegExp(`(^| )${e}=([^;]+)`));
-    return t ? decodeURIComponent(t[2]) : null;
+  getCookie(name) {
+    const matches = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+    return matches ? decodeURIComponent(matches[2]) : null;
   }
   // Helper to set a cookie with expiration time
-  setCookie(e, t, s) {
-    const o = /* @__PURE__ */ new Date();
-    o.setTime(o.getTime() + s), document.cookie = `${e}=${encodeURIComponent(t)}; expires=${o.toUTCString()}; path=/`;
+  setCookie(name, value, expirationMs) {
+    const date = /* @__PURE__ */ new Date();
+    date.setTime(date.getTime() + expirationMs);
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/`;
   }
   // Reusable throttle function
-  async throttle(e, t, s) {
-    const o = this.getCookie(t), a = Date.now();
-    if (o && a - parseInt(o, 10) < s)
-      return console.log(`Skipping execution of ${t}: Throttled.`), null;
-    console.log(`Executing ${t}...`);
-    const c = await e();
-    return this.setCookie(t, a.toString(), s), c;
+  async throttle(method, identifier, interval) {
+    const lastExecution = this.getCookie(identifier);
+    const now = Date.now();
+    if (lastExecution && now - parseInt(lastExecution, 10) < interval) {
+      console.log(`Skipping execution of ${identifier}: Throttled.`);
+      return null;
+    }
+    console.log(`Executing ${identifier}...`);
+    const result = await method();
+    this.setCookie(identifier, now.toString(), interval);
+    return result;
   }
   // Public wrapper for validateSessionStatus with throttling
   validateSessionStatusThrottled() {
-    return localStorage.getItem("_ms-mid") ? this.throttle(
+    const memberToken = localStorage.getItem("_ms-mid");
+    if (!memberToken) {
+      return Promise.resolve(null);
+    }
+    return this.throttle(
       () => this.validateSessionStatus(),
       "lastSessionValidation",
       3 * 60 * 1e3
       // 3 minutes throttle interval
-    ) : Promise.resolve(null);
+    );
   }
 }
-function y(r) {
-  return "data" in r && typeof r.data == "object" && "type" in r;
+function isTwoFactorRequiredResponse(response) {
+  return "data" in response && typeof response.data === "object" && "type" in response;
 }
-new I();
-function S() {
-  return !!localStorage.getItem("_ms-mid");
+new AuthService();
+function isMemberLoggedIn() {
+  const memberToken = localStorage.getItem("_ms-mid");
+  return !!memberToken;
 }
-function k(r) {
-  window.$memberstackDom._showLoader(), setTimeout(() => {
-    window.location.href = r;
+function navigateTo(url) {
+  window.$memberstackDom._showLoader();
+  setTimeout(() => {
+    window.location.href = url;
   }, 500);
 }
-const $ = async (r, e = "/") => {
-  await window.$memberstackDom.logout(), localStorage.removeItem("_ms-mid"), localStorage.removeItem("_ms_mem"), k(e);
-}, P = (r) => {
-  const e = new CustomEvent(w.VALID_SESSION, {
-    bubbles: !1,
-    cancelable: !1,
-    detail: { isStatusValid: r }
-  });
-  document.dispatchEvent(e);
+const handleLogout = async (message, redirect = "/") => {
+  await window.$memberstackDom.logout();
+  localStorage.removeItem("_ms-mid");
+  localStorage.removeItem("_ms_mem");
+  navigateTo(redirect);
 };
-function O() {
-  var h, u;
-  function r(n) {
-    return "provider" in n;
+const dispatchValidationEvent = (isStatusValid) => {
+  const validSessionEvt = new CustomEvent(MemberstackEvents.VALID_SESSION, {
+    bubbles: false,
+    cancelable: false,
+    detail: { isStatusValid }
+  });
+  document.dispatchEvent(validSessionEvt);
+};
+function formUtils() {
+  var _a, _b;
+  function isProviderAuth(options) {
+    return "provider" in options;
   }
-  function e(n) {
-    return "email" in n && "password" in n;
+  function isEmailPasswordAuth(options) {
+    return "email" in options && "password" in options;
   }
-  function t(n) {
-    const i = {};
-    return n.querySelectorAll("[data-ms-member]").forEach((m) => {
-      const g = m.getAttribute("data-ms-member");
-      g && !["email", "password", "new-password", "current-password"].includes(g) && (i[g] = m.value || "");
-    }), i;
+  function getCustomFields(form) {
+    const customFields = {};
+    const inputs = form.querySelectorAll("[data-ms-member]");
+    inputs.forEach((input) => {
+      const memberKey = input.getAttribute("data-ms-member");
+      if (memberKey && !["email", "password", "new-password", "current-password"].includes(memberKey)) {
+        customFields[memberKey] = input.value || "";
+      }
+    });
+    return customFields;
   }
-  function s(n) {
-    const i = n.getAttribute("data-ms-plan") || n.getAttribute("data-ms-plan:add") || n.getAttribute("data-ms-plan:update"), l = n.getAttribute("data-ms-price:add");
-    return { freePlan: i, paidPlan: l };
+  function getPlanAttributes(form) {
+    const freePlan = form.getAttribute("data-ms-plan") || form.getAttribute("data-ms-plan:add") || form.getAttribute("data-ms-plan:update");
+    const paidPlan = form.getAttribute("data-ms-price:add");
+    return { freePlan, paidPlan };
   }
-  async function o(n, i) {
-    console.error(n, i), await window.$memberstackDom._showMessage((i == null ? void 0 : i.message) || "An error occurred", !0);
+  async function handleError(message, error) {
+    console.error(message, error);
+    await window.$memberstackDom._showMessage((error == null ? void 0 : error.message) || "An error occurred", true);
   }
-  async function a(n, i) {
-    var f, p;
-    n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation();
-    const l = n.target, m = (f = l.querySelector('[data-ms-member="email"]')) == null ? void 0 : f.value, g = (p = l.querySelector('[data-ms-member="password"]')) == null ? void 0 : p.value;
-    i === "signup" ? await d(l, { email: m, password: g }) : i === "login" && await c(l, { email: m, password: g });
-  }
-  async function c(n, i) {
-    let l;
-    if (r(i))
-      l = {
-        provider: i.provider
-      };
-    else if (e(i))
-      l = {
-        email: i.email,
-        password: i.password
-      };
-    else
-      throw new Error("Invalid form authentication options");
-    try {
-      const m = r(i) ? await window.$memberstackDom.loginWithProvider(l) : await window.$memberstackDom.loginMemberEmailPassword(l);
-      console.log("Signin successful:", m);
-    } catch (m) {
-      await o("Login failed:", m);
+  async function formHandler(event, type) {
+    var _a2, _b2;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const form = event.target;
+    const email = (_a2 = form.querySelector('[data-ms-member="email"]')) == null ? void 0 : _a2.value;
+    const password = (_b2 = form.querySelector('[data-ms-member="password"]')) == null ? void 0 : _b2.value;
+    if (type === "signup") {
+      await handleSignup(form, { email, password });
+    } else if (type === "login") {
+      await handleLogin(form, { email, password });
     }
   }
-  async function d(n, i) {
-    const l = t(n), { freePlan: m, paidPlan: g } = s(n);
-    let f = { customFields: l };
-    if (r(i))
-      f = {
-        allowLogin: !1,
-        provider: i.provider
+  async function handleLogin(_form, options) {
+    let loginData;
+    if (isProviderAuth(options)) {
+      loginData = {
+        provider: options.provider
       };
-    else if (e(i))
-      f = {
-        email: i.email,
-        password: i.password
+    } else if (isEmailPasswordAuth(options)) {
+      loginData = {
+        email: options.email,
+        password: options.password
       };
-    else
+    } else {
       throw new Error("Invalid form authentication options");
-    m && (f.plans = [{ planId: m }]);
+    }
+    try {
+      const hasLogin = isProviderAuth(options) ? await window.$memberstackDom.loginWithProvider(loginData) : await window.$memberstackDom.loginMemberEmailPassword(loginData);
+      console.log("Signin successful:", hasLogin);
+    } catch (error) {
+      await handleError("Login failed:", error);
+    }
+  }
+  async function handleSignup(form, options) {
+    const customFields = getCustomFields(form);
+    const { freePlan, paidPlan } = getPlanAttributes(form);
+    let signupData = { customFields };
+    if (isProviderAuth(options)) {
+      signupData = {
+        allowLogin: false,
+        provider: options.provider
+      };
+    } else if (isEmailPasswordAuth(options)) {
+      signupData = {
+        email: options.email,
+        password: options.password
+      };
+    } else {
+      throw new Error("Invalid form authentication options");
+    }
+    if (freePlan) {
+      signupData.plans = [{ planId: freePlan }];
+    }
     try {
       window.$memberstackDom._showLoader();
-      const p = r(i) ? await window.$memberstackDom.signupWithProvider(f) : await window.$memberstackDom.signupMemberEmailPassword(f);
-      console.log("Signup successful:", p), g ? await window.$memberstackDom.purchasePlansWithCheckout({ priceId: g }) : k(p.data.redirect), window.$memberstackDom._hideLoader();
-    } catch (p) {
-      await o("Signup failed:", p), window.$memberstackDom._hideLoader();
+      const hasSignup = isProviderAuth(options) ? await window.$memberstackDom.signupWithProvider(signupData) : await window.$memberstackDom.signupMemberEmailPassword(signupData);
+      console.log("Signup successful:", hasSignup);
+      if (paidPlan) {
+        await window.$memberstackDom.purchasePlansWithCheckout({ priceId: paidPlan });
+      } else {
+        navigateTo(hasSignup.data.redirect);
+      }
+      window.$memberstackDom._hideLoader();
+    } catch (error) {
+      await handleError("Signup failed:", error);
+      window.$memberstackDom._hideLoader();
     }
   }
-  (h = document.querySelector('[data-ms-form="signup"]')) == null || h.addEventListener("submit", async (n) => (n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation(), await a(n, "signup"), !1)), (u = document.querySelector('[data-ms-form="login"]')) == null || u.addEventListener("submit", async (n) => (n.preventDefault(), n.stopPropagation(), n.stopImmediatePropagation(), await a(n, "login"), !1)), document.querySelectorAll('[data-ms-auth-provider="google"]').forEach((n) => {
-    n.addEventListener("click", async (i) => {
-      i.preventDefault(), i.stopPropagation(), i.stopImmediatePropagation();
-      const l = n.closest("[data-ms-form]");
-      if (!l) {
+  (_a = document.querySelector('[data-ms-form="signup"]')) == null ? void 0 : _a.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    await formHandler(event, "signup");
+    return false;
+  });
+  (_b = document.querySelector('[data-ms-form="login"]')) == null ? void 0 : _b.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    await formHandler(event, "login");
+    return false;
+  });
+  document.querySelectorAll('[data-ms-auth-provider="google"]').forEach((element) => {
+    element.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const form = element.closest("[data-ms-form]");
+      if (!form) {
         console.warn("No parent form with 'data-ms-form' found.");
         return;
       }
-      l.getAttribute("data-ms-form") === "signup" ? await d(l, { provider: "google" }) : await c(l, { provider: "google" });
+      if (form.getAttribute("data-ms-form") === "signup") {
+        await handleSignup(form, { provider: "google" });
+      } else {
+        await handleLogin(form, { provider: "google" });
+      }
     });
   });
 }
-(function() {
-  T(window.$memberstackDom);
-  const e = new I(), t = "/default".split(",").map((o) => new RegExp(o)), s = (o) => t.some((a) => a.test(o));
-  document.addEventListener(w.GET_APP, async () => {
-    if (s(location.href)) {
+(function main() {
+  MemberstackInterceptor(window.$memberstackDom);
+  const authService = new AuthService();
+  const EXCLUDED_URL_PATTERNS = "/default".split(",").map((pattern) => new RegExp(pattern));
+  const isExcludedPage = (url) => {
+    return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
+  };
+  document.addEventListener(MemberstackEvents.GET_APP, async () => {
+    if (isExcludedPage(location.href)) {
       console.log("Avoided verification on excluded page");
       return;
     }
-    if (console.log("getApp"), !S()) {
-      P("unauthenticated");
+    console.log("getApp");
+    if (!isMemberLoggedIn()) {
+      dispatchValidationEvent("unauthenticated");
       return;
     }
     try {
-      if (await e.validateSessionStatus() === !1) {
+      const isStatusValid = await authService.validateSessionStatus();
+      if (isStatusValid === false) {
         await window.$memberstackDom.logout();
         return;
       }
-      P(!0);
-    } catch (o) {
-      if (o instanceof v) {
-        (o.status === 401 || o.status === 403) && await window.$memberstackDom.logout({ isExpired: !0 });
+      dispatchValidationEvent(true);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        if (error.status === 401 || error.status === 403) {
+          await window.$memberstackDom.logout({ isExpired: true });
+        }
         return;
       }
     }
-  }, { once: !0 }), document.addEventListener(w.LOGOUT, async (o) => {
-    const { detail: a } = o;
-    if (console.log("logout"), !S()) {
+  }, { once: true });
+  document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
+    const { detail } = ev;
+    console.log("logout");
+    if (!isMemberLoggedIn()) {
       console.log("Member is not logged in.");
       return;
     }
-    if (a != null && a.isExpired)
-      await window.$memberstackDom._showMessage("Forbidden. Please login again.", !0);
-    else
+    if (detail == null ? void 0 : detail.isExpired) {
+      await window.$memberstackDom._showMessage("Forbidden. Please login again.", true);
+    } else {
       try {
-        await window.$memberstackDom._showMessage("Your session has expired. Please login again.", !0), await e.logout();
-      } catch (c) {
-        c instanceof v && (c.status === 401 || c.status === 403) && console.log("Member is already logged out from the server.");
+        await window.$memberstackDom._showMessage("Your session has expired. Please login again.", true);
+        await authService.logout();
+      } catch (error) {
+        if (error instanceof AuthError) {
+          if (error.status === 401 || error.status === 403) {
+            console.log("Member is already logged out from the server.");
+          }
+        }
       }
-    await $(null, "/");
-  }), document.addEventListener(w.LOGIN, async (o) => {
+    }
+    await handleLogout(null, "/");
+  });
+  document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     console.log("login");
-    const a = o.detail;
-    if (!a && S()) {
-      console.log("Member is already logged in."), await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", !0);
+    const detail = event.detail;
+    if (!detail && isMemberLoggedIn()) {
+      console.log("Member is already logged in.");
+      await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", true);
       return;
     }
     try {
-      if (function(d) {
-        return "email" in d && "password" in d;
-      }(a)) {
-        const d = await e.login({ email: a.email, password: a.password });
-        localStorage.setItem("_ms-mid", d.data.tokens.accessToken), localStorage.setItem("_ms-mem", JSON.stringify(d.data.member)), window.location.href = d.data.redirect;
+      let isEmailPasswordAuth = function(detail2) {
+        return "email" in detail2 && "password" in detail2;
+      };
+      if (isEmailPasswordAuth(detail)) {
+        const res = await authService.login({ email: detail.email, password: detail.password });
+        localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
+        localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
+        window.location.href = res.data.redirect;
       } else {
-        const d = await e.loginWithProvider({ loginResponse: a });
-        window.location.href = d.data.redirect;
+        const res = await authService.loginWithProvider({ loginResponse: detail });
+        window.location.href = res.data.redirect;
       }
-    } catch (c) {
-      if (c instanceof E) {
+    } catch (error) {
+      if (error instanceof TwoFactorRequiredError) {
         localStorage.removeItem("_ms-mid");
-        const d = "_ms-2fa-session", h = JSON.stringify({ data: c.data, type: c.type });
-        sessionStorage.setItem(d, h), k("/src/pages/2factor-challenge/");
+        const SESSION_NAME = "_ms-2fa-session";
+        const session = JSON.stringify({ data: error.data, type: error.type });
+        sessionStorage.setItem(SESSION_NAME, session);
+        navigateTo("/src/pages/2factor-challenge/");
         return;
       }
-      throw c;
+      throw error;
     }
-  }), document.addEventListener(w.SIGN_UP, async (o) => {
-    const a = o.detail;
-    await e.signup({ token: a.data.tokens.accessToken });
-  }), O();
+  });
+  document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
+    const memberData = event.detail;
+    await authService.signup({ token: memberData.data.tokens.accessToken });
+  });
+  formUtils();
 })();
