@@ -34,7 +34,7 @@ function MemberstackInterceptor(memberstackInstance) {
             document.dispatchEvent(evt);
             return false;
           }
-          if (propKey === "getApp") {
+          if (propKey === "getApp" || propKey === "getAppAndMember") {
             const evt = new Event(MemberstackEvents.GET_APP, {
               bubbles: false,
               cancelable: false
