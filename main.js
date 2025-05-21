@@ -104,7 +104,7 @@ function getDeviceId() {
   }
   throw new Error("Device Id cookie not found");
 }
-const BASE_URL = "";
+const BASE_URL = "https://api.ordotype.fr/v1.0.0";
 class AuthError extends Error {
   constructor(message, status = 500) {
     super(message);
@@ -129,11 +129,14 @@ class TwoFactorRequiredError extends Error {
 class AuthService {
   constructor() {
     __publicField(this, "headers");
-    window.localStorage.getItem("ms_session_id");
-    getDeviceId();
-    {
-      throw new Error("Missing API key for AuthService");
-    }
+    const apiKey = "pk_97bbd1213f5b1bd2fc0f";
+    const sessionId = window.localStorage.getItem("ms_session_id");
+    const deviceId = getDeviceId();
+    this.headers = {
+      "X-Api-Key": apiKey,
+      "X-Session-Id": sessionId ?? void 0,
+      "X-Device-Id": deviceId ?? void 0
+    };
   }
   async request(endpoint, entity, method = "GET", body = null, additionalHeaders = {}) {
     const url = `${BASE_URL}/${entity}/${endpoint}`;
@@ -527,7 +530,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
-      navigateTo("");
+      navigateTo("/membership/connexion-2fa");
       return;
     }
     throw error;
