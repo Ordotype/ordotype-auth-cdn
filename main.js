@@ -489,10 +489,9 @@ document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
     return;
   }
   if (detail == null ? void 0 : detail.isExpired) {
-    await window.$memberstackDom._showMessage("Forbidden. Please login again.", true);
+    await window.$memberstackDom._showMessage("Votre session a expiré. Veuillez vous reconnecter.", true);
   } else {
     try {
-      await window.$memberstackDom._showMessage("Your session has expired. Please login again.", true);
       await authService.logout();
     } catch (error) {
       if (error instanceof AuthError) {
