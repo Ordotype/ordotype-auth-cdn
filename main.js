@@ -300,7 +300,7 @@ function navigateTo(url) {
 }
 const handleLogout = async (message, redirect = "/") => {
   localStorage.removeItem("_ms-mid");
-  localStorage.removeItem("_ms_mem");
+  localStorage.removeItem("_ms-mem");
   navigateTo(redirect);
 };
 const dispatchValidationEvent = (isStatusValid) => {
