@@ -299,7 +299,6 @@ function navigateTo(url) {
   }, 500);
 }
 const handleLogout = async (message, redirect = "/") => {
-  await window.$memberstackDom.logout();
   localStorage.removeItem("_ms-mid");
   localStorage.removeItem("_ms_mem");
   navigateTo(redirect);
