@@ -438,7 +438,7 @@ function initLoginForm(form) {
   });
 }
 function initAuthForms() {
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("load", () => {
     const signupForm = document.querySelector('[data-ordo-form="signup"]');
     const signupFormMS = document.querySelector('[data-ms-form="signup"]');
     if (signupForm) initSignUpForm(signupForm);
