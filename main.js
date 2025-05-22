@@ -3,7 +3,6 @@ var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { en
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 const MemberstackEvents = {
   LOGOUT: "memberstack.logout",
-  GET_APP: "memberstack.getApp",
   LOGIN: "memberstack.login",
   VALID_SESSION: "memberstack.validSession",
   SIGN_UP: "memberstack.signUp"
@@ -33,13 +32,6 @@ function MemberstackInterceptor(memberstackInstance) {
             });
             document.dispatchEvent(evt);
             return false;
-          }
-          if (propKey === "getApp" || propKey === "getAppAndMember") {
-            const evt = new Event(MemberstackEvents.GET_APP, {
-              bubbles: false,
-              cancelable: false
-            });
-            document.dispatchEvent(evt);
           }
           if (propKey === "loginMemberEmailPassword") {
             const evt = new CustomEvent(MemberstackEvents.LOGIN, {
@@ -311,124 +303,137 @@ const dispatchValidationEvent = (isStatusValid) => {
   });
   document.dispatchEvent(validSessionEvt);
 };
-function formUtils() {
+function isProviderAuth(options) {
+  return "provider" in options;
+}
+function isEmailPasswordAuth(options) {
+  return "email" in options && "password" in options;
+}
+function getCustomFields(form) {
+  const customFields = {};
+  const inputs = form.querySelectorAll("[data-ms-member]");
+  inputs.forEach((input) => {
+    const memberKey = input.getAttribute("data-ms-member");
+    if (memberKey && !["email", "password", "new-password", "current-password"].includes(memberKey)) {
+      customFields[memberKey] = input.value || "";
+    }
+  });
+  return customFields;
+}
+function getPlanAttributes(form) {
+  const freePlan = form.getAttribute("data-ms-plan") || form.getAttribute("data-ms-plan:add") || form.getAttribute("data-ms-plan:update");
+  const paidPlan = form.getAttribute("data-ms-price:add");
+  return { freePlan, paidPlan };
+}
+async function handleError(message, error) {
+  console.error(message, error);
+  await window.$memberstackDom._showMessage((error == null ? void 0 : error.message) || "An error occurred", true);
+}
+async function formHandler(event, type) {
   var _a, _b;
-  function isProviderAuth(options) {
-    return "provider" in options;
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+  const form = event.target;
+  const email = (_a = form.querySelector('[data-ms-member="email"]')) == null ? void 0 : _a.value;
+  const password = (_b = form.querySelector('[data-ms-member="password"]')) == null ? void 0 : _b.value;
+  if (type === "signup") {
+    await handleSignup(form, { email, password });
+  } else if (type === "login") {
+    await handleLogin(form, { email, password });
   }
-  function isEmailPasswordAuth(options) {
-    return "email" in options && "password" in options;
+}
+async function handleLogin(_form, options) {
+  let loginData;
+  if (isProviderAuth(options)) {
+    loginData = {
+      provider: options.provider
+    };
+  } else if (isEmailPasswordAuth(options)) {
+    loginData = {
+      email: options.email,
+      password: options.password
+    };
+  } else {
+    throw new Error("Invalid form authentication options");
   }
-  function getCustomFields(form) {
-    const customFields = {};
-    const inputs = form.querySelectorAll("[data-ms-member]");
-    inputs.forEach((input) => {
-      const memberKey = input.getAttribute("data-ms-member");
-      if (memberKey && !["email", "password", "new-password", "current-password"].includes(memberKey)) {
-        customFields[memberKey] = input.value || "";
-      }
+  try {
+    const hasLogin = isProviderAuth(options) ? await window.$memberstackDom.loginWithProvider(loginData) : await window.$memberstackDom.loginMemberEmailPassword(loginData);
+    console.log("Signin successful:", hasLogin);
+  } catch (error) {
+    await handleError("Login failed:", error);
+  }
+}
+async function handleSignup(form, options) {
+  const customFields = getCustomFields(form);
+  const { freePlan, paidPlan } = getPlanAttributes(form);
+  let signupData = { customFields };
+  if (isProviderAuth(options)) {
+    signupData = {
+      allowLogin: false,
+      provider: options.provider
+    };
+  } else if (isEmailPasswordAuth(options)) {
+    signupData = {
+      email: options.email,
+      password: options.password
+    };
+  } else {
+    throw new Error("Invalid form authentication options");
+  }
+  if (freePlan) {
+    signupData.plans = [{ planId: freePlan }];
+  }
+  try {
+    window.$memberstackDom._showLoader();
+    const hasSignup = isProviderAuth(options) ? await window.$memberstackDom.signupWithProvider(signupData) : await window.$memberstackDom.signupMemberEmailPassword(signupData);
+    console.log("Signup successful:", hasSignup);
+    if (paidPlan) {
+      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: paidPlan });
+    } else {
+      navigateTo(hasSignup.data.redirect);
+    }
+    window.$memberstackDom._hideLoader();
+  } catch (error) {
+    await handleError("Signup failed:", error);
+    window.$memberstackDom._hideLoader();
+  }
+}
+function initAuthForms() {
+  const signupForm = document.querySelector('[data-ordo-form="signup"]');
+  if (signupForm) {
+    const email = signupForm.querySelector("[data-ms-member='email']");
+    const password = signupForm.querySelector("[data-ms-member='password']");
+    if (email) email.type = "email";
+    if (password) password.type = "password";
+    signupForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      await formHandler(event, "signup");
+      return false;
     });
-    return customFields;
   }
-  function getPlanAttributes(form) {
-    const freePlan = form.getAttribute("data-ms-plan") || form.getAttribute("data-ms-plan:add") || form.getAttribute("data-ms-plan:update");
-    const paidPlan = form.getAttribute("data-ms-price:add");
-    return { freePlan, paidPlan };
+  const loginForm = document.querySelector('[data-ordo-form="login"]');
+  if (loginForm) {
+    const email = loginForm.querySelector("[data-ms-member='email']");
+    const password = loginForm.querySelector("[data-ms-member='password']");
+    if (email) email.type = "email";
+    if (password) password.type = "password";
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      await formHandler(event, "login");
+      return false;
+    });
   }
-  async function handleError(message, error) {
-    console.error(message, error);
-    await window.$memberstackDom._showMessage((error == null ? void 0 : error.message) || "An error occurred", true);
-  }
-  async function formHandler(event, type) {
-    var _a2, _b2;
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    const form = event.target;
-    const email = (_a2 = form.querySelector('[data-ms-member="email"]')) == null ? void 0 : _a2.value;
-    const password = (_b2 = form.querySelector('[data-ms-member="password"]')) == null ? void 0 : _b2.value;
-    if (type === "signup") {
-      await handleSignup(form, { email, password });
-    } else if (type === "login") {
-      await handleLogin(form, { email, password });
-    }
-  }
-  async function handleLogin(_form, options) {
-    let loginData;
-    if (isProviderAuth(options)) {
-      loginData = {
-        provider: options.provider
-      };
-    } else if (isEmailPasswordAuth(options)) {
-      loginData = {
-        email: options.email,
-        password: options.password
-      };
-    } else {
-      throw new Error("Invalid form authentication options");
-    }
-    try {
-      const hasLogin = isProviderAuth(options) ? await window.$memberstackDom.loginWithProvider(loginData) : await window.$memberstackDom.loginMemberEmailPassword(loginData);
-      console.log("Signin successful:", hasLogin);
-    } catch (error) {
-      await handleError("Login failed:", error);
-    }
-  }
-  async function handleSignup(form, options) {
-    const customFields = getCustomFields(form);
-    const { freePlan, paidPlan } = getPlanAttributes(form);
-    let signupData = { customFields };
-    if (isProviderAuth(options)) {
-      signupData = {
-        allowLogin: false,
-        provider: options.provider
-      };
-    } else if (isEmailPasswordAuth(options)) {
-      signupData = {
-        email: options.email,
-        password: options.password
-      };
-    } else {
-      throw new Error("Invalid form authentication options");
-    }
-    if (freePlan) {
-      signupData.plans = [{ planId: freePlan }];
-    }
-    try {
-      window.$memberstackDom._showLoader();
-      const hasSignup = isProviderAuth(options) ? await window.$memberstackDom.signupWithProvider(signupData) : await window.$memberstackDom.signupMemberEmailPassword(signupData);
-      console.log("Signup successful:", hasSignup);
-      if (paidPlan) {
-        await window.$memberstackDom.purchasePlansWithCheckout({ priceId: paidPlan });
-      } else {
-        navigateTo(hasSignup.data.redirect);
-      }
-      window.$memberstackDom._hideLoader();
-    } catch (error) {
-      await handleError("Signup failed:", error);
-      window.$memberstackDom._hideLoader();
-    }
-  }
-  (_a = document.querySelector('[data-ms-form="signup"]')) == null ? void 0 : _a.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    await formHandler(event, "signup");
-    return false;
-  });
-  (_b = document.querySelector('[data-ms-form="login"]')) == null ? void 0 : _b.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    await formHandler(event, "login");
-    return false;
-  });
-  document.querySelectorAll('[data-ms-auth-provider="google"]').forEach((element) => {
+  document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
     element.addEventListener("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
-      const form = element.closest("[data-ms-form]");
+      const form = element.closest("[data-ordo-form]");
       if (!form) {
         console.warn("No parent form with 'data-ms-form' found.");
         return;
@@ -440,7 +445,7 @@ function formUtils() {
       }
     });
   });
-  document.querySelectorAll('[data-ms-action="logout"]').forEach((element) => {
+  document.querySelectorAll('[data-ordo-action="logout"]').forEach((element) => {
     element.addEventListener("click", async function(evt) {
       evt.preventDefault();
       evt.stopPropagation();
@@ -455,7 +460,16 @@ const EXCLUDED_URL_PATTERNS = "/default".split(",").map((pattern) => new RegExp(
 const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
-document.addEventListener(MemberstackEvents.GET_APP, async () => {
+(async function() {
+  if (window.$memberstackReady) {
+    await init();
+  } else {
+    document.addEventListener("memberstack.ready", async () => {
+      await init();
+    });
+  }
+})();
+async function init() {
   if (isExcludedPage(location.href)) {
     console.log("Avoided verification on excluded page");
     return;
@@ -480,7 +494,8 @@ document.addEventListener(MemberstackEvents.GET_APP, async () => {
       return;
     }
   }
-}, { once: true });
+  initAuthForms();
+}
 document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
   const { detail } = ev;
   console.log("logout");
@@ -512,10 +527,10 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     return;
   }
   try {
-    let isEmailPasswordAuth = function(detail2) {
+    let isEmailPasswordAuth2 = function(detail2) {
       return "email" in detail2 && "password" in detail2;
     };
-    if (isEmailPasswordAuth(detail)) {
+    if (isEmailPasswordAuth2(detail)) {
       const res = await authService.login({ email: detail.email, password: detail.password });
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
       localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
@@ -540,4 +555,3 @@ document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
   const memberData = event.detail;
   await authService.signup({ token: memberData.data.tokens.accessToken });
 });
-formUtils();
