@@ -441,16 +441,12 @@ function initAuthForms() {
   document.addEventListener("DOMContentLoaded", () => {
     const signupForm = document.querySelector('[data-ordo-form="signup"]');
     const signupFormMS = document.querySelector('[data-ms-form="signup"]');
-    if (signupForm) {
-      initSignUpForm(signupForm);
-      initSignUpForm(signupFormMS);
-    }
+    if (signupForm) initSignUpForm(signupForm);
+    if (signupFormMS) initSignUpForm(signupFormMS);
     const loginForm = document.querySelector('[data-ordo-form="login"]');
     const loginFormMS = document.querySelector('[data-ms-form="login"]');
-    if (loginForm) {
-      initLoginForm(loginForm);
-      initLoginForm(loginFormMS);
-    }
+    if (loginForm) initLoginForm(loginForm);
+    if (loginFormMS) initLoginForm(loginFormMS);
     document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
       element.addEventListener("click", async (event) => {
         event.preventDefault();
