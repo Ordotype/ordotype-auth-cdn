@@ -471,7 +471,8 @@ function initAuthForms() {
         }
       });
     });
-    document.querySelectorAll('[data-ordo-action="logout"]').forEach((element) => {
+    const logoutBtn = document.querySelectorAll('[data-ordo-action="logout"]') || document.querySelectorAll('[data-ms-action="logout"]');
+    logoutBtn.forEach((element) => {
       element.addEventListener("click", async function(evt) {
         evt.preventDefault();
         evt.stopPropagation();
