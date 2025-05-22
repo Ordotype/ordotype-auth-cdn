@@ -443,22 +443,23 @@ function initAuthForms() {
     const signupFormMS = document.querySelector('[data-ms-form="signup"]');
     if (signupForm) initSignUpForm(signupForm);
     if (signupFormMS) initSignUpForm(signupFormMS);
-    if (signupForm || signupFormMS) {
+    if (!signupForm && !signupFormMS) {
       console.warn("no signup form found.");
     }
     const loginForm = document.querySelector('[data-ordo-form="login"]');
     const loginFormMS = document.querySelector('[data-ms-form="login"]');
     if (loginForm) initLoginForm(loginForm);
     if (loginFormMS) initLoginForm(loginFormMS);
-    if (loginForm || loginFormMS) {
+    if (!loginForm && !loginFormMS) {
       console.warn("no login form found.");
     }
-    document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
+    const googleAuth = document.querySelectorAll('[data-ordo-auth-provider="google"]') || document.querySelectorAll('[data-ms-auth-provider="google"]');
+    googleAuth.forEach((element) => {
       element.addEventListener("click", async (event) => {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        const form = element.closest("[data-ordo-form]");
+        const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
         if (!form) {
           console.warn("No parent form with 'data-ms-form' found.");
           return;
