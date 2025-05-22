@@ -130,7 +130,7 @@ class AuthService {
       "X-Device-Id": deviceId ?? void 0
     };
   }
-  async request(endpoint, entity, method = "GET", body = null, additionalHeaders = {}) {
+  async request(endpoint, entity, method = "GET", body = null, additionalHeaders = {}, signal) {
     const url = `${BASE_URL}/${entity}/${endpoint}`;
     const headers = {
       "Content-Type": "application/json",
@@ -140,7 +140,8 @@ class AuthService {
     const options = {
       method,
       headers,
-      ...body && { body: JSON.stringify(body) }
+      ...body && { body: JSON.stringify(body) },
+      signal
     };
     try {
       const response = await fetch(url, options);
@@ -152,11 +153,16 @@ class AuthService {
       }
       return await response.json();
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.warn("Request was canceled:", error);
+        return null;
+      }
       console.error("API Request Failed:", error);
       throw error;
     }
   }
   async validateSessionStatus() {
+    const controller = new AbortController();
     try {
       const memberToken = localStorage.getItem("_ms-mid");
       return await this.request(
@@ -164,7 +170,8 @@ class AuthService {
         "auth",
         "POST",
         null,
-        { Authorization: `Bearer ${memberToken}` }
+        { Authorization: `Bearer ${memberToken}` },
+        controller.signal
       );
     } catch (error) {
       console.error("Session validation failed:", error);
