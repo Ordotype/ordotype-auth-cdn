@@ -94,9 +94,13 @@ function getDeviceId() {
       return value;
     }
   }
-  throw new Error("Device Id cookie not found");
+  const msSessionId = localStorage.getItem("ms_session_id");
+  if (msSessionId && msSessionId.length > 0) {
+    return localStorage.getItem("ms_session_id");
+  }
+  return "unknown-device-id";
 }
-const BASE_URL = "https://api.ordotype.fr/v1.0.0";
+const BASE_URL = "https://staging-api.ordotype.fr/v1.0.0";
 class AuthError extends Error {
   constructor(message, status = 500) {
     super(message);
@@ -121,7 +125,7 @@ class TwoFactorRequiredError extends Error {
 class AuthService {
   constructor() {
     __publicField(this, "headers");
-    const apiKey = "pk_97bbd1213f5b1bd2fc0f";
+    const apiKey = "pk_sb_e80d8429a51c2ceb0530";
     const sessionId = window.localStorage.getItem("ms_session_id");
     const deviceId = getDeviceId();
     this.headers = {
@@ -406,34 +410,44 @@ async function handleSignup(form, options) {
     window.$memberstackDom._hideLoader();
   }
 }
+function initSignUpForm(form) {
+  const email = form.querySelector("[data-ms-member='email']");
+  const password = form.querySelector("[data-ms-member='password']");
+  if (email) email.type = "email";
+  if (password) password.type = "password";
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    await formHandler(event, "signup");
+    return false;
+  });
+}
+function initLoginForm(form) {
+  const email = form.querySelector("[data-ms-member='email']");
+  const password = form.querySelector("[data-ms-member='password']");
+  if (email) email.type = "email";
+  if (password) password.type = "password";
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    await formHandler(event, "login");
+    return false;
+  });
+}
 function initAuthForms() {
   const signupForm = document.querySelector('[data-ordo-form="signup"]');
+  const signupFormMS = document.querySelector('[data-ms-form="signup"]');
   if (signupForm) {
-    const email = signupForm.querySelector("[data-ms-member='email']");
-    const password = signupForm.querySelector("[data-ms-member='password']");
-    if (email) email.type = "email";
-    if (password) password.type = "password";
-    signupForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      await formHandler(event, "signup");
-      return false;
-    });
+    initSignUpForm(signupForm);
+    initSignUpForm(signupFormMS);
   }
   const loginForm = document.querySelector('[data-ordo-form="login"]');
+  const loginFormMS = document.querySelector('[data-ms-form="login"]');
   if (loginForm) {
-    const email = loginForm.querySelector("[data-ms-member='email']");
-    const password = loginForm.querySelector("[data-ms-member='password']");
-    if (email) email.type = "email";
-    if (password) password.type = "password";
-    loginForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      await formHandler(event, "login");
-      return false;
-    });
+    initLoginForm(loginForm);
+    initLoginForm(loginFormMS);
   }
   document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
     element.addEventListener("click", async (event) => {
@@ -552,7 +566,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
-      navigateTo("/membership/connexion-2fa");
+      navigateTo("/src/pages/2factor-challenge/");
       return;
     }
     throw error;
