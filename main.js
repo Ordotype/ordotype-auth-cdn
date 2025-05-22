@@ -98,6 +98,7 @@ function getDeviceId() {
   if (msSessionId && msSessionId.length > 0) {
     return localStorage.getItem("ms_session_id");
   }
+  console.warn("No device id found. Using default value.");
   return "unknown-device-id";
 }
 const BASE_URL = "https://api.ordotype.fr/v1.0.0";
@@ -437,41 +438,43 @@ function initLoginForm(form) {
   });
 }
 function initAuthForms() {
-  const signupForm = document.querySelector('[data-ordo-form="signup"]');
-  const signupFormMS = document.querySelector('[data-ms-form="signup"]');
-  if (signupForm) {
-    initSignUpForm(signupForm);
-    initSignUpForm(signupFormMS);
-  }
-  const loginForm = document.querySelector('[data-ordo-form="login"]');
-  const loginFormMS = document.querySelector('[data-ms-form="login"]');
-  if (loginForm) {
-    initLoginForm(loginForm);
-    initLoginForm(loginFormMS);
-  }
-  document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
-    element.addEventListener("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      const form = element.closest("[data-ordo-form]");
-      if (!form) {
-        console.warn("No parent form with 'data-ms-form' found.");
-        return;
-      }
-      if (form.getAttribute("data-ms-form") === "signup") {
-        await handleSignup(form, { provider: "google" });
-      } else {
-        await handleLogin(form, { provider: "google" });
-      }
+  document.addEventListener("DOMContentLoaded", () => {
+    const signupForm = document.querySelector('[data-ordo-form="signup"]');
+    const signupFormMS = document.querySelector('[data-ms-form="signup"]');
+    if (signupForm) {
+      initSignUpForm(signupForm);
+      initSignUpForm(signupFormMS);
+    }
+    const loginForm = document.querySelector('[data-ordo-form="login"]');
+    const loginFormMS = document.querySelector('[data-ms-form="login"]');
+    if (loginForm) {
+      initLoginForm(loginForm);
+      initLoginForm(loginFormMS);
+    }
+    document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
+      element.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        const form = element.closest("[data-ordo-form]");
+        if (!form) {
+          console.warn("No parent form with 'data-ms-form' found.");
+          return;
+        }
+        if (form.getAttribute("data-ms-form") === "signup") {
+          await handleSignup(form, { provider: "google" });
+        } else {
+          await handleLogin(form, { provider: "google" });
+        }
+      });
     });
-  });
-  document.querySelectorAll('[data-ordo-action="logout"]').forEach((element) => {
-    element.addEventListener("click", async function(evt) {
-      evt.preventDefault();
-      evt.stopPropagation();
-      evt.stopImmediatePropagation();
-      await window.$memberstackDom.logout();
+    document.querySelectorAll('[data-ordo-action="logout"]').forEach((element) => {
+      element.addEventListener("click", async function(evt) {
+        evt.preventDefault();
+        evt.stopPropagation();
+        evt.stopImmediatePropagation();
+        await window.$memberstackDom.logout();
+      });
     });
   });
 }
