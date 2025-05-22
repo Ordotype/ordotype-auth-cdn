@@ -468,6 +468,7 @@ const isExcludedPage = (url) => {
       await init();
     });
   }
+  initAuthForms();
 })();
 async function init() {
   if (isExcludedPage(location.href)) {
@@ -494,7 +495,6 @@ async function init() {
       return;
     }
   }
-  initAuthForms();
 }
 document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
   const { detail } = ev;
