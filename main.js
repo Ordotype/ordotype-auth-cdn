@@ -443,10 +443,16 @@ function initAuthForms() {
     const signupFormMS = document.querySelector('[data-ms-form="signup"]');
     if (signupForm) initSignUpForm(signupForm);
     if (signupFormMS) initSignUpForm(signupFormMS);
+    if (signupForm || signupFormMS) {
+      console.warn("no signup form found.");
+    }
     const loginForm = document.querySelector('[data-ordo-form="login"]');
     const loginFormMS = document.querySelector('[data-ms-form="login"]');
     if (loginForm) initLoginForm(loginForm);
     if (loginFormMS) initLoginForm(loginFormMS);
+    if (loginForm || loginFormMS) {
+      console.warn("no login form found.");
+    }
     document.querySelectorAll('[data-ordo-auth-provider="google"]').forEach((element) => {
       element.addEventListener("click", async (event) => {
         event.preventDefault();
@@ -481,6 +487,7 @@ const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
 (async function() {
+  initAuthForms();
   if (window.$memberstackReady) {
     await init();
   } else {
@@ -488,7 +495,6 @@ const isExcludedPage = (url) => {
       await init();
     });
   }
-  initAuthForms();
 })();
 async function init() {
   if (isExcludedPage(location.href)) {
