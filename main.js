@@ -100,7 +100,7 @@ function getDeviceId() {
   }
   return "unknown-device-id";
 }
-const BASE_URL = "https://staging-api.ordotype.fr/v1.0.0";
+const BASE_URL = "https://api.ordotype.fr/v1.0.0";
 class AuthError extends Error {
   constructor(message, status = 500) {
     super(message);
@@ -125,7 +125,7 @@ class TwoFactorRequiredError extends Error {
 class AuthService {
   constructor() {
     __publicField(this, "headers");
-    const apiKey = "pk_sb_e80d8429a51c2ceb0530";
+    const apiKey = "pk_97bbd1213f5b1bd2fc0f";
     const sessionId = window.localStorage.getItem("ms_session_id");
     const deviceId = getDeviceId();
     this.headers = {
@@ -566,7 +566,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
-      navigateTo("/src/pages/2factor-challenge/");
+      navigateTo("/membership/connexion-2fa");
       return;
     }
     throw error;
