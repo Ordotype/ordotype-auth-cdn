@@ -152,6 +152,11 @@ class AuthService {
     try {
       const response = await fetch(url, options);
       if (!response.ok) {
+        const resText = await response.text();
+        if (resText) {
+          const error = JSON.parse(resText);
+          throw new AuthError(error.message, response.status);
+        }
         throw new AuthError(response.statusText, response.status);
       }
       if (response.status === 204 || !response.body) {
@@ -167,7 +172,6 @@ class AuthService {
         console.warn("Request was canceled:", error);
         return null;
       }
-      console.error("API Request Failed:", error);
       throw error;
     }
   }
@@ -553,7 +557,11 @@ document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
       if (error instanceof AuthError) {
         if (error.status === 401 || error.status === 403) {
           console.log("Member is already logged out from the server.");
+          return;
         }
+        await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
+        console.error(error);
+        throw error;
       }
     }
   }
@@ -594,11 +602,27 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       navigateTo("/membership/connexion-2fa");
       return;
     }
+    if (error instanceof AuthError) {
+      await window.$memberstackDom._showMessage(error.message, true);
+      return;
+    }
+    await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
+    console.error(error);
     throw error;
   }
   console.log("end login event");
 });
 document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
   const memberData = event.detail;
-  await authService.signup({ token: memberData.data.tokens.accessToken });
+  try {
+    await authService.signup({ token: memberData.data.tokens.accessToken });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      await window.$memberstackDom._showMessage(error.message, true);
+      return;
+    }
+    await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
+    console.error(error);
+    throw error;
+  }
 });
