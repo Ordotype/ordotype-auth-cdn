@@ -575,14 +575,15 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const res = await authService.login({ email: detail.email, password: detail.password });
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
       localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
-      window.location.href = res.data.redirect;
+      navigateTo(res.data.redirect);
     } else {
       const res = await authService.loginWithProvider({ loginResponse: detail });
       if (res === null) {
         const memberObj = JSON.parse(localStorage.getItem("_ms-mem") || "{}");
-        window.location.href = memberObj ? memberObj.loginRedirect : "/";
+        navigateTo(memberObj ? memberObj.loginRedirect : "/");
+        return;
       }
-      window.location.href = res.data.redirect;
+      navigateTo(res.data.redirect);
     }
   } catch (error) {
     if (error instanceof TwoFactorRequiredError) {
