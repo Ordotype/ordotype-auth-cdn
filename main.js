@@ -96,6 +96,7 @@ function getDeviceId() {
   }
   const msSessionId = localStorage.getItem("ms_session_id");
   if (msSessionId && msSessionId.length > 0) {
+    console.warn("No GA cookie found. Using ms session id value.");
     return localStorage.getItem("ms_session_id");
   }
   console.warn("No device id found. Using default value.");
@@ -156,7 +157,11 @@ class AuthService {
       if (response.status === 204 || !response.body) {
         return null;
       }
-      return await response.json();
+      if (response) {
+        const resText = await response.text();
+        return resText ? JSON.parse(resText) : null;
+      }
+      return null;
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         console.warn("Request was canceled:", error);
@@ -245,8 +250,10 @@ class AuthService {
       payload,
       {}
     );
-    if (isTwoFactorRequiredResponse(res)) {
-      throw new TwoFactorRequiredError("2fa required", res.data, res.type);
+    if (res) {
+      if (isTwoFactorRequiredResponse(res)) {
+        throw new TwoFactorRequiredError("2fa required", res.data, res.type);
+      }
     }
     return res;
   }
@@ -399,7 +406,6 @@ async function handleSignup(form, options) {
   try {
     window.$memberstackDom._showLoader();
     const hasSignup = isProviderAuth(options) ? await window.$memberstackDom.signupWithProvider(signupData) : await window.$memberstackDom.signupMemberEmailPassword(signupData);
-    console.log("Signup successful:", hasSignup);
     if (paidPlan) {
       await window.$memberstackDom.purchasePlansWithCheckout({ priceId: paidPlan });
     } else {
@@ -438,58 +444,55 @@ function initLoginForm(form) {
   });
 }
 function initAuthForms() {
-  window.addEventListener("load", () => {
-    const signupForm = document.querySelector('[data-ordo-form="signup"]');
-    const signupFormMS = document.querySelector('[data-ms-form="signup"]');
-    if (signupForm) initSignUpForm(signupForm);
-    if (signupFormMS) initSignUpForm(signupFormMS);
-    if (!signupForm && !signupFormMS) {
-      console.warn("no signup form found.");
-    }
-    const loginForm = document.querySelector('[data-ordo-form="login"]');
-    const loginFormMS = document.querySelector('[data-ms-form="login"]');
-    if (loginForm) initLoginForm(loginForm);
-    if (loginFormMS) initLoginForm(loginFormMS);
-    if (!loginForm && !loginFormMS) {
-      console.warn("no login form found.");
-    }
-    const googleAuth = document.querySelectorAll('[data-ordo-auth-provider="google"]') || document.querySelectorAll('[data-ms-auth-provider="google"]');
-    googleAuth.forEach((element) => {
-      element.addEventListener("click", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
-        if (!form) {
-          console.warn("No parent form with 'data-ms-form' found.");
-          return;
-        }
-        if (form.getAttribute("data-ms-form") === "signup") {
-          await handleSignup(form, { provider: "google" });
-        } else {
-          await handleLogin(form, { provider: "google" });
-        }
-      });
+  const signupForm = document.querySelector('[data-ordo-form="signup"]');
+  const signupFormMS = document.querySelector('[data-ms-form="signup"]');
+  if (signupForm) initSignUpForm(signupForm);
+  if (signupFormMS) initSignUpForm(signupFormMS);
+  if (!signupForm && !signupFormMS) {
+    console.warn("no signup form found.");
+  }
+  const loginForm = document.querySelector('[data-ordo-form="login"]');
+  const loginFormMS = document.querySelector('[data-ms-form="login"]');
+  if (loginForm) initLoginForm(loginForm);
+  if (loginFormMS) initLoginForm(loginFormMS);
+  if (!loginForm && !loginFormMS) {
+    console.warn("no login form found.");
+  }
+  const googleAuth = document.querySelectorAll('[data-ordo-auth-provider="google"]').length ? document.querySelectorAll('[data-ordo-auth-provider="google"]') : document.querySelectorAll('[data-ms-auth-provider="google"]');
+  googleAuth.forEach((element) => {
+    element.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
+      if (!form) {
+        console.warn("No parent form with 'data-ms-form' found.");
+        return;
+      }
+      if (form.getAttribute("data-ms-form") === "signup") {
+        await handleSignup(form, { provider: "google" });
+      } else {
+        await handleLogin(form, { provider: "google" });
+      }
     });
-    const logoutBtn = document.querySelectorAll('[data-ordo-action="logout"]') || document.querySelectorAll('[data-ms-action="logout"]');
-    logoutBtn.forEach((element) => {
-      element.addEventListener("click", async function(evt) {
-        evt.preventDefault();
-        evt.stopPropagation();
-        evt.stopImmediatePropagation();
-        await window.$memberstackDom.logout();
-      });
+  });
+  const logoutBtn = document.querySelectorAll('[data-ordo-action="logout"]').length ? document.querySelectorAll('[data-ordo-action="logout"]') : document.querySelectorAll('[data-ms-action="logout"]');
+  logoutBtn.forEach((element) => {
+    debugger;
+    element.addEventListener("click", async function(evt) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      evt.stopImmediatePropagation();
+      await window.$memberstackDom.logout();
     });
   });
 }
-MemberstackInterceptor(window.$memberstackDom);
 const authService = new AuthService();
-const EXCLUDED_URL_PATTERNS = "/default".split(",").map((pattern) => new RegExp(pattern));
+const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login".split(",").map((pattern) => new RegExp(pattern));
 const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
 (async function() {
-  initAuthForms();
   if (window.$memberstackReady) {
     await init();
   } else {
@@ -499,11 +502,17 @@ const isExcludedPage = (url) => {
   }
 })();
 async function init() {
+  console.log("ordo auth init");
+  MemberstackInterceptor(window.$memberstackDom);
+  window.Webflow.push(() => {
+    console.log("document loaded");
+    initAuthForms();
+  });
   if (isExcludedPage(location.href)) {
     console.log("Avoided verification on excluded page");
     return;
   }
-  console.log("getApp");
+  console.log("getApp verification");
   if (!isMemberLoggedIn()) {
     dispatchValidationEvent("unauthenticated");
     return;
@@ -547,7 +556,7 @@ document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
   await handleLogout(null, "/");
 });
 document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
-  console.log("login");
+  console.log("start login event");
   const detail = event.detail;
   if (!detail && isMemberLoggedIn()) {
     console.log("Member is already logged in.");
@@ -565,6 +574,10 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       window.location.href = res.data.redirect;
     } else {
       const res = await authService.loginWithProvider({ loginResponse: detail });
+      if (res === null) {
+        const memberObj = JSON.parse(localStorage.getItem("_ms-mem") || "{}");
+        window.location.href = memberObj ? memberObj.loginRedirect : "/";
+      }
       window.location.href = res.data.redirect;
     }
   } catch (error) {
@@ -578,6 +591,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     }
     throw error;
   }
+  console.log("end login event");
 });
 document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
   const memberData = event.detail;
