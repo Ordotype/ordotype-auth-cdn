@@ -423,9 +423,9 @@ function initSignUpForm(form) {
   if (email) email.type = "email";
   if (password) password.type = "password";
   form.addEventListener("submit", async (event) => {
+    event.stopImmediatePropagation();
     event.preventDefault();
     event.stopPropagation();
-    event.stopImmediatePropagation();
     await formHandler(event, "signup");
     return false;
   });
@@ -436,9 +436,9 @@ function initLoginForm(form) {
   if (email) email.type = "email";
   if (password) password.type = "password";
   form.addEventListener("submit", async (event) => {
+    event.stopImmediatePropagation();
     event.preventDefault();
     event.stopPropagation();
-    event.stopImmediatePropagation();
     await formHandler(event, "login");
     return false;
   });
@@ -461,9 +461,9 @@ function initAuthForms() {
   const googleAuth = document.querySelectorAll('[data-ordo-auth-provider="google"]').length ? document.querySelectorAll('[data-ordo-auth-provider="google"]') : document.querySelectorAll('[data-ms-auth-provider="google"]');
   googleAuth.forEach((element) => {
     element.addEventListener("click", async (event) => {
+      event.stopImmediatePropagation();
       event.preventDefault();
       event.stopPropagation();
-      event.stopImmediatePropagation();
       const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
       if (!form) {
         console.warn("No parent form with 'data-ms-form' found.");
@@ -478,11 +478,14 @@ function initAuthForms() {
   });
   const logoutBtn = document.querySelectorAll('[data-ordo-action="logout"]').length ? document.querySelectorAll('[data-ordo-action="logout"]') : document.querySelectorAll('[data-ms-action="logout"]');
   logoutBtn.forEach((element) => {
-    debugger;
-    element.addEventListener("click", async function(evt) {
+    const clonedElement = element.cloneNode(true);
+    if (element.parentNode) {
+      element.parentNode.replaceChild(clonedElement, element);
+    }
+    clonedElement.addEventListener("click", async function(evt) {
+      evt.stopImmediatePropagation();
       evt.preventDefault();
       evt.stopPropagation();
-      evt.stopImmediatePropagation();
       await window.$memberstackDom.logout();
     });
   });
@@ -504,6 +507,7 @@ const isExcludedPage = (url) => {
 async function init() {
   console.log("ordo auth init");
   MemberstackInterceptor(window.$memberstackDom);
+  window.Webflow = window.Webflow || [];
   window.Webflow.push(() => {
     console.log("document loaded");
     initAuthForms();
