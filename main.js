@@ -491,7 +491,7 @@ function initAuthForms() {
   });
 }
 const authService = new AuthService();
-const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login".split(",").map((pattern) => new RegExp(pattern));
+const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login".split(",").map((pattern) => new RegExp(pattern));
 const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
