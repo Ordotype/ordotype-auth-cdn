@@ -62,7 +62,7 @@ function MemberstackInterceptor(memberstackInstance) {
           if (propKey === "signupWithProvider") {
             let success;
             try {
-              const signup = await originalMethod.apply(target, args);
+              success = await originalMethod.apply(target, args);
             } catch (err) {
               throw err;
             }
@@ -370,7 +370,6 @@ async function handleError(message, error) {
 async function formHandler(event, type) {
   var _a, _b;
   event.preventDefault();
-  event.stopPropagation();
   event.stopImmediatePropagation();
   const form = event.target;
   const email = (_a = form.querySelector('[data-ms-member="email"]')) == null ? void 0 : _a.value;
@@ -446,7 +445,6 @@ function initSignUpForm(form) {
   form.addEventListener("submit", async (event) => {
     event.stopImmediatePropagation();
     event.preventDefault();
-    event.stopPropagation();
     await formHandler(event, "signup");
     return false;
   }, true);
@@ -459,7 +457,6 @@ function initLoginForm(form) {
   form.addEventListener("submit", async (event) => {
     event.stopImmediatePropagation();
     event.preventDefault();
-    event.stopPropagation();
     await formHandler(event, "login");
     return false;
   }, true);
@@ -484,7 +481,6 @@ function initAuthForms() {
     element.addEventListener("click", async (event) => {
       event.stopImmediatePropagation();
       event.preventDefault();
-      event.stopPropagation();
       const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
       if (!form) {
         console.warn("No parent form with 'data-ms-form' found.");
@@ -506,9 +502,8 @@ function initAuthForms() {
     clonedElement.addEventListener("click", async function(evt) {
       evt.stopImmediatePropagation();
       evt.preventDefault();
-      evt.stopPropagation();
       await window.$memberstackDom.logout();
-    });
+    }, true);
   });
 }
 const authService = new AuthService();
@@ -636,20 +631,16 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
   console.log("end login event");
 }, { capture: true });
 document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
-  const [error, memberData] = event.detail;
-  if (error) {
-    await window.$memberstackDom._showMessage(error.message, true);
-    return;
-  }
+  const memberData = event.detail;
   try {
     await authService.signup({ token: memberData.data.tokens.accessToken });
-  } catch (error2) {
-    if (error2 instanceof AuthError) {
-      await window.$memberstackDom._showMessage(error2.message, true);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      await window.$memberstackDom._showMessage(error.message, true);
       return;
     }
     await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
-    console.error(error2);
-    throw error2;
+    console.error(error);
+    throw error;
   }
 }, { capture: true });
