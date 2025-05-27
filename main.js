@@ -326,7 +326,7 @@ function navigateTo(url) {
   window.$memberstackDom._showLoader();
   setTimeout(() => {
     window.location.href = url;
-  }, 500);
+  }, 1500);
 }
 const handleLogout = async (message, redirect = "/") => {
   localStorage.removeItem("_ms-mid");
