@@ -644,7 +644,11 @@ document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
     window.$memberstackDom._hideLoader();
   } catch (error) {
     if (error instanceof AuthError) {
-      await window.$memberstackDom._showMessage(error.message, true);
+      if (error.message === "User already exists") {
+        await window.$memberstackDom._showMessage("L'email fourni est déjà utilisé, cliquez sur 'Connectez-vous'", true);
+      } else {
+        await window.$memberstackDom._showMessage(error.message, true);
+      }
       window.$memberstackDom._hideLoader();
       return;
     }
