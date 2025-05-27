@@ -61,30 +61,34 @@ function MemberstackInterceptor(memberstackInstance) {
           }
           if (propKey === "signupWithProvider") {
             let success;
+            const signupParams = args[0];
+            const { paidPlan, ...params } = signupParams;
             try {
-              success = await originalMethod.apply(target, args);
+              success = await originalMethod.apply(target, [params]);
             } catch (err) {
               throw err;
             }
             const evt = new CustomEvent(MemberstackEvents.SIGN_UP, {
               bubbles: false,
               cancelable: false,
-              detail: success
+              detail: [success, paidPlan]
             });
             document.dispatchEvent(evt);
             return success;
           }
           if (propKey === "signupMemberEmailPassword") {
             let success;
+            const signupParams = args[0];
+            const { paidPlan, ...params } = signupParams;
             try {
-              success = await originalMethod.apply(target, args);
+              success = await originalMethod.apply(target, [params]);
             } catch (err) {
               throw err;
             }
             const evt = new CustomEvent(MemberstackEvents.SIGN_UP, {
               bubbles: false,
               cancelable: false,
-              detail: success
+              detail: [success, paidPlan]
             });
             document.dispatchEvent(evt);
             return success;
@@ -326,7 +330,7 @@ function navigateTo(url) {
   window.$memberstackDom._showLoader();
   setTimeout(() => {
     window.location.href = url;
-  }, 1500);
+  }, 700);
 }
 const handleLogout = async (message, redirect = "/") => {
   localStorage.removeItem("_ms-mid");
@@ -425,13 +429,11 @@ async function handleSignup(form, options) {
   }
   try {
     window.$memberstackDom._showLoader();
-    const hasSignup = isProviderAuth(options) ? await window.$memberstackDom.signupWithProvider(signupData) : await window.$memberstackDom.signupMemberEmailPassword(signupData);
-    if (paidPlan) {
-      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: paidPlan });
+    if (isProviderAuth(options)) {
+      await window.$memberstackDom.signupWithProvider({ ...signupData, paidPlan });
     } else {
-      navigateTo(hasSignup.data.redirect);
+      await window.$memberstackDom.signupMemberEmailPassword({ ...signupData, paidPlan });
     }
-    window.$memberstackDom._hideLoader();
   } catch (error) {
     await handleError("Signup failed:", error);
     window.$memberstackDom._hideLoader();
@@ -631,9 +633,15 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
   console.log("end login event");
 }, { capture: true });
 document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
-  const memberData = event.detail;
+  const [memberData, paidPlan] = event.detail;
   try {
     await authService.signup({ token: memberData.data.tokens.accessToken });
+    if (paidPlan) {
+      await window.$memberstackDom.purchasePlansWithCheckout({ priceId: paidPlan });
+    } else {
+      navigateTo(memberData.data.redirect);
+    }
+    window.$memberstackDom._hideLoader();
   } catch (error) {
     if (error instanceof AuthError) {
       await window.$memberstackDom._showMessage(error.message, true);
