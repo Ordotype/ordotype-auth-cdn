@@ -45,34 +45,49 @@ function MemberstackInterceptor(memberstackInstance) {
             };
           }
           if (propKey === "loginWithProvider") {
-            const providerLogin = await originalMethod.apply(target, args);
+            let success;
+            try {
+              success = await originalMethod.apply(target, args);
+            } catch (err) {
+              throw err;
+            }
             const evt = new CustomEvent(MemberstackEvents.LOGIN, {
               bubbles: false,
               cancelable: false,
-              detail: providerLogin
+              detail: success
             });
             document.dispatchEvent(evt);
-            return providerLogin;
+            return success;
           }
           if (propKey === "signupWithProvider") {
-            const signup = await originalMethod.apply(target, args);
+            let success;
+            try {
+              const signup = await originalMethod.apply(target, args);
+            } catch (err) {
+              throw err;
+            }
             const evt = new CustomEvent(MemberstackEvents.SIGN_UP, {
               bubbles: false,
               cancelable: false,
-              detail: signup
+              detail: success
             });
             document.dispatchEvent(evt);
-            return signup;
+            return success;
           }
           if (propKey === "signupMemberEmailPassword") {
-            const signup = await originalMethod.apply(target, args);
+            let success;
+            try {
+              success = await originalMethod.apply(target, args);
+            } catch (err) {
+              throw err;
+            }
             const evt = new CustomEvent(MemberstackEvents.SIGN_UP, {
               bubbles: false,
               cancelable: false,
-              detail: signup
+              detail: success
             });
             document.dispatchEvent(evt);
-            return signup;
+            return success;
           }
           if (propKey === "getMemberCookie") {
             const cookie = await await originalMethod.apply(target, args);
@@ -367,6 +382,7 @@ async function formHandler(event, type) {
   }
 }
 async function handleLogin(_form, options) {
+  window.$memberstackDom._showLoader();
   let loginData;
   if (isProviderAuth(options)) {
     loginData = {
@@ -382,8 +398,9 @@ async function handleLogin(_form, options) {
   }
   try {
     const hasLogin = isProviderAuth(options) ? await window.$memberstackDom.loginWithProvider(loginData) : await window.$memberstackDom.loginMemberEmailPassword(loginData);
-    console.log("Signin successful:", hasLogin);
+    console.log("Signin submit finished:", hasLogin);
   } catch (error) {
+    window.$memberstackDom._hideLoader();
     await handleError("Login failed:", error);
   }
 }
@@ -432,7 +449,7 @@ function initSignUpForm(form) {
     event.stopPropagation();
     await formHandler(event, "signup");
     return false;
-  });
+  }, true);
 }
 function initLoginForm(form) {
   const email = form.querySelector("[data-ms-member='email']");
@@ -445,7 +462,7 @@ function initLoginForm(form) {
     event.stopPropagation();
     await formHandler(event, "login");
     return false;
-  });
+  }, true);
 }
 function initAuthForms() {
   const signupForm = document.querySelector('[data-ordo-form="signup"]');
@@ -478,7 +495,7 @@ function initAuthForms() {
       } else {
         await handleLogin(form, { provider: "google" });
       }
-    });
+    }, true);
   });
   const logoutBtn = document.querySelectorAll('[data-ordo-action="logout"]').length ? document.querySelectorAll('[data-ordo-action="logout"]') : document.querySelectorAll('[data-ms-action="logout"]');
   logoutBtn.forEach((element) => {
@@ -572,6 +589,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
   const detail = event.detail;
   if (!detail && isMemberLoggedIn()) {
     console.log("Member is already logged in.");
+    window.$memberstackDom._hideLoader();
     await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", true);
     return;
   }
@@ -584,6 +602,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
       localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
       navigateTo(res.data.redirect);
+      window.$memberstackDom._hideLoader();
     } else {
       const res = await authService.loginWithProvider({ loginResponse: detail });
       if (res === null) {
@@ -592,10 +611,12 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
         return;
       }
       navigateTo(res.data.redirect);
+      window.$memberstackDom._hideLoader();
     }
   } catch (error) {
     if (error instanceof TwoFactorRequiredError) {
       localStorage.removeItem("_ms-mid");
+      localStorage.removeItem("_ms-mem");
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
@@ -604,25 +625,31 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     }
     if (error instanceof AuthError) {
       await window.$memberstackDom._showMessage(error.message, true);
+      window.$memberstackDom._hideLoader();
       return;
     }
     await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
     console.error(error);
+    window.$memberstackDom._hideLoader();
     throw error;
   }
   console.log("end login event");
-});
+}, { capture: true });
 document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
-  const memberData = event.detail;
+  const [error, memberData] = event.detail;
+  if (error) {
+    await window.$memberstackDom._showMessage(error.message, true);
+    return;
+  }
   try {
     await authService.signup({ token: memberData.data.tokens.accessToken });
-  } catch (error) {
-    if (error instanceof AuthError) {
-      await window.$memberstackDom._showMessage(error.message, true);
+  } catch (error2) {
+    if (error2 instanceof AuthError) {
+      await window.$memberstackDom._showMessage(error2.message, true);
       return;
     }
     await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
-    console.error(error);
-    throw error;
+    console.error(error2);
+    throw error2;
   }
-});
+}, { capture: true });
