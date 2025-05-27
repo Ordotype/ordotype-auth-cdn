@@ -645,9 +645,11 @@ document.addEventListener(MemberstackEvents.SIGN_UP, async (event) => {
   } catch (error) {
     if (error instanceof AuthError) {
       await window.$memberstackDom._showMessage(error.message, true);
+      window.$memberstackDom._hideLoader();
       return;
     }
     await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
+    window.$memberstackDom._hideLoader();
     console.error(error);
     throw error;
   }
