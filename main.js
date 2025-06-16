@@ -122,7 +122,7 @@ function getDeviceId() {
   return "unknown-device-id";
 }
 const PROD_HOST = "www.ordotype.fr";
-const ORDOTYPE_API = location.host === PROD_HOST ? `${void 0}` : `${void 0}`;
+const ORDOTYPE_API = location.host === PROD_HOST ? `${"https://api.ordotype.fr/v1.0.0"}` : `${"https://staging-api.ordotype.fr/v1.0.0"}`;
 class AuthError extends Error {
   constructor(message, status = 500) {
     super(message);
