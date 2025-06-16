@@ -325,10 +325,12 @@ function isTwoFactorRequiredResponse(response) {
 new AuthService();
 function isMemberLoggedIn() {
   const memberToken = localStorage.getItem("_ms-mid");
+  console.log("isMemberLoggedIn", !!memberToken);
   return !!memberToken;
 }
 function navigateTo(url) {
   window.$memberstackDom._showLoader();
+  console.log("navigating to: ", url);
   setTimeout(() => {
     window.location.href = url;
   }, 700);
@@ -542,6 +544,7 @@ async function init() {
   }
   try {
     const isStatusValid = await authService.validateSessionStatus();
+    console.log("isStatusValid", isStatusValid);
     if (isStatusValid === false) {
       await window.$memberstackDom.logout();
       return;
@@ -599,7 +602,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const res = await authService.login({ email: detail.email, password: detail.password });
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
       localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
-      navigateTo(res.data.redirect);
+      navigateTo(res.data.member.loginRedirect);
       window.$memberstackDom._hideLoader();
     } else {
       const res = await authService.loginWithProvider({ loginResponse: detail });
@@ -608,7 +611,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
         navigateTo(memberObj ? memberObj.loginRedirect : "/");
         return;
       }
-      navigateTo(res.data.redirect);
+      navigateTo(res.data.member.loginRedirect);
       window.$memberstackDom._hideLoader();
     }
   } catch (error) {
@@ -618,7 +621,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
-      navigateTo("/src/pages/2factor-challenge/");
+      navigateTo("/membership/connexion-2fa");
       return;
     }
     if (error instanceof AuthError) {
