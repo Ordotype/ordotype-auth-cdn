@@ -121,7 +121,8 @@ function getDeviceId() {
   console.warn("No device id found. Using default value.");
   return "unknown-device-id";
 }
-const BASE_URL = "https://api.ordotype.fr/v1.0.0";
+const PROD_HOST = "www.ordotype.fr";
+const ORDOTYPE_API = location.host === PROD_HOST ? `${void 0}` : `${void 0}`;
 class AuthError extends Error {
   constructor(message, status = 500) {
     super(message);
@@ -146,7 +147,7 @@ class TwoFactorRequiredError extends Error {
 class AuthService {
   constructor() {
     __publicField(this, "headers");
-    const apiKey = "pk_97bbd1213f5b1bd2fc0f";
+    const apiKey = "pk_sb_e80d8429a51c2ceb0530";
     const sessionId = window.localStorage.getItem("ms_session_id");
     const deviceId = getDeviceId();
     this.headers = {
@@ -156,7 +157,7 @@ class AuthService {
     };
   }
   async request(endpoint, entity, method = "GET", body = null, additionalHeaders = {}, signal) {
-    const url = `${BASE_URL}/${entity}/${endpoint}`;
+    const url = `${ORDOTYPE_API}/${entity}/${endpoint}`;
     const headers = {
       "Content-Type": "application/json",
       ...this.headers,
@@ -509,7 +510,7 @@ function initAuthForms() {
   });
 }
 const authService = new AuthService();
-const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login".split(",").map((pattern) => new RegExp(pattern));
+const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login,/sta".split(",").map((pattern) => new RegExp(pattern));
 const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
@@ -617,7 +618,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
-      navigateTo("/membership/connexion-2fa");
+      navigateTo("/src/pages/2factor-challenge/");
       return;
     }
     if (error instanceof AuthError) {
