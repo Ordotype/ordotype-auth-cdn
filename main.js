@@ -122,7 +122,10 @@ function getDeviceId() {
   return "unknown-device-id";
 }
 const PROD_HOST = "www.ordotype.fr";
-const ORDOTYPE_API = location.host === PROD_HOST ? `${"https://api.ordotype.fr/v1.0.0"}` : `${"https://staging-api.ordotype.fr/v1.0.0"}`;
+function isProdHost() {
+  return location.host === PROD_HOST;
+}
+const ORDOTYPE_API = isProdHost() ? `${"https://api.ordotype.fr/v1.0.0"}` : `${"https://staging-api.ordotype.fr/v1.0.0"}`;
 class AuthError extends Error {
   constructor(message, status = 500) {
     super(message);
@@ -147,9 +150,12 @@ class TwoFactorRequiredError extends Error {
 class AuthService {
   constructor() {
     __publicField(this, "headers");
-    const apiKey = "pk_sb_e80d8429a51c2ceb0530";
+    const apiKey = isProdHost() ? "pk_97bbd1213f5b1bd2fc0f" : "pk_sb_e80d8429a51c2ceb0530";
     const sessionId = window.localStorage.getItem("ms_session_id");
     const deviceId = getDeviceId();
+    if (!apiKey) {
+      throw new Error("Missing API key for AuthService");
+    }
     this.headers = {
       "X-Api-Key": apiKey,
       "X-Session-Id": sessionId ?? void 0,
