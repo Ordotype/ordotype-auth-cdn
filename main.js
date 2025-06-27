@@ -518,7 +518,7 @@ function initAuthForms() {
   });
 }
 const authService = new AuthService();
-const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login,/sta".split(",").map((pattern) => new RegExp(pattern));
+const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login".split(",").map((pattern) => new RegExp(pattern));
 const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
@@ -622,12 +622,13 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     }
   } catch (error) {
     if (error instanceof TwoFactorRequiredError) {
+      const _2faUrl = isProdHost() ? "/membership/connexion-2fa" : void 0;
       localStorage.removeItem("_ms-mid");
       localStorage.removeItem("_ms-mem");
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
-      navigateTo("/membership/connexion-2fa");
+      navigateTo(_2faUrl);
       return;
     }
     if (error instanceof AuthError) {
