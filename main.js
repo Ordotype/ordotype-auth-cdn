@@ -627,7 +627,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     }
   } catch (error) {
     if (error instanceof TwoFactorRequiredError) {
-      const _2faUrl = isProdHost() ? "/membership/connexion-2fa" : void 0;
+      const _2faUrl = isProdHost() ? "/membership/connexion-2fa" : "/membership/connexion-2fa";
       localStorage.removeItem("_ms-mid");
       localStorage.removeItem("_ms-mem");
       const SESSION_NAME = "_ms-2fa-session";
