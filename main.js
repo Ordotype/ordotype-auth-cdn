@@ -123,6 +123,11 @@ function getDeviceId() {
 }
 const PROD_HOST = "www.ordotype.fr";
 function isProdHost() {
+  var _a;
+  const forceProd = (_a = window.memberstackConfig) == null ? void 0 : _a.forceProd;
+  if (forceProd === true) {
+    return true;
+  }
   return location.host === PROD_HOST;
 }
 const ORDOTYPE_API = isProdHost() ? `${"https://api.ordotype.fr/v1.0.0"}` : `${"https://staging-api.ordotype.fr/v1.0.0"}`;
