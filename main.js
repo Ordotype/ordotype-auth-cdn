@@ -627,9 +627,11 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     }
   } catch (error) {
     if (error instanceof TwoFactorRequiredError) {
-      const _2faUrl = isProdHost() ? "/membership/connexion-2fa" : "/membership/connexion-2fa";
+      const _2faUrl = isProdHost() ? "/membership/connexion-2fa" : void 0;
       localStorage.removeItem("_ms-mid");
       localStorage.removeItem("_ms-mem");
+      sessionStorage.removeItem("_ms-2fa-session");
+      sessionStorage.removeItem("timer_timeLeft");
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
