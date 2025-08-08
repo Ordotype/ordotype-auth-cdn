@@ -605,10 +605,10 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
     await window.$memberstackDom._showMessage("Vous êtes déjà connecté.", true);
     return;
   }
+  function isEmailPasswordAuth2(detail2) {
+    return "email" in detail2 && "password" in detail2;
+  }
   try {
-    let isEmailPasswordAuth2 = function(detail2) {
-      return "email" in detail2 && "password" in detail2;
-    };
     if (isEmailPasswordAuth2(detail)) {
       const res = await authService.login({ email: detail.email, password: detail.password });
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
@@ -632,6 +632,13 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       localStorage.removeItem("_ms-mem");
       sessionStorage.removeItem("_ms-2fa-session");
       sessionStorage.removeItem("timer_timeLeft");
+      let emailToStore = "";
+      if (isEmailPasswordAuth2(detail)) {
+        emailToStore = detail.email;
+      } else {
+        emailToStore = "unknown";
+      }
+      sessionStorage.setItem("ms_email", emailToStore);
       const SESSION_NAME = "_ms-2fa-session";
       const session = JSON.stringify({ data: error.data, type: error.type });
       sessionStorage.setItem(SESSION_NAME, session);
