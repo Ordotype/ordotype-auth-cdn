@@ -636,7 +636,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       if (isEmailPasswordAuth2(detail)) {
         emailToStore = detail.email;
       } else {
-        emailToStore = "unknown";
+        emailToStore = error.data.email || "unknown";
       }
       sessionStorage.setItem("ms_email", emailToStore);
       const SESSION_NAME = "_ms-2fa-session";
