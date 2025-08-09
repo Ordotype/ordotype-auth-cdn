@@ -632,6 +632,9 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       localStorage.removeItem("_ms-mem");
       sessionStorage.removeItem("_ms-2fa-session");
       sessionStorage.removeItem("timer_timeLeft");
+      sessionStorage.removeItem("otp_timer_timeLeft");
+      sessionStorage.removeItem("_ms-2fa-timer");
+      sessionStorage.removeItem("_ms-2fa-timer-start");
       let emailToStore = "";
       if (isEmailPasswordAuth2(detail)) {
         emailToStore = detail.email;
