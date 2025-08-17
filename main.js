@@ -21,9 +21,15 @@ function MemberstackInterceptor(memberstackInstance) {
       const originalMethod = target[propKey];
       if (typeof originalMethod === "function") {
         return async function(...args) {
-          console.log(
-            `Method ${propKey} called with arguments: ${JSON.stringify(args)}`
-          );
+          if (propKey !== "loginMemberEmailPassword") {
+            console.log(
+              `Method ${propKey} called with arguments: ${JSON.stringify(args)}`
+            );
+          } else {
+            console.log(
+              `Method ${propKey} called with arguments: ${JSON.stringify(args[0])}, "password": "*****"`
+            );
+          }
           if (propKey === "logout") {
             const evt = new CustomEvent(MemberstackEvents.LOGOUT, {
               bubbles: false,
@@ -382,7 +388,7 @@ function getPlanAttributes(form) {
   return { freePlan, paidPlan };
 }
 async function handleError(message, error) {
-  console.error(message, error);
+  console.log("submitFormError", message, error);
   await window.$memberstackDom._showMessage((error == null ? void 0 : error.message) || "An error occurred", true);
 }
 async function formHandler(event, type) {
@@ -418,7 +424,17 @@ async function handleLogin(_form, options) {
     console.log("Signin submit finished:", hasLogin);
   } catch (error) {
     window.$memberstackDom._hideLoader();
+    if ("code" in error && (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT")) {
+      console.log("Network timeout during login, not showing error to user", error);
+      window.$memberstackDom._hideLoader();
+      const sessionObj = localStorage.getItem("_ms-mem");
+      if (sessionObj) {
+        navigateTo(sessionObj.loginRedirect);
+      }
+      return;
+    }
     await handleError("Login failed:", error);
+    throw error;
   }
 }
 async function handleSignup(form, options) {
@@ -613,6 +629,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       const res = await authService.login({ email: detail.email, password: detail.password });
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
       localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
+      console.log("login successful with email and password");
       navigateTo(res.data.member.loginRedirect);
       window.$memberstackDom._hideLoader();
     } else {
@@ -622,6 +639,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
         navigateTo(memberObj ? memberObj.loginRedirect : "/");
         return;
       }
+      console.log("login successful with provider");
       navigateTo(res.data.member.loginRedirect);
       window.$memberstackDom._hideLoader();
     }
@@ -653,8 +671,17 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       window.$memberstackDom._hideLoader();
       return;
     }
+    if ("code" in error && (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT")) {
+      console.log("Network timeout during login, not showing error to user", error);
+      window.$memberstackDom._hideLoader();
+      const sessionObj = localStorage.getItem("_ms-mem");
+      if (sessionObj) {
+        navigateTo(sessionObj.loginRedirect);
+      }
+      return;
+    }
     await window.$memberstackDom._showMessage("Il y a eu une erreur avec votre demande.", true);
-    console.error(error);
+    console.error({ loginError: error });
     window.$memberstackDom._hideLoader();
     throw error;
   }
