@@ -27,7 +27,7 @@ function MemberstackInterceptor(memberstackInstance) {
             );
           } else {
             console.log(
-              `Method ${propKey} called with arguments: ${JSON.stringify(args[0])}, "password": "*****"`
+              `Method ${propKey} called with arguments: ${JSON.stringify(args[0].email)}, "password": "*****"`
             );
           }
           if (propKey === "logout") {
@@ -511,17 +511,15 @@ function initAuthForms() {
   const googleAuth = document.querySelectorAll('[data-ordo-auth-provider="google"]').length ? document.querySelectorAll('[data-ordo-auth-provider="google"]') : document.querySelectorAll('[data-ms-auth-provider="google"]');
   googleAuth.forEach((element) => {
     element.addEventListener("click", async (event) => {
-      event.stopImmediatePropagation();
-      event.preventDefault();
       const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
-      if (!form) {
-        console.warn("No parent form with 'data-ms-form' found.");
-        return;
-      }
-      if (form.getAttribute("data-ms-form") === "signup") {
-        await handleSignup(form, { provider: "google" });
-      } else {
-        await handleLogin(form, { provider: "google" });
+      if (form) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        if (form.getAttribute("data-ms-form") === "signup") {
+          await handleSignup(form, { provider: "google" });
+        } else {
+          await handleLogin(form, { provider: "google" });
+        }
       }
     }, true);
   });
