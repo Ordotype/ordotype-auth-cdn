@@ -1,6 +1,3 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 const MemberstackEvents = {
   LOGOUT: "memberstack.logout",
   LOGIN: "memberstack.login",
@@ -129,8 +126,7 @@ function getDeviceId() {
 }
 const PROD_HOST = "www.ordotype.fr";
 function isProdHost() {
-  var _a;
-  const forceProd = (_a = window.memberstackConfig) == null ? void 0 : _a.forceProd;
+  const forceProd = window.memberstackConfig?.forceProd;
   if (forceProd === true) {
     return true;
   }
@@ -138,9 +134,9 @@ function isProdHost() {
 }
 const ORDOTYPE_API = isProdHost() ? `${"https://api.ordotype.fr/v1.0.0"}` : `${"https://staging-api.ordotype.fr/v1.0.0"}`;
 class AuthError extends Error {
+  status;
   constructor(message, status = 500) {
     super(message);
-    __publicField(this, "status");
     this.name = "AuthError";
     this.status = status;
     if (Error.captureStackTrace) {
@@ -149,24 +145,21 @@ class AuthError extends Error {
   }
 }
 class TwoFactorRequiredError extends Error {
+  data;
+  type;
   constructor(message, data, type) {
     super(message);
-    __publicField(this, "data");
-    __publicField(this, "type");
     this.name = "TwoFactorRequiredError";
     this.data = data;
     this.type = type;
   }
 }
 class AuthService {
+  headers;
   constructor() {
-    __publicField(this, "headers");
     const apiKey = isProdHost() ? "pk_97bbd1213f5b1bd2fc0f" : "pk_sb_e80d8429a51c2ceb0530";
     const sessionId = window.localStorage.getItem("ms_session_id");
     const deviceId = getDeviceId();
-    if (!apiKey) {
-      throw new Error("Missing API key for AuthService");
-    }
     this.headers = {
       "X-Api-Key": apiKey,
       "X-Session-Id": sessionId ?? void 0,
@@ -355,6 +348,7 @@ function navigateTo(url) {
 const handleLogout = async (message, redirect = "/") => {
   localStorage.removeItem("_ms-mid");
   localStorage.removeItem("_ms-mem");
+  deleteUserSessionInitTime();
   navigateTo(redirect);
 };
 const dispatchValidationEvent = (isStatusValid) => {
@@ -365,6 +359,46 @@ const dispatchValidationEvent = (isStatusValid) => {
   });
   document.dispatchEvent(validSessionEvt);
 };
+const SESSION_INIT_TIME_KEY = "sessionInitTime";
+function createUserSessionInitTime() {
+  const sessionInitTime = /* @__PURE__ */ new Date();
+  localStorage.setItem(SESSION_INIT_TIME_KEY, sessionInitTime.toISOString());
+}
+function deleteUserSessionInitTime() {
+  localStorage.removeItem(SESSION_INIT_TIME_KEY);
+}
+function getUserSessionInitTime() {
+  const sessionInitTime = localStorage.getItem(SESSION_INIT_TIME_KEY);
+  if (sessionInitTime) {
+    return new Date(sessionInitTime);
+  }
+  return null;
+}
+function calculateUserSessionLifetime() {
+  const sessionInitTimeObj = getUserSessionInitTime();
+  if (!sessionInitTimeObj) {
+    return {
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      formatted: "00:00:00"
+    };
+  }
+  const currentTime = /* @__PURE__ */ new Date();
+  const diffMs = currentTime.getTime() - sessionInitTimeObj.getTime();
+  const totalSeconds = Math.floor(diffMs / 1e3);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor(totalSeconds % 3600 / 60);
+  const seconds = totalSeconds % 60;
+  const pad = (n) => n.toString().padStart(2, "0");
+  const formatted = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return {
+    hours,
+    minutes,
+    seconds,
+    formatted
+  };
+}
 function isProviderAuth(options) {
   return "provider" in options;
 }
@@ -389,15 +423,14 @@ function getPlanAttributes(form) {
 }
 async function handleError(message, error) {
   console.log("submitFormError", message, error);
-  await window.$memberstackDom._showMessage((error == null ? void 0 : error.message) || "An error occurred", true);
+  await window.$memberstackDom._showMessage(error?.message || "An error occurred", true);
 }
 async function formHandler(event, type) {
-  var _a, _b;
   event.preventDefault();
   event.stopImmediatePropagation();
   const form = event.target;
-  const email = (_a = form.querySelector('[data-ms-member="email"]')) == null ? void 0 : _a.value;
-  const password = (_b = form.querySelector('[data-ms-member="password"]')) == null ? void 0 : _b.value;
+  const email = form.querySelector('[data-ms-member="email"]')?.value;
+  const password = form.querySelector('[data-ms-member="password"]')?.value;
   if (type === "signup") {
     await handleSignup(form, { email, password });
   } else if (type === "login") {
@@ -536,6 +569,52 @@ function initAuthForms() {
     }, true);
   });
 }
+function getSentry() {
+  try {
+    const sentry = window.Sentry;
+    if (!sentry) throw new Error("Sentry not available");
+    return sentry;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+async function trackSentryAction({
+  name = "my-span",
+  attributes = {},
+  op,
+  description,
+  fn
+}) {
+  const Sentry = getSentry();
+  if (!Sentry) {
+    throw new Error("Sentry not available");
+  }
+  Sentry?.addBreadcrumb({
+    category: op.split(".")[0],
+    // e.g. 'auth' from 'auth.logout'
+    message: description,
+    level: "info"
+  });
+  Sentry.startSpan(
+    {
+      name,
+      op,
+      attributes
+    },
+    async (span) => {
+      try {
+        const result = await fn();
+        span.setStatus({ code: 1, message: "ok" });
+        return result;
+      } catch (error) {
+        span.setStatus({ code: 2, message: "internal_error" });
+        Sentry.captureException(error);
+        throw error;
+      }
+    }
+  );
+}
 const authService = new AuthService();
 const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login".split(",").map((pattern) => new RegExp(pattern));
 const isExcludedPage = (url) => {
@@ -591,7 +670,7 @@ document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
     console.log("Member is not logged in.");
     return;
   }
-  if (detail == null ? void 0 : detail.isExpired) {
+  if (detail?.isExpired) {
     await window.$memberstackDom._showMessage("Votre session a expiré. Veuillez vous reconnecter.", true);
   } else {
     try {
@@ -608,7 +687,19 @@ document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
       }
     }
   }
-  await handleLogout(null, "/");
+  const sessionLifetime = calculateUserSessionLifetime();
+  await trackSentryAction({
+    name: "User Logout",
+    attributes: {
+      userSessionLifetime: sessionLifetime.formatted,
+      userSessionLifeTimeHours: sessionLifetime.hours,
+      userSessionLifeTimeMinutes: sessionLifetime.minutes,
+      userSessionLifeTimeSeconds: sessionLifetime.seconds
+    },
+    op: "auth.logout",
+    description: "User logged out",
+    fn: async () => await handleLogout(null, "/")
+  });
 });
 document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
   console.log("start login event");
@@ -628,6 +719,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
       localStorage.setItem("_ms-mid", res.data.tokens.accessToken);
       localStorage.setItem("_ms-mem", JSON.stringify(res.data.member));
       console.log("login successful with email and password");
+      createUserSessionInitTime();
       navigateTo(res.data.member.loginRedirect);
       window.$memberstackDom._hideLoader();
     } else {
@@ -638,6 +730,7 @@ document.addEventListener(MemberstackEvents.LOGIN, async (event) => {
         return;
       }
       console.log("login successful with provider");
+      createUserSessionInitTime();
       navigateTo(res.data.member.loginRedirect);
       window.$memberstackDom._hideLoader();
     }
