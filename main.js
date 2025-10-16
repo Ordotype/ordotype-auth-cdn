@@ -381,7 +381,8 @@ function calculateUserSessionLifetime() {
       hours: 0,
       minutes: 0,
       seconds: 0,
-      formatted: "00:00:00"
+      formatted: "undefined",
+      documentReferrer: document.referrer
     };
   }
   const currentTime = /* @__PURE__ */ new Date();
@@ -396,7 +397,8 @@ function calculateUserSessionLifetime() {
     hours,
     minutes,
     seconds,
-    formatted
+    formatted,
+    documentReferrer: document.referrer
   };
 }
 function isProviderAuth(options) {
