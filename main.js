@@ -8376,11 +8376,11 @@ function _addResourceSpans(span, entry, resourceUrl, startTime, duration, timeOr
   });
 }
 function _trackNavigator(span) {
-  const navigator2 = WINDOW$1.navigator;
-  if (!navigator2) {
+  const navigator = WINDOW$1.navigator;
+  if (!navigator) {
     return;
   }
-  const connection = navigator2.connection;
+  const connection = navigator.connection;
   if (connection) {
     if (connection.effectiveType) {
       span.setAttribute("effectiveConnectionType", connection.effectiveType);
@@ -8392,11 +8392,11 @@ function _trackNavigator(span) {
       _measurements["connection.rtt"] = { value: connection.rtt, unit: "millisecond" };
     }
   }
-  if (isMeasurementValue(navigator2.deviceMemory)) {
-    span.setAttribute("deviceMemory", `${navigator2.deviceMemory} GB`);
+  if (isMeasurementValue(navigator.deviceMemory)) {
+    span.setAttribute("deviceMemory", `${navigator.deviceMemory} GB`);
   }
-  if (isMeasurementValue(navigator2.hardwareConcurrency)) {
-    span.setAttribute("hardwareConcurrency", String(navigator2.hardwareConcurrency));
+  if (isMeasurementValue(navigator.hardwareConcurrency)) {
+    span.setAttribute("hardwareConcurrency", String(navigator.hardwareConcurrency));
   }
 }
 function _setWebVitalAttributes(span, options) {
@@ -10908,6 +10908,11 @@ const EXCLUDED_URL_PATTERNS = "/challenge,/signup,/login,/successful-login".spli
 const isExcludedPage = (url) => {
   return EXCLUDED_URL_PATTERNS.some((pattern) => pattern.test(url));
 };
+const isFormPage = (url) => {
+  const formKeywords = ["signup", "login", "auth", "register"];
+  const lowerUrl = url.toLowerCase();
+  return formKeywords.some((keyword) => lowerUrl.includes(keyword));
+};
 (async function() {
   try {
     initializeSentry();
@@ -10915,22 +10920,39 @@ const isExcludedPage = (url) => {
   } catch (error2) {
     console.warn("Sentry initialization failed:", error2);
   }
+  let memberstackReady = false;
+  let domReady = false;
+  async function tryInitialize() {
+    if (memberstackReady && domReady) {
+      console.log("ordo auth init - both events ready");
+      await init();
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", async () => {
+      domReady = true;
+      await tryInitialize();
+    });
+  } else {
+    domReady = true;
+  }
   if (window.$memberstackReady) {
-    await init();
+    memberstackReady = true;
+    await tryInitialize();
   } else {
     document.addEventListener("memberstack.ready", async () => {
-      await init();
+      memberstackReady = true;
+      await tryInitialize();
     });
   }
 })();
 async function init() {
-  console.log("ordo auth init");
   MemberstackInterceptor(window.$memberstackDom);
-  const isFirefox = navigator.userAgent.toLowerCase().includes("firefox");
-  if (isFirefox) {
-    setTimeout(() => initAuthForms(), 10);
-  } else {
+  if (isFormPage(location.href)) {
+    console.log("Form page detected, initializing form interceptors");
     initAuthForms();
+  } else {
+    console.log("Non-form page, skipping form initialization");
   }
   if (isExcludedPage(location.href)) {
     console.log("Avoided verification on excluded page");
