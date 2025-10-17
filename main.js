@@ -393,7 +393,7 @@ function calculateUserSessionLifetime() {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor(totalSeconds % 3600 / 60);
   const seconds = totalSeconds % 60;
-  const pad = (n) => n.toString().padStart(2, "0");
+  const pad = (n2) => n2.toString().padStart(2, "0");
   const formatted = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   return {
     hours,
@@ -618,7 +618,7 @@ function initAuthForms() {
     }, true);
   });
 }
-const DEBUG_BUILD$2 = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
+const DEBUG_BUILD$4 = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
 const GLOBAL_OBJ = globalThis;
 const SDK_VERSION = "10.19.0";
 function getMainCarrier() {
@@ -635,7 +635,7 @@ function getGlobalSingleton(name, creator, obj = GLOBAL_OBJ) {
   const carrier = __SENTRY__[SDK_VERSION] = __SENTRY__[SDK_VERSION] || {};
   return carrier[name] || (carrier[name] = creator());
 }
-const CONSOLE_LEVELS = [
+const CONSOLE_LEVELS$1 = [
   "debug",
   "info",
   "warn",
@@ -644,7 +644,7 @@ const CONSOLE_LEVELS = [
   "assert",
   "trace"
 ];
-const PREFIX = "Sentry Logger ";
+const PREFIX$1 = "Sentry Logger ";
 const originalConsoleMethods = {};
 function consoleSandbox(callback) {
   if (!("console" in GLOBAL_OBJ)) {
@@ -678,29 +678,29 @@ function isEnabled$1() {
 function log(...args) {
   _maybeLog("log", ...args);
 }
-function warn(...args) {
+function warn$1(...args) {
   _maybeLog("warn", ...args);
 }
-function error(...args) {
+function error$1(...args) {
   _maybeLog("error", ...args);
 }
 function _maybeLog(level, ...args) {
-  if (!DEBUG_BUILD$2) {
+  if (!DEBUG_BUILD$4) {
     return;
   }
   if (isEnabled$1()) {
     consoleSandbox(() => {
-      GLOBAL_OBJ.console[level](`${PREFIX}[${level}]:`, ...args);
+      GLOBAL_OBJ.console[level](`${PREFIX$1}[${level}]:`, ...args);
     });
   }
 }
 function _getLoggerSettings() {
-  if (!DEBUG_BUILD$2) {
+  if (!DEBUG_BUILD$4) {
     return { enabled: false };
   }
   return getGlobalSingleton("loggerSettings", () => ({ enabled: false }));
 }
-const debug = {
+const debug$2 = {
   /** Enable logging. */
   enable,
   /** Disable logging. */
@@ -710,21 +710,21 @@ const debug = {
   /** Log a message. */
   log,
   /** Log a warning. */
-  warn,
+  warn: warn$1,
   /** Log an error. */
-  error
+  error: error$1
 };
 const STACKTRACE_FRAME_LIMIT = 50;
 const UNKNOWN_FUNCTION = "?";
 const WEBPACK_ERROR_REGEXP = /\(error: (.*)\)/;
 const STRIP_FRAME_REGEXP = /captureMessage|captureException/;
 function createStackParser(...parsers) {
-  const sortedParsers = parsers.sort((a, b) => a[0] - b[0]).map((p) => p[1]);
+  const sortedParsers = parsers.sort((a2, b2) => a2[0] - b2[0]).map((p2) => p2[1]);
   return (stack, skipFirstLines = 0, framesToPop = 0) => {
     const frames = [];
     const lines = stack.split("\n");
-    for (let i = skipFirstLines; i < lines.length; i++) {
-      let line = lines[i];
+    for (let i2 = skipFirstLines; i2 < lines.length; i2++) {
+      let line = lines[i2];
       if (line.length > 1024) {
         line = line.slice(0, 1024);
       }
@@ -804,37 +804,37 @@ function getFramesFromEvent(event) {
   }
   return void 0;
 }
-const handlers$1 = {};
+const handlers$2 = {};
 const instrumented$1 = {};
 function addHandler$1(type, handler) {
-  handlers$1[type] = handlers$1[type] || [];
-  handlers$1[type].push(handler);
+  handlers$2[type] = handlers$2[type] || [];
+  handlers$2[type].push(handler);
 }
 function maybeInstrument(type, instrumentFn) {
   if (!instrumented$1[type]) {
     instrumented$1[type] = true;
     try {
       instrumentFn();
-    } catch (e) {
-      DEBUG_BUILD$2 && debug.error(`Error while instrumenting ${type}`, e);
+    } catch (e2) {
+      DEBUG_BUILD$4 && debug$2.error(`Error while instrumenting ${type}`, e2);
     }
   }
 }
 function triggerHandlers$1(type, data) {
-  const typeHandlers = type && handlers$1[type];
+  const typeHandlers = type && handlers$2[type];
   if (!typeHandlers) {
     return;
   }
   for (const handler of typeHandlers) {
     try {
       handler(data);
-    } catch (e) {
-      DEBUG_BUILD$2 && debug.error(
+    } catch (e2) {
+      DEBUG_BUILD$4 && debug$2.error(
         `Error while triggering instrumentation handler.
 Type: ${type}
 Name: ${getFunctionName(handler)}
 Error:`,
-        e
+        e2
       );
     }
   }
@@ -871,8 +871,8 @@ function addGlobalUnhandledRejectionInstrumentationHandler(handler) {
 }
 function instrumentUnhandledRejection() {
   _oldOnUnhandledRejectionHandler = GLOBAL_OBJ.onunhandledrejection;
-  GLOBAL_OBJ.onunhandledrejection = function(e) {
-    const handlerData = e;
+  GLOBAL_OBJ.onunhandledrejection = function(e2) {
+    const handlerData = e2;
     triggerHandlers$1("unhandledrejection", handlerData);
     if (_oldOnUnhandledRejectionHandler) {
       return _oldOnUnhandledRejectionHandler.apply(this, arguments);
@@ -896,7 +896,7 @@ function isError(wat) {
 function isBuiltin(wat, className) {
   return objectToString.call(wat) === `[object ${className}]`;
 }
-function isErrorEvent$1(wat) {
+function isErrorEvent$2(wat) {
   return isBuiltin(wat, "ErrorEvent");
 }
 function isDOMError(wat) {
@@ -920,7 +920,7 @@ function isPlainObject(wat) {
 function isEvent(wat) {
   return typeof Event !== "undefined" && isInstanceOf(wat, Event);
 }
-function isElement(wat) {
+function isElement$2(wat) {
   return typeof Element !== "undefined" && isInstanceOf(wat, Element);
 }
 function isRegExp(wat) {
@@ -945,7 +945,7 @@ function isVueViewModel(wat) {
 function isRequest(request) {
   return typeof Request !== "undefined" && isInstanceOf(request, Request);
 }
-const WINDOW$4 = GLOBAL_OBJ;
+const WINDOW$7 = GLOBAL_OBJ;
 const DEFAULT_MAX_STRING_LENGTH = 80;
 function htmlTreeAsString(elem, options = {}) {
   if (!elem) {
@@ -982,7 +982,7 @@ function _htmlElementAsString(el, keyAttrs) {
   if (!elem?.tagName) {
     return "";
   }
-  if (WINDOW$4.HTMLElement) {
+  if (WINDOW$7.HTMLElement) {
     if (elem instanceof HTMLElement && elem.dataset) {
       if (elem.dataset["sentryComponent"]) {
         return elem.dataset["sentryComponent"];
@@ -1005,34 +1005,34 @@ function _htmlElementAsString(el, keyAttrs) {
     const className = elem.className;
     if (className && isString(className)) {
       const classes = className.split(/\s+/);
-      for (const c of classes) {
-        out.push(`.${c}`);
+      for (const c2 of classes) {
+        out.push(`.${c2}`);
       }
     }
   }
   const allowedAttrs = ["aria-label", "type", "name", "title", "alt"];
-  for (const k of allowedAttrs) {
-    const attr = elem.getAttribute(k);
+  for (const k2 of allowedAttrs) {
+    const attr = elem.getAttribute(k2);
     if (attr) {
-      out.push(`[${k}="${attr}"]`);
+      out.push(`[${k2}="${attr}"]`);
     }
   }
   return out.join("");
 }
 function getLocationHref() {
   try {
-    return WINDOW$4.document.location.href;
+    return WINDOW$7.document.location.href;
   } catch {
     return "";
   }
 }
 function getComponentName(elem) {
-  if (!WINDOW$4.HTMLElement) {
+  if (!WINDOW$7.HTMLElement) {
     return null;
   }
   let currentElem = elem;
   const MAX_TRAVERSE_HEIGHT = 5;
-  for (let i = 0; i < MAX_TRAVERSE_HEIGHT; i++) {
+  for (let i2 = 0; i2 < MAX_TRAVERSE_HEIGHT; i2++) {
     if (!currentElem) {
       return null;
     }
@@ -1088,8 +1088,8 @@ function safeJoin(input, delimiter) {
     return "";
   }
   const output = [];
-  for (let i = 0; i < input.length; i++) {
-    const value = input[i];
+  for (let i2 = 0; i2 < input.length; i2++) {
+    const value = input[i2];
     try {
       if (isVueViewModel(value)) {
         output.push("[VueViewModel]");
@@ -1132,7 +1132,7 @@ function fill(source, name, replacementFactory) {
   try {
     source[name] = wrapped;
   } catch {
-    DEBUG_BUILD$2 && debug.log(`Failed to replace method "${name}" in object`, source);
+    DEBUG_BUILD$4 && debug$2.log(`Failed to replace method "${name}" in object`, source);
   }
 }
 function addNonEnumerableProperty(obj, name, value) {
@@ -1144,7 +1144,7 @@ function addNonEnumerableProperty(obj, name, value) {
       configurable: true
     });
   } catch {
-    DEBUG_BUILD$2 && debug.log(`Failed to add non-enumerable property "${name}" to object`, obj);
+    DEBUG_BUILD$4 && debug$2.log(`Failed to add non-enumerable property "${name}" to object`, obj);
   }
 }
 function markFunctionWrapped(wrapped, original) {
@@ -1183,7 +1183,7 @@ function convertToPlainObject(value) {
 }
 function serializeEventTarget(target) {
   try {
-    return isElement(target) ? htmlTreeAsString(target) : Object.prototype.toString.call(target);
+    return isElement$2(target) ? htmlTreeAsString(target) : Object.prototype.toString.call(target);
   } catch {
     return "<unknown>";
   }
@@ -1202,21 +1202,21 @@ function getOwnProperties(obj) {
   }
 }
 function extractExceptionKeysForMessage(exception, maxLength = 40) {
-  const keys = Object.keys(convertToPlainObject(exception));
-  keys.sort();
-  const firstKey = keys[0];
+  const keys2 = Object.keys(convertToPlainObject(exception));
+  keys2.sort();
+  const firstKey = keys2[0];
   if (!firstKey) {
     return "[object has no keys]";
   }
   if (firstKey.length >= maxLength) {
     return truncate(firstKey, maxLength);
   }
-  for (let includedKeys = keys.length; includedKeys > 0; includedKeys--) {
-    const serialized = keys.slice(0, includedKeys).join(", ");
+  for (let includedKeys = keys2.length; includedKeys > 0; includedKeys--) {
+    const serialized = keys2.slice(0, includedKeys).join(", ");
     if (serialized.length > maxLength) {
       continue;
     }
-    if (includedKeys === keys.length) {
+    if (includedKeys === keys2.length) {
       return serialized;
     }
     return truncate(serialized, maxLength);
@@ -1244,9 +1244,9 @@ function uuid4(crypto = getCrypto()) {
   }
   return ("10000000100040008000" + 1e11).replace(
     /[018]/g,
-    (c) => (
+    (c2) => (
       // eslint-disable-next-line no-bitwise
-      (c ^ (getRandomByte() & 15) >> c / 4).toString(16)
+      (c2 ^ (getRandomByte() & 15) >> c2 / 4).toString(16)
     )
   );
 }
@@ -1367,7 +1367,7 @@ function browserPerformanceTimeOrigin() {
   }
   return cachedTimeOrigin[0];
 }
-function makeSession(context) {
+function makeSession$1(context) {
   const startingTime = timestampInSeconds();
   const session = {
     sid: uuid4(),
@@ -1583,8 +1583,8 @@ class Scope {
    * Set the ID of the last captured error event.
    * This is generally only captured on the isolation scope.
    */
-  setLastEventId(lastEventId) {
-    this._lastEventId = lastEventId;
+  setLastEventId(lastEventId2) {
+    this._lastEventId = lastEventId2;
   }
   /**
    * Get the client assigned to this scope.
@@ -1889,7 +1889,7 @@ class Scope {
   captureException(exception, hint) {
     const eventId = hint?.event_id || uuid4();
     if (!this._client) {
-      DEBUG_BUILD$2 && debug.warn("No client configured on scope - will not capture exception!");
+      DEBUG_BUILD$4 && debug$2.warn("No client configured on scope - will not capture exception!");
       return eventId;
     }
     const syntheticException = new Error("Sentry syntheticException");
@@ -1913,7 +1913,7 @@ class Scope {
   captureMessage(message, level, hint) {
     const eventId = hint?.event_id || uuid4();
     if (!this._client) {
-      DEBUG_BUILD$2 && debug.warn("No client configured on scope - will not capture message!");
+      DEBUG_BUILD$4 && debug$2.warn("No client configured on scope - will not capture message!");
       return eventId;
     }
     const syntheticException = new Error(message);
@@ -1938,7 +1938,7 @@ class Scope {
   captureEvent(event, hint) {
     const eventId = hint?.event_id || uuid4();
     if (!this._client) {
-      DEBUG_BUILD$2 && debug.warn("No client configured on scope - will not capture event!");
+      DEBUG_BUILD$4 && debug$2.warn("No client configured on scope - will not capture event!");
       return eventId;
     }
     this._client.captureEvent(event, { ...hint, event_id: eventId }, this);
@@ -1988,9 +1988,9 @@ class AsyncContextStack {
     let maybePromiseResult;
     try {
       maybePromiseResult = callback(scope);
-    } catch (e) {
+    } catch (e2) {
       this._popScope();
-      throw e;
+      throw e2;
     }
     if (isThenable(maybePromiseResult)) {
       return maybePromiseResult.then(
@@ -1998,9 +1998,9 @@ class AsyncContextStack {
           this._popScope();
           return res;
         },
-        (e) => {
+        (e2) => {
           this._popScope();
-          throw e;
+          throw e2;
         }
       );
     }
@@ -2065,18 +2065,18 @@ function withSetScope(scope, callback) {
     return callback(scope);
   });
 }
-function withIsolationScope(callback) {
+function withIsolationScope$1(callback) {
   return getAsyncContextStack().withScope(() => {
     return callback(getAsyncContextStack().getIsolationScope());
   });
 }
 function getStackAsyncContextStrategy() {
   return {
-    withIsolationScope,
+    withIsolationScope: withIsolationScope$1,
     withScope: withScope$1,
     withSetScope,
     withSetIsolationScope: (_isolationScope, callback) => {
-      return withIsolationScope(callback);
+      return withIsolationScope$1(callback);
     },
     getCurrentScope: () => getAsyncContextStack().getScope(),
     getIsolationScope: () => getAsyncContextStack().getIsolationScope()
@@ -2114,6 +2114,18 @@ function withScope(...rest) {
   }
   return acs.withScope(rest[0]);
 }
+function withIsolationScope(...rest) {
+  const carrier = getMainCarrier();
+  const acs = getAsyncContextStrategy(carrier);
+  if (rest.length === 2) {
+    const [isolationScope, callback] = rest;
+    if (!isolationScope) {
+      return acs.withIsolationScope(callback);
+    }
+    return acs.withSetIsolationScope(isolationScope, callback);
+  }
+  return acs.withIsolationScope(rest[0]);
+}
 function getClient() {
   return getCurrentScope().getClient();
 }
@@ -2140,6 +2152,8 @@ const SEMANTIC_ATTRIBUTE_SENTRY_MEASUREMENT_VALUE = "sentry.measurement_value";
 const SEMANTIC_ATTRIBUTE_SENTRY_CUSTOM_SPAN_NAME = "sentry.custom_span_name";
 const SEMANTIC_ATTRIBUTE_PROFILE_ID = "sentry.profile_id";
 const SEMANTIC_ATTRIBUTE_EXCLUSIVE_TIME = "sentry.exclusive_time";
+const SEMANTIC_ATTRIBUTE_HTTP_REQUEST_METHOD = "http.request.method";
+const SEMANTIC_ATTRIBUTE_URL_FULL = "url.full";
 const SEMANTIC_LINK_ATTRIBUTE_LINK_TYPE = "sentry.link.type";
 const SPAN_STATUS_UNSET = 0;
 const SPAN_STATUS_OK = 1;
@@ -2308,7 +2322,7 @@ function objectToBaggageHeader(object) {
     const baggageEntry = `${encodeURIComponent(objectKey)}=${encodeURIComponent(objectValue)}`;
     const newBaggageHeader = currentIndex === 0 ? baggageEntry : `${baggageHeader},${baggageEntry}`;
     if (newBaggageHeader.length > MAX_BAGGAGE_STRING_LENGTH) {
-      DEBUG_BUILD$2 && debug.warn(
+      DEBUG_BUILD$4 && debug$2.warn(
         `Not adding key: ${objectKey} with val: ${objectValue} to baggage header due to exceeding baggage size limits.`
       );
       return baggageHeader;
@@ -2362,14 +2376,14 @@ function dsnFromComponents(components) {
   };
 }
 function validateDsn(dsn) {
-  if (!DEBUG_BUILD$2) {
+  if (!DEBUG_BUILD$4) {
     return true;
   }
   const { port, projectId, protocol } = dsn;
   const requiredComponents = ["protocol", "publicKey", "host", "projectId"];
   const hasMissingRequiredComponent = requiredComponents.find((component) => {
     if (!dsn[component]) {
-      debug.error(`Invalid Sentry Dsn: ${component} missing`);
+      debug$2.error(`Invalid Sentry Dsn: ${component} missing`);
       return true;
     }
     return false;
@@ -2378,15 +2392,15 @@ function validateDsn(dsn) {
     return false;
   }
   if (!projectId.match(/^\d+$/)) {
-    debug.error(`Invalid Sentry Dsn: Invalid projectId ${projectId}`);
+    debug$2.error(`Invalid Sentry Dsn: Invalid projectId ${projectId}`);
     return false;
   }
   if (!isValidProtocol(protocol)) {
-    debug.error(`Invalid Sentry Dsn: Invalid protocol ${protocol}`);
+    debug$2.error(`Invalid Sentry Dsn: Invalid protocol ${protocol}`);
     return false;
   }
   if (port && isNaN(parseInt(port, 10))) {
-    debug.error(`Invalid Sentry Dsn: Invalid port ${port}`);
+    debug$2.error(`Invalid Sentry Dsn: Invalid port ${port}`);
     return false;
   }
   return true;
@@ -2497,6 +2511,25 @@ function getSampleRandFromTraceparentAndDsc(traceparentData, dsc) {
   } else {
     return Math.random();
   }
+}
+function shouldContinueTrace(client, baggageOrgId) {
+  const clientOrgId = extractOrgIdFromClient(client);
+  if (baggageOrgId && clientOrgId && baggageOrgId !== clientOrgId) {
+    debug$2.log(
+      `Won't continue trace because org IDs don't match (incoming baggage: ${baggageOrgId}, SDK options: ${clientOrgId})`
+    );
+    return false;
+  }
+  const strictTraceContinuation = client.getOptions().strictTraceContinuation || false;
+  if (strictTraceContinuation) {
+    if (baggageOrgId && !clientOrgId || !baggageOrgId && clientOrgId) {
+      debug$2.log(
+        `Starting a new trace because strict trace continuation is enabled but one org ID is missing (incoming baggage: ${baggageOrgId}, Sentry client: ${clientOrgId})`
+      );
+      return false;
+    }
+  }
+  return true;
 }
 const TRACE_FLAG_NONE = 0;
 const TRACE_FLAG_SAMPLED = 1;
@@ -2668,6 +2701,13 @@ function showSpanDropWarning() {
     hasShownSpanDropWarning = true;
   }
 }
+function updateSpanName(span, name) {
+  span.updateName(name);
+  span.setAttributes({
+    [SEMANTIC_ATTRIBUTE_SENTRY_SOURCE]: "custom",
+    [SEMANTIC_ATTRIBUTE_SENTRY_CUSTOM_SPAN_NAME]: name
+  });
+}
 let errorsInstrumented = false;
 function registerSpanErrorInstrumentation() {
   if (errorsInstrumented) {
@@ -2678,7 +2718,7 @@ function registerSpanErrorInstrumentation() {
     const rootSpan = activeSpan && getRootSpan(activeSpan);
     if (rootSpan) {
       const message = "internal_error";
-      DEBUG_BUILD$2 && debug.log(`[Tracing] Root span: ${message} -> Global error occurred`);
+      DEBUG_BUILD$4 && debug$2.log(`[Tracing] Root span: ${message} -> Global error occurred`);
       rootSpan.setStatus({ code: SPAN_STATUS_ERROR, message });
     }
   }
@@ -2696,7 +2736,7 @@ function hasSpansEnabled(maybeOptions) {
   (options.tracesSampleRate != null || !!options.tracesSampler);
 }
 function logIgnoredSpan(droppedSpan) {
-  debug.log(`Ignoring span ${droppedSpan.op} - ${droppedSpan.description} because it matches \`ignoreSpans\`.`);
+  debug$2.log(`Ignoring span ${droppedSpan.op} - ${droppedSpan.description} because it matches \`ignoreSpans\`.`);
 }
 function shouldIgnoreSpan(span, ignoreSpans) {
   if (!ignoreSpans?.length || !span.description) {
@@ -2705,7 +2745,7 @@ function shouldIgnoreSpan(span, ignoreSpans) {
   for (const pattern of ignoreSpans) {
     if (isStringOrRegExp(pattern)) {
       if (isMatchingPattern(span.description, pattern)) {
-        DEBUG_BUILD$2 && logIgnoredSpan(span);
+        DEBUG_BUILD$4 && logIgnoredSpan(span);
         return true;
       }
       continue;
@@ -2716,7 +2756,7 @@ function shouldIgnoreSpan(span, ignoreSpans) {
     const nameMatches = pattern.name ? isMatchingPattern(span.description, pattern.name) : true;
     const opMatches = pattern.op ? span.op && isMatchingPattern(span.op, pattern.op) : true;
     if (nameMatches && opMatches) {
-      DEBUG_BUILD$2 && logIgnoredSpan(span);
+      DEBUG_BUILD$4 && logIgnoredSpan(span);
       return true;
     }
   }
@@ -2801,6 +2841,10 @@ function getDynamicSamplingContextFromSpan(span) {
   applyLocalSampleRateToDsc(dsc);
   client.emit("createDsc", dsc, rootSpan);
   return dsc;
+}
+function spanToBaggageHeader(span) {
+  const dsc = getDynamicSamplingContextFromSpan(span);
+  return dynamicSamplingContextToSentryBaggageHeader(dsc);
 }
 class SentryNonRecordingSpan {
   constructor(spanContext = {}) {
@@ -3006,9 +3050,16 @@ function forEachEnvelopeItem(envelope, callback) {
   }
   return false;
 }
+function envelopeContainsItemType(envelope, types) {
+  return forEachEnvelopeItem(envelope, (_2, type) => types.includes(type));
+}
 function encodeUTF8(input) {
   const carrier = getSentryCarrier(GLOBAL_OBJ);
   return carrier.encodePolyfill ? carrier.encodePolyfill(input) : new TextEncoder().encode(input);
+}
+function decodeUTF8(input) {
+  const carrier = getSentryCarrier(GLOBAL_OBJ);
+  return carrier.decodePolyfill ? carrier.decodePolyfill(input) : new TextDecoder().decode(input);
 }
 function serializeEnvelope(envelope) {
   const [envHeaders, items] = envelope;
@@ -3048,6 +3099,29 @@ function concatBuffers(buffers) {
     offset += buffer.length;
   }
   return merged;
+}
+function parseEnvelope(env) {
+  let buffer = typeof env === "string" ? encodeUTF8(env) : env;
+  function readBinary(length) {
+    const bin = buffer.subarray(0, length);
+    buffer = buffer.subarray(length + 1);
+    return bin;
+  }
+  function readJson() {
+    let i2 = buffer.indexOf(10);
+    if (i2 < 0) {
+      i2 = buffer.length;
+    }
+    return JSON.parse(decodeUTF8(readBinary(i2)));
+  }
+  const envelopeHeader = readJson();
+  const items = [];
+  while (buffer.length) {
+    const itemHeader = readJson();
+    const binaryLength = typeof itemHeader.length === "number" ? itemHeader.length : void 0;
+    items.push([itemHeader, binaryLength ? readBinary(binaryLength) : readJson()]);
+  }
+  return [envelopeHeader, items];
 }
 function createSpanEnvelopeItem(spanJson) {
   const spanHeaders = {
@@ -3184,7 +3258,7 @@ function createSpanEnvelope(spans, client) {
   return createEnvelope(headers, items);
 }
 function logSpanStart(span) {
-  if (!DEBUG_BUILD$2) return;
+  if (!DEBUG_BUILD$4) return;
   const { description = "< unknown name >", op = "< unknown op >", parent_span_id: parentSpanId } = spanToJSON(span);
   const { spanId } = span.spanContext();
   const sampled = spanIsSampled(span);
@@ -3205,22 +3279,22 @@ function logSpanStart(span) {
       infoParts.push(`root description: ${description2}`);
     }
   }
-  debug.log(`${header}
+  debug$2.log(`${header}
   ${infoParts.join("\n  ")}`);
 }
 function logSpanEnd(span) {
-  if (!DEBUG_BUILD$2) return;
+  if (!DEBUG_BUILD$4) return;
   const { description = "< unknown name >", op = "< unknown op >" } = spanToJSON(span);
   const { spanId } = span.spanContext();
   const rootSpan = getRootSpan(span);
   const isRootSpan = rootSpan === span;
   const msg = `[Tracing] Finishing "${op}" ${isRootSpan ? "root " : ""}span "${description}" with ID ${spanId}`;
-  debug.log(msg);
+  debug$2.log(msg);
 }
 function setMeasurement(name, value, unit, activeSpan = getActiveSpan()) {
   const rootSpan = activeSpan && getRootSpan(activeSpan);
   if (rootSpan) {
-    DEBUG_BUILD$2 && debug.log(`[Measurement] Setting measurement on root span: ${name} = ${value} ${unit}`);
+    DEBUG_BUILD$4 && debug$2.log(`[Measurement] Setting measurement on root span: ${name} = ${value} ${unit}`);
     rootSpan.addEvent(name, {
       [SEMANTIC_ATTRIBUTE_SENTRY_MEASUREMENT_VALUE]: value,
       [SEMANTIC_ATTRIBUTE_SENTRY_MEASUREMENT_UNIT]: unit
@@ -3404,7 +3478,7 @@ class SentrySpan {
    * @inheritdoc
    */
   addEvent(name, attributesOrStartTime, startTime) {
-    DEBUG_BUILD$2 && debug.log("[Tracing] Adding an event to span:", name);
+    DEBUG_BUILD$4 && debug$2.log("[Tracing] Adding an event to span:", name);
     const time = isSpanTimeInput(attributesOrStartTime) ? attributesOrStartTime : startTime || timestampInSeconds();
     const attributes = isSpanTimeInput(attributesOrStartTime) ? {} : attributesOrStartTime || {};
     const event = {
@@ -3440,7 +3514,7 @@ class SentrySpan {
       if (this._sampled) {
         sendSpanEnvelope(createSpanEnvelope([this], client));
       } else {
-        DEBUG_BUILD$2 && debug.log("[Tracing] Discarding standalone span because its trace was not chosen to be sampled.");
+        DEBUG_BUILD$4 && debug$2.log("[Tracing] Discarding standalone span because its trace was not chosen to be sampled.");
         if (client) {
           client.recordDroppedEvent("sample_rate", "span");
         }
@@ -3461,7 +3535,7 @@ class SentrySpan {
       return void 0;
     }
     if (!this._name) {
-      DEBUG_BUILD$2 && debug.warn("Transaction has no name, falling back to `<unlabeled transaction>`.");
+      DEBUG_BUILD$4 && debug$2.warn("Transaction has no name, falling back to `<unlabeled transaction>`.");
       this._name = "<unlabeled transaction>";
     }
     const { scope: capturedSpanScope, isolationScope: capturedSpanIsolationScope } = getCapturedScopesOnSpan(this);
@@ -3483,7 +3557,7 @@ class SentrySpan {
       spans: (
         // spans.sort() mutates the array, but `spans` is already a copy so we can safely do this here
         // we do not use spans anymore after this point
-        spans.length > MAX_SPAN_COUNT ? spans.sort((a, b) => a.start_timestamp - b.start_timestamp).slice(0, MAX_SPAN_COUNT) : spans
+        spans.length > MAX_SPAN_COUNT ? spans.sort((a2, b2) => a2.start_timestamp - b2.start_timestamp).slice(0, MAX_SPAN_COUNT) : spans
       ),
       start_timestamp: this._startTime,
       timestamp: this._endTime,
@@ -3504,7 +3578,7 @@ class SentrySpan {
     const measurements = timedEventsToMeasurements(this._events);
     const hasMeasurements = measurements && Object.keys(measurements).length;
     if (hasMeasurements) {
-      DEBUG_BUILD$2 && debug.log(
+      DEBUG_BUILD$4 && debug$2.log(
         "[Measurements] Adding measurements to transaction event",
         JSON.stringify(measurements, void 0, 2)
       );
@@ -3540,10 +3614,10 @@ function handleCallbackErrors(fn, onError, onFinally = () => {
   let maybePromiseResult;
   try {
     maybePromiseResult = fn();
-  } catch (e) {
-    onError(e);
+  } catch (e2) {
+    onError(e2);
     onFinally();
-    throw e;
+    throw e2;
   }
   return maybeHandlePromiseRejection(maybePromiseResult, onError, onFinally, onSuccess);
 }
@@ -3555,10 +3629,10 @@ function maybeHandlePromiseRejection(value, onError, onFinally, onSuccess) {
         onSuccess(res);
         return res;
       },
-      (e) => {
-        onError(e);
+      (e2) => {
+        onError(e2);
         onFinally();
-        throw e;
+        throw e2;
       }
     );
   }
@@ -3594,7 +3668,7 @@ function sampleSpan(options, samplingContext, sampleRand) {
   }
   const parsedSampleRate = parseSampleRate(sampleRate);
   if (parsedSampleRate === void 0) {
-    DEBUG_BUILD$2 && debug.warn(
+    DEBUG_BUILD$4 && debug$2.warn(
       `[Tracing] Discarding root span because of invalid sample rate. Sample rate must be a boolean or a number between 0 and 1. Got ${JSON.stringify(
         sampleRate
       )} of type ${JSON.stringify(typeof sampleRate)}.`
@@ -3602,14 +3676,14 @@ function sampleSpan(options, samplingContext, sampleRand) {
     return [false];
   }
   if (!parsedSampleRate) {
-    DEBUG_BUILD$2 && debug.log(
+    DEBUG_BUILD$4 && debug$2.log(
       `[Tracing] Discarding transaction because ${typeof options.tracesSampler === "function" ? "tracesSampler returned 0 or false" : "a negative sampling decision was inherited or tracesSampleRate is set to 0"}`
     );
     return [false, parsedSampleRate, localSampleRateWasApplied];
   }
   const shouldSample = sampleRand < parsedSampleRate;
   if (!shouldSample) {
-    DEBUG_BUILD$2 && debug.log(
+    DEBUG_BUILD$4 && debug$2.log(
       `[Tracing] Discarding transaction because it's not included in the random sample (sampling rate = ${Number(
         sampleRate
       )})`
@@ -3654,6 +3728,43 @@ function startSpan(options, callback) {
     });
   });
 }
+function startSpanManual(options, callback) {
+  const acs = getAcs();
+  if (acs.startSpanManual) {
+    return acs.startSpanManual(options, callback);
+  }
+  const spanArguments = parseSentrySpanArguments(options);
+  const { forceTransaction, parentSpan: customParentSpan, scope: customScope } = options;
+  const customForkedScope = customScope?.clone();
+  return withScope(customForkedScope, () => {
+    const wrapper = getActiveSpanWrapper(customParentSpan);
+    return wrapper(() => {
+      const scope = getCurrentScope();
+      const parentSpan = getParentSpan(scope, customParentSpan);
+      const shouldSkipSpan = options.onlyIfParent && !parentSpan;
+      const activeSpan = shouldSkipSpan ? new SentryNonRecordingSpan() : createChildOrRootSpan({
+        parentSpan,
+        spanArguments,
+        forceTransaction,
+        scope
+      });
+      _setSpanForScope(scope, activeSpan);
+      return handleCallbackErrors(
+        // We pass the `finish` function to the callback, so the user can finish the span manually
+        // this is mainly here for historic purposes because previously, we instructed users to call
+        // `finish` instead of `span.end()` to also clean up the scope. Nowadays, calling `span.end()`
+        // or `finish` has the same effect and we simply leave it here to avoid breaking user code.
+        () => callback(activeSpan, () => activeSpan.end()),
+        () => {
+          const { status } = spanToJSON(activeSpan);
+          if (activeSpan.isRecording() && (!status || status === "ok")) {
+            activeSpan.setStatus({ code: SPAN_STATUS_ERROR, message: "internal_error" });
+          }
+        }
+      );
+    });
+  });
+}
 function startInactiveSpan(options) {
   const acs = getAcs();
   if (acs.startInactiveSpan) {
@@ -3677,6 +3788,24 @@ function startInactiveSpan(options) {
     });
   });
 }
+const continueTrace = (options, callback) => {
+  const carrier = getMainCarrier();
+  const acs = getAsyncContextStrategy(carrier);
+  if (acs.continueTrace) {
+    return acs.continueTrace(options, callback);
+  }
+  const { sentryTrace, baggage } = options;
+  const client = getClient();
+  const incomingDsc = baggageHeaderToDynamicSamplingContext(baggage);
+  if (client && !shouldContinueTrace(client, incomingDsc?.org_id)) {
+    return startNewTrace(callback);
+  }
+  return withScope((scope) => {
+    const propagationContext = propagationContextFromHeaders(sentryTrace, baggage);
+    scope.setPropagationContext(propagationContext);
+    return callback();
+  });
+};
 function withActiveSpan(span, callback) {
   const acs = getAcs();
   if (acs.withActiveSpan) {
@@ -3685,6 +3814,28 @@ function withActiveSpan(span, callback) {
   return withScope((scope) => {
     _setSpanForScope(scope, span || void 0);
     return callback(scope);
+  });
+}
+function suppressTracing(callback) {
+  const acs = getAcs();
+  if (acs.suppressTracing) {
+    return acs.suppressTracing(callback);
+  }
+  return withScope((scope) => {
+    scope.setSDKProcessingMetadata({ [SUPPRESS_TRACING_KEY]: true });
+    const res = callback();
+    scope.setSDKProcessingMetadata({ [SUPPRESS_TRACING_KEY]: void 0 });
+    return res;
+  });
+}
+function startNewTrace(callback) {
+  return withScope((scope) => {
+    scope.setPropagationContext({
+      traceId: generateTraceId(),
+      sampleRand: Math.random()
+    });
+    DEBUG_BUILD$4 && debug$2.log(`Starting a new trace with id ${scope.getPropagationContext().traceId}`);
+    return withActiveSpan(null, callback);
   });
 }
 function createChildOrRootSpan({
@@ -3799,7 +3950,7 @@ function _startRootSpan(spanArguments, scope, parentSampled) {
     sampled
   });
   if (!sampled && client) {
-    DEBUG_BUILD$2 && debug.log("[Tracing] Discarding root span because its trace was not chosen to be sampled.");
+    DEBUG_BUILD$4 && debug$2.log("[Tracing] Discarding root span because its trace was not chosen to be sampled.");
     client.recordDroppedEvent("sample_rate", "transaction");
   }
   if (client) {
@@ -3975,26 +4126,26 @@ function startIdleSpan(startSpanOptions, options = {}) {
     if (!attributes[SEMANTIC_ATTRIBUTE_SENTRY_IDLE_SPAN_FINISH_REASON]) {
       span.setAttribute(SEMANTIC_ATTRIBUTE_SENTRY_IDLE_SPAN_FINISH_REASON, _finishReason);
     }
-    debug.log(`[Tracing] Idle span "${spanJSON.op}" finished`);
+    debug$2.log(`[Tracing] Idle span "${spanJSON.op}" finished`);
     const childSpans = getSpanDescendants(span).filter((child) => child !== span);
     let discardedSpans = 0;
     childSpans.forEach((childSpan) => {
       if (childSpan.isRecording()) {
         childSpan.setStatus({ code: SPAN_STATUS_ERROR, message: "cancelled" });
         childSpan.end(endTimestamp);
-        DEBUG_BUILD$2 && debug.log("[Tracing] Cancelling span since span ended early", JSON.stringify(childSpan, void 0, 2));
+        DEBUG_BUILD$4 && debug$2.log("[Tracing] Cancelling span since span ended early", JSON.stringify(childSpan, void 0, 2));
       }
       const childSpanJSON = spanToJSON(childSpan);
       const { timestamp: childEndTimestamp = 0, start_timestamp: childStartTimestamp = 0 } = childSpanJSON;
       const spanStartedBeforeIdleSpanEnd = childStartTimestamp <= endTimestamp;
       const timeoutWithMarginOfError = (finalTimeout + idleTimeout) / 1e3;
       const spanEndedBeforeFinalTimeout = childEndTimestamp - childStartTimestamp <= timeoutWithMarginOfError;
-      if (DEBUG_BUILD$2) {
+      if (DEBUG_BUILD$4) {
         const stringifiedSpan = JSON.stringify(childSpan, void 0, 2);
         if (!spanStartedBeforeIdleSpanEnd) {
-          debug.log("[Tracing] Discarding span since it happened after idle span was finished", stringifiedSpan);
+          debug$2.log("[Tracing] Discarding span since it happened after idle span was finished", stringifiedSpan);
         } else if (!spanEndedBeforeFinalTimeout) {
-          debug.log("[Tracing] Discarding span since it finished after idle span final timeout", stringifiedSpan);
+          debug$2.log("[Tracing] Discarding span since it finished after idle span final timeout", stringifiedSpan);
         }
       }
       if (!spanEndedBeforeFinalTimeout || !spanStartedBeforeIdleSpanEnd) {
@@ -4051,19 +4202,19 @@ function startIdleSpan(startSpanOptions, options = {}) {
 function _startIdleSpan(options) {
   const span = startInactiveSpan(options);
   _setSpanForScope(getCurrentScope(), span);
-  DEBUG_BUILD$2 && debug.log("[Tracing] Started span is an idle span");
+  DEBUG_BUILD$4 && debug$2.log("[Tracing] Started span is an idle span");
   return span;
 }
 const STATE_PENDING = 0;
 const STATE_RESOLVED = 1;
 const STATE_REJECTED = 2;
 function resolvedSyncPromise(value) {
-  return new SyncPromise((resolve) => {
-    resolve(value);
+  return new SyncPromise((resolve2) => {
+    resolve2(value);
   });
 }
 function rejectedSyncPromise(reason) {
-  return new SyncPromise((_, reject) => {
+  return new SyncPromise((_2, reject) => {
     reject(reason);
   });
 }
@@ -4075,17 +4226,17 @@ class SyncPromise {
   }
   /** @inheritdoc */
   then(onfulfilled, onrejected) {
-    return new SyncPromise((resolve, reject) => {
+    return new SyncPromise((resolve2, reject) => {
       this._handlers.push([
         false,
         (result) => {
           if (!onfulfilled) {
-            resolve(result);
+            resolve2(result);
           } else {
             try {
-              resolve(onfulfilled(result));
-            } catch (e) {
-              reject(e);
+              resolve2(onfulfilled(result));
+            } catch (e2) {
+              reject(e2);
             }
           }
         },
@@ -4094,9 +4245,9 @@ class SyncPromise {
             reject(reason);
           } else {
             try {
-              resolve(onrejected(reason));
-            } catch (e) {
-              reject(e);
+              resolve2(onrejected(reason));
+            } catch (e2) {
+              reject(e2);
             }
           }
         }
@@ -4110,7 +4261,7 @@ class SyncPromise {
   }
   /** @inheritdoc */
   finally(onfinally) {
-    return new SyncPromise((resolve, reject) => {
+    return new SyncPromise((resolve2, reject) => {
       let val;
       let isRejected;
       return this.then(
@@ -4133,7 +4284,7 @@ class SyncPromise {
           reject(val);
           return;
         }
-        resolve(val);
+        resolve2(val);
       });
     });
   }
@@ -4164,23 +4315,23 @@ class SyncPromise {
         return;
       }
       if (isThenable(value)) {
-        void value.then(resolve, reject);
+        void value.then(resolve2, reject);
         return;
       }
       this._state = state;
       this._value = value;
       this._executeHandlers();
     };
-    const resolve = (value) => {
+    const resolve2 = (value) => {
       setResult(STATE_RESOLVED, value);
     };
     const reject = (reason) => {
       setResult(STATE_REJECTED, reason);
     };
     try {
-      executor(resolve, reject);
-    } catch (e) {
-      reject(e);
+      executor(resolve2, reject);
+    } catch (e2) {
+      reject(e2);
     }
   }
 }
@@ -4198,7 +4349,7 @@ function _notifyEventProcessors(event, hint, processors, index) {
     return event;
   }
   const result = processor({ ...event }, hint);
-  DEBUG_BUILD$2 && result === null && debug.log(`Event processor "${processor.id || "?"}" dropped event`);
+  DEBUG_BUILD$4 && result === null && debug$2.log(`Event processor "${processor.id || "?"}" dropped event`);
   if (isThenable(result)) {
     return result.then((final) => _notifyEventProcessors(final, hint, processors, index + 1));
   }
@@ -4338,8 +4489,8 @@ function getFilenameToDebugIdMap(stackParser) {
       acc[result[0]] = result[1];
     } else {
       const parsedStack = stackParser(stackKey);
-      for (let i = parsedStack.length - 1; i >= 0; i--) {
-        const stackFrame = parsedStack[i];
+      for (let i2 = parsedStack.length - 1; i2 >= 0; i2--) {
+        const stackFrame = parsedStack[i2];
         const filename = stackFrame?.filename;
         const debugId = debugIdMap[stackKey];
         if (filename && debugId) {
@@ -4353,6 +4504,23 @@ function getFilenameToDebugIdMap(stackParser) {
   }, {});
   return cachedFilenameDebugIds;
 }
+function getDebugImagesForResources(stackParser, resource_paths) {
+  const filenameDebugIdMap = getFilenameToDebugIdMap(stackParser);
+  if (!filenameDebugIdMap) {
+    return [];
+  }
+  const images = [];
+  for (const path of resource_paths) {
+    if (path && filenameDebugIdMap[path]) {
+      images.push({
+        type: "sourcemap",
+        code_file: path,
+        debug_id: filenameDebugIdMap[path]
+      });
+    }
+  }
+  return images;
+}
 function prepareEvent(options, event, hint, scope, client, isolationScope) {
   const { normalizeDepth = 3, normalizeMaxBreadth = 1e3 } = options;
   const prepared = {
@@ -4360,7 +4528,7 @@ function prepareEvent(options, event, hint, scope, client, isolationScope) {
     event_id: event.event_id || hint.event_id || uuid4(),
     timestamp: event.timestamp || dateTimestampInSeconds()
   };
-  const integrations = hint.integrations || options.integrations.map((i) => i.name);
+  const integrations = hint.integrations || options.integrations.map((i2) => i2.name);
   applyClientOptions(prepared, options);
   applyIntegrationsMetadata(prepared, integrations);
   if (client) {
@@ -4469,10 +4637,10 @@ function normalizeEvent(event, depth, maxBreadth) {
   const normalized = {
     ...event,
     ...event.breadcrumbs && {
-      breadcrumbs: event.breadcrumbs.map((b) => ({
-        ...b,
-        ...b.data && {
-          data: normalize(b.data, depth, maxBreadth)
+      breadcrumbs: event.breadcrumbs.map((b2) => ({
+        ...b2,
+        ...b2.data && {
+          data: normalize(b2.data, depth, maxBreadth)
         }
       }))
     },
@@ -4516,28 +4684,97 @@ function getFinalScope(scope, captureContext) {
   return finalScope;
 }
 function parseEventHintOrCaptureContext(hint) {
-  {
+  if (!hint) {
     return void 0;
   }
+  if (hintIsScopeOrFunction(hint)) {
+    return { captureContext: hint };
+  }
+  if (hintIsScopeContext(hint)) {
+    return {
+      captureContext: hint
+    };
+  }
+  return hint;
+}
+function hintIsScopeOrFunction(hint) {
+  return hint instanceof Scope || typeof hint === "function";
+}
+const captureContextKeys = [
+  "user",
+  "level",
+  "extra",
+  "contexts",
+  "tags",
+  "fingerprint",
+  "propagationContext"
+];
+function hintIsScopeContext(hint) {
+  return Object.keys(hint).some((key) => captureContextKeys.includes(key));
 }
 function captureException(exception, hint) {
-  return getCurrentScope().captureException(exception, parseEventHintOrCaptureContext());
+  return getCurrentScope().captureException(exception, parseEventHintOrCaptureContext(hint));
+}
+function captureMessage(message, captureContext) {
+  const level = typeof captureContext === "string" ? captureContext : void 0;
+  const context = typeof captureContext !== "string" ? { captureContext } : void 0;
+  return getCurrentScope().captureMessage(message, level, context);
 }
 function captureEvent(event, hint) {
   return getCurrentScope().captureEvent(event, hint);
 }
+function setContext(name, context) {
+  getIsolationScope().setContext(name, context);
+}
+function setExtras(extras) {
+  getIsolationScope().setExtras(extras);
+}
+function setExtra(key, extra) {
+  getIsolationScope().setExtra(key, extra);
+}
+function setTags(tags) {
+  getIsolationScope().setTags(tags);
+}
 function setTag(key, value) {
   getIsolationScope().setTag(key, value);
+}
+function setUser(user) {
+  getIsolationScope().setUser(user);
+}
+function lastEventId() {
+  return getIsolationScope().lastEventId();
+}
+async function flush(timeout) {
+  const client = getClient();
+  if (client) {
+    return client.flush(timeout);
+  }
+  DEBUG_BUILD$4 && debug$2.warn("Cannot flush events. No client defined.");
+  return Promise.resolve(false);
+}
+async function close(timeout) {
+  const client = getClient();
+  if (client) {
+    return client.close(timeout);
+  }
+  DEBUG_BUILD$4 && debug$2.warn("Cannot flush events and disable SDK. No client defined.");
+  return Promise.resolve(false);
+}
+function isInitialized() {
+  return !!getClient();
 }
 function isEnabled() {
   const client = getClient();
   return client?.getOptions().enabled !== false && !!client?.getTransport();
 }
+function addEventProcessor(callback) {
+  getIsolationScope().addEventProcessor(callback);
+}
 function startSession(context) {
   const isolationScope = getIsolationScope();
   const currentScope = getCurrentScope();
   const { userAgent } = GLOBAL_OBJ.navigator || {};
-  const session = makeSession({
+  const session = makeSession$1({
     user: currentScope.getUser() || isolationScope.getUser(),
     ...userAgent && { userAgent },
     ...context
@@ -4599,6 +4836,37 @@ function _encodedAuth(dsn, sdkInfo) {
 function getEnvelopeEndpointWithUrlEncodedAuth(dsn, tunnel, sdkInfo) {
   return tunnel ? tunnel : `${_getIngestEndpoint(dsn)}?${_encodedAuth(dsn, sdkInfo)}`;
 }
+function getReportDialogEndpoint(dsnLike, dialogOptions) {
+  const dsn = makeDsn(dsnLike);
+  if (!dsn) {
+    return "";
+  }
+  const endpoint = `${getBaseApiEndpoint(dsn)}embed/error-page/`;
+  let encodedOptions = `dsn=${dsnToString(dsn)}`;
+  for (const key in dialogOptions) {
+    if (key === "dsn") {
+      continue;
+    }
+    if (key === "onClose") {
+      continue;
+    }
+    if (key === "user") {
+      const user = dialogOptions.user;
+      if (!user) {
+        continue;
+      }
+      if (user.name) {
+        encodedOptions += `&name=${encodeURIComponent(user.name)}`;
+      }
+      if (user.email) {
+        encodedOptions += `&email=${encodeURIComponent(user.email)}`;
+      }
+    } else {
+      encodedOptions += `&${encodeURIComponent(key)}=${encodeURIComponent(dialogOptions[key])}`;
+    }
+  }
+  return `${endpoint}?${encodedOptions}`;
+}
 const installedIntegrations = [];
 function filterDuplicates(integrations) {
   const integrationsByName = {};
@@ -4647,7 +4915,7 @@ function afterSetupIntegrations(client, integrations) {
 }
 function setupIntegration(client, integration, integrationIndex) {
   if (integrationIndex[integration.name]) {
-    DEBUG_BUILD$2 && debug.log(`Integration skipped because it was already installed: ${integration.name}`);
+    DEBUG_BUILD$4 && debug$2.log(`Integration skipped because it was already installed: ${integration.name}`);
     return;
   }
   integrationIndex[integration.name] = integration;
@@ -4669,7 +4937,15 @@ function setupIntegration(client, integration, integrationIndex) {
     });
     client.addEventProcessor(processor);
   }
-  DEBUG_BUILD$2 && debug.log(`Integration installed: ${integration.name}`);
+  DEBUG_BUILD$4 && debug$2.log(`Integration installed: ${integration.name}`);
+}
+function addIntegration(integration) {
+  const client = getClient();
+  if (!client) {
+    DEBUG_BUILD$4 && debug$2.warn(`Cannot add integration "${integration.name}" because no SDK Client is available.`);
+    return;
+  }
+  client.addIntegration(integration);
 }
 function defineIntegration(fn) {
   return fn;
@@ -4788,7 +5064,7 @@ class Client {
     if (options.dsn) {
       this._dsn = makeDsn(options.dsn);
     } else {
-      DEBUG_BUILD$2 && debug.warn("No DSN provided, client will not send events.");
+      DEBUG_BUILD$4 && debug$2.warn("No DSN provided, client will not send events.");
     }
     if (this._dsn) {
       const url = getEnvelopeEndpointWithUrlEncodedAuth(
@@ -4812,7 +5088,7 @@ class Client {
   captureException(exception, hint, scope) {
     const eventId = uuid4();
     if (checkOrSetAlreadyCaught(exception)) {
-      DEBUG_BUILD$2 && debug.log(ALREADY_SEEN_ERROR);
+      DEBUG_BUILD$4 && debug$2.log(ALREADY_SEEN_ERROR);
       return eventId;
     }
     const hintWithEventId = {
@@ -4849,7 +5125,7 @@ class Client {
   captureEvent(event, hint, currentScope) {
     const eventId = uuid4();
     if (hint?.originalException && checkOrSetAlreadyCaught(hint.originalException)) {
-      DEBUG_BUILD$2 && debug.log(ALREADY_SEEN_ERROR);
+      DEBUG_BUILD$4 && debug$2.log(ALREADY_SEEN_ERROR);
       return eventId;
     }
     const hintWithEventId = {
@@ -5007,7 +5283,7 @@ class Client {
     if ("aggregates" in session) {
       const sessionAttrs = session.attrs || {};
       if (!sessionAttrs.release && !clientReleaseOption) {
-        DEBUG_BUILD$2 && debug.warn(MISSING_RELEASE_FOR_SESSION_ERROR);
+        DEBUG_BUILD$4 && debug$2.warn(MISSING_RELEASE_FOR_SESSION_ERROR);
         return;
       }
       sessionAttrs.release = sessionAttrs.release || clientReleaseOption;
@@ -5015,7 +5291,7 @@ class Client {
       session.attrs = sessionAttrs;
     } else {
       if (!session.release && !clientReleaseOption) {
-        DEBUG_BUILD$2 && debug.warn(MISSING_RELEASE_FOR_SESSION_ERROR);
+        DEBUG_BUILD$4 && debug$2.warn(MISSING_RELEASE_FOR_SESSION_ERROR);
         return;
       }
       session.release = session.release || clientReleaseOption;
@@ -5028,11 +5304,11 @@ class Client {
   /**
    * Record on the client that an event got dropped (ie, an event that will not be sent to Sentry).
    */
-  recordDroppedEvent(reason, category, count = 1) {
+  recordDroppedEvent(reason, category, count2 = 1) {
     if (this._options.sendClientReports) {
       const key = `${reason}:${category}`;
-      DEBUG_BUILD$2 && debug.log(`Recording outcome: "${key}"${count > 1 ? ` (${count} times)` : ""}`);
-      this._outcomes[key] = (this._outcomes[key] || 0) + count;
+      DEBUG_BUILD$4 && debug$2.log(`Recording outcome: "${key}"${count2 > 1 ? ` (${count2} times)` : ""}`);
+      this._outcomes[key] = (this._outcomes[key] || 0) + count2;
     }
   }
   /* eslint-disable @typescript-eslint/unified-signatures */
@@ -5072,11 +5348,11 @@ class Client {
       try {
         return await this._transport.send(envelope);
       } catch (reason) {
-        DEBUG_BUILD$2 && debug.error("Error while sending envelope:", reason);
+        DEBUG_BUILD$4 && debug$2.error("Error while sending envelope:", reason);
         return {};
       }
     }
-    DEBUG_BUILD$2 && debug.error("Transport disabled");
+    DEBUG_BUILD$4 && debug$2.error("Transport disabled");
     return {};
   }
   /* eslint-enable @typescript-eslint/unified-signatures */
@@ -5124,7 +5400,7 @@ class Client {
   async _isClientDoneProcessing(timeout) {
     let ticked = 0;
     while (!timeout || ticked < timeout) {
-      await new Promise((resolve) => setTimeout(resolve, 1));
+      await new Promise((resolve2) => setTimeout(resolve2, 1));
       if (!this._numProcessing) {
         return true;
       }
@@ -5184,21 +5460,21 @@ class Client {
    * @param scope
    */
   _captureEvent(event, hint = {}, currentScope = getCurrentScope(), isolationScope = getIsolationScope()) {
-    if (DEBUG_BUILD$2 && isErrorEvent(event)) {
-      debug.log(`Captured error event \`${getPossibleEventMessages(event)[0] || "<unknown>"}\``);
+    if (DEBUG_BUILD$4 && isErrorEvent$1(event)) {
+      debug$2.log(`Captured error event \`${getPossibleEventMessages(event)[0] || "<unknown>"}\``);
     }
     return this._processEvent(event, hint, currentScope, isolationScope).then(
       (finalEvent) => {
         return finalEvent.event_id;
       },
       (reason) => {
-        if (DEBUG_BUILD$2) {
+        if (DEBUG_BUILD$4) {
           if (_isDoNotSendEventError(reason)) {
-            debug.log(reason.message);
+            debug$2.log(reason.message);
           } else if (_isInternalError(reason)) {
-            debug.warn(reason.message);
+            debug$2.warn(reason.message);
           } else {
-            debug.warn(reason);
+            debug$2.warn(reason);
           }
         }
         return void 0;
@@ -5221,8 +5497,8 @@ class Client {
   _processEvent(event, hint, currentScope, isolationScope) {
     const options = this.getOptions();
     const { sampleRate } = options;
-    const isTransaction = isTransactionEvent(event);
-    const isError2 = isErrorEvent(event);
+    const isTransaction = isTransactionEvent$1(event);
+    const isError2 = isErrorEvent$1(event);
     const eventType = event.type || "error";
     const beforeSendLabel = `before send for type \`${eventType}\``;
     const parsedSampleRate = typeof sampleRate === "undefined" ? void 0 : parseSampleRate(sampleRate);
@@ -5333,17 +5609,17 @@ Reason: ${reason}`
    * Sends client reports as an envelope.
    */
   _flushOutcomes() {
-    DEBUG_BUILD$2 && debug.log("Flushing outcomes...");
+    DEBUG_BUILD$4 && debug$2.log("Flushing outcomes...");
     const outcomes = this._clearOutcomes();
     if (outcomes.length === 0) {
-      DEBUG_BUILD$2 && debug.log("No outcomes to send");
+      DEBUG_BUILD$4 && debug$2.log("No outcomes to send");
       return;
     }
     if (!this._dsn) {
-      DEBUG_BUILD$2 && debug.log("No dsn provided, will not send outcomes");
+      DEBUG_BUILD$4 && debug$2.log("No dsn provided, will not send outcomes");
       return;
     }
-    DEBUG_BUILD$2 && debug.log("Sending outcomes:", outcomes);
+    DEBUG_BUILD$4 && debug$2.log("Sending outcomes:", outcomes);
     const envelope = createClientReportEnvelope(outcomes, this._options.tunnel && dsnToString(this._dsn));
     this.sendEnvelope(envelope);
   }
@@ -5361,8 +5637,8 @@ function _validateBeforeSendResult(beforeSendResult, beforeSendLabel) {
         }
         return event;
       },
-      (e) => {
-        throw _makeInternalError(`${beforeSendLabel} rejected with ${e}`);
+      (e2) => {
+        throw _makeInternalError(`${beforeSendLabel} rejected with ${e2}`);
       }
     );
   } else if (!isPlainObject(beforeSendResult) && beforeSendResult !== null) {
@@ -5373,10 +5649,10 @@ function _validateBeforeSendResult(beforeSendResult, beforeSendLabel) {
 function processBeforeSend(client, options, event, hint) {
   const { beforeSend, beforeSendTransaction, beforeSendSpan, ignoreSpans } = options;
   let processedEvent = event;
-  if (isErrorEvent(processedEvent) && beforeSend) {
+  if (isErrorEvent$1(processedEvent) && beforeSend) {
     return beforeSend(processedEvent, hint);
   }
-  if (isTransactionEvent(processedEvent)) {
+  if (isTransactionEvent$1(processedEvent)) {
     if (beforeSendSpan || ignoreSpans) {
       const rootSpanJson = convertTransactionEventToSpanJson(processedEvent);
       if (ignoreSpans?.length && shouldIgnoreSpan(rootSpanJson, ignoreSpans)) {
@@ -5430,12 +5706,31 @@ function processBeforeSend(client, options, event, hint) {
   }
   return processedEvent;
 }
-function isErrorEvent(event) {
+function isErrorEvent$1(event) {
   return event.type === void 0;
 }
-function isTransactionEvent(event) {
+function isTransactionEvent$1(event) {
   return event.type === "transaction";
 }
+function _getTraceInfoFromScope(client, scope) {
+  if (!scope) {
+    return [void 0, void 0];
+  }
+  return withScope(scope, () => {
+    const span = getActiveSpan();
+    const traceContext = span ? spanToTraceContext(span) : getTraceContextFromScope(scope);
+    const dynamicSamplingContext = span ? getDynamicSamplingContextFromSpan(span) : getDynamicSamplingContextFromScope(client, scope);
+    return [dynamicSamplingContext, traceContext];
+  });
+}
+const SEVERITY_TEXT_TO_SEVERITY_NUMBER = {
+  trace: 1,
+  debug: 5,
+  info: 9,
+  warn: 13,
+  error: 17,
+  fatal: 21
+};
 function createLogContainerEnvelopeItem(items) {
   return [
     {
@@ -5461,8 +5756,132 @@ function createLogEnvelope(logs, metadata, tunnel, dsn) {
   }
   return createEnvelope(headers, [createLogContainerEnvelopeItem(logs)]);
 }
+const MAX_LOG_BUFFER_SIZE = 100;
+function logAttributeToSerializedLogAttribute(value) {
+  switch (typeof value) {
+    case "number":
+      if (Number.isInteger(value)) {
+        return {
+          value,
+          type: "integer"
+        };
+      }
+      return {
+        value,
+        type: "double"
+      };
+    case "boolean":
+      return {
+        value,
+        type: "boolean"
+      };
+    case "string":
+      return {
+        value,
+        type: "string"
+      };
+    default: {
+      let stringValue = "";
+      try {
+        stringValue = JSON.stringify(value) ?? "";
+      } catch {
+      }
+      return {
+        value: stringValue,
+        type: "string"
+      };
+    }
+  }
+}
+function setLogAttribute(logAttributes, key, value, setEvenIfPresent = true) {
+  if (value && (!logAttributes[key] || setEvenIfPresent)) {
+    logAttributes[key] = value;
+  }
+}
+function _INTERNAL_captureSerializedLog(client, serializedLog) {
+  const bufferMap = _getBufferMap$1();
+  const logBuffer = _INTERNAL_getLogBuffer(client);
+  if (logBuffer === void 0) {
+    bufferMap.set(client, [serializedLog]);
+  } else {
+    bufferMap.set(client, [...logBuffer, serializedLog]);
+    if (logBuffer.length >= MAX_LOG_BUFFER_SIZE) {
+      _INTERNAL_flushLogsBuffer(client, logBuffer);
+    }
+  }
+}
+function _INTERNAL_captureLog(beforeLog, currentScope = getCurrentScope(), captureSerializedLog = _INTERNAL_captureSerializedLog) {
+  const client = currentScope?.getClient() ?? getClient();
+  if (!client) {
+    DEBUG_BUILD$4 && debug$2.warn("No client available to capture log.");
+    return;
+  }
+  const { release, environment, enableLogs = false, beforeSendLog } = client.getOptions();
+  if (!enableLogs) {
+    DEBUG_BUILD$4 && debug$2.warn("logging option not enabled, log will not be captured.");
+    return;
+  }
+  const [, traceContext] = _getTraceInfoFromScope(client, currentScope);
+  const processedLogAttributes = {
+    ...beforeLog.attributes
+  };
+  const {
+    user: { id, email, username }
+  } = getMergedScopeData$1(currentScope);
+  setLogAttribute(processedLogAttributes, "user.id", id, false);
+  setLogAttribute(processedLogAttributes, "user.email", email, false);
+  setLogAttribute(processedLogAttributes, "user.name", username, false);
+  setLogAttribute(processedLogAttributes, "sentry.release", release);
+  setLogAttribute(processedLogAttributes, "sentry.environment", environment);
+  const { name, version } = client.getSdkMetadata()?.sdk ?? {};
+  setLogAttribute(processedLogAttributes, "sentry.sdk.name", name);
+  setLogAttribute(processedLogAttributes, "sentry.sdk.version", version);
+  const replay = client.getIntegrationByName("Replay");
+  const replayId = replay?.getReplayId(true);
+  setLogAttribute(processedLogAttributes, "sentry.replay_id", replayId);
+  if (replayId && replay?.getRecordingMode() === "buffer") {
+    setLogAttribute(processedLogAttributes, "sentry._internal.replay_is_buffering", true);
+  }
+  const beforeLogMessage = beforeLog.message;
+  if (isParameterizedString(beforeLogMessage)) {
+    const { __sentry_template_string__, __sentry_template_values__ = [] } = beforeLogMessage;
+    if (__sentry_template_values__?.length) {
+      processedLogAttributes["sentry.message.template"] = __sentry_template_string__;
+    }
+    __sentry_template_values__.forEach((param, index) => {
+      processedLogAttributes[`sentry.message.parameter.${index}`] = param;
+    });
+  }
+  const span = _getSpanForScope(currentScope);
+  setLogAttribute(processedLogAttributes, "sentry.trace.parent_span_id", span?.spanContext().spanId);
+  const processedLog = { ...beforeLog, attributes: processedLogAttributes };
+  client.emit("beforeCaptureLog", processedLog);
+  const log2 = beforeSendLog ? consoleSandbox(() => beforeSendLog(processedLog)) : processedLog;
+  if (!log2) {
+    client.recordDroppedEvent("before_send", "log_item", 1);
+    DEBUG_BUILD$4 && debug$2.warn("beforeSendLog returned null, log will not be captured.");
+    return;
+  }
+  const { level, message, attributes = {}, severityNumber } = log2;
+  const serializedLog = {
+    timestamp: timestampInSeconds(),
+    level,
+    body: message,
+    trace_id: traceContext?.trace_id,
+    severity_number: severityNumber ?? SEVERITY_TEXT_TO_SEVERITY_NUMBER[level],
+    attributes: Object.keys(attributes).reduce(
+      (acc, key) => {
+        acc[key] = logAttributeToSerializedLogAttribute(attributes[key]);
+        return acc;
+      },
+      {}
+    )
+  };
+  captureSerializedLog(client, serializedLog);
+  client.emit("afterCaptureLog", log2);
+}
 function _INTERNAL_flushLogsBuffer(client, maybeLogBuffer) {
-  const logBuffer = _INTERNAL_getLogBuffer(client) ?? [];
+  const logBuffer = maybeLogBuffer ?? _INTERNAL_getLogBuffer(client) ?? [];
   if (logBuffer.length === 0) {
     return;
   }
@@ -5474,6 +5893,12 @@ function _INTERNAL_flushLogsBuffer(client, maybeLogBuffer) {
 }
 function _INTERNAL_getLogBuffer(client) {
   return _getBufferMap$1().get(client);
+}
+function getMergedScopeData$1(currentScope) {
+  const scopeData = getGlobalScope().getScopeData();
+  mergeScopeData(scopeData, getIsolationScope().getScopeData());
+  mergeScopeData(scopeData, currentScope.getScopeData());
+  return scopeData;
 }
 function _getBufferMap$1() {
   return getGlobalSingleton("clientToLogBufferMap", () => /* @__PURE__ */ new WeakMap());
@@ -5503,8 +5928,130 @@ function createMetricEnvelope(metrics, metadata, tunnel, dsn) {
   }
   return createEnvelope(headers, [createMetricContainerEnvelopeItem(metrics)]);
 }
+const MAX_METRIC_BUFFER_SIZE = 100;
+function metricAttributeToSerializedMetricAttribute(value) {
+  switch (typeof value) {
+    case "number":
+      if (Number.isInteger(value)) {
+        return {
+          value,
+          type: "integer"
+        };
+      }
+      return {
+        value,
+        type: "double"
+      };
+    case "boolean":
+      return {
+        value,
+        type: "boolean"
+      };
+    case "string":
+      return {
+        value,
+        type: "string"
+      };
+    default: {
+      let stringValue = "";
+      try {
+        stringValue = JSON.stringify(value) ?? "";
+      } catch {
+      }
+      return {
+        value: stringValue,
+        type: "string"
+      };
+    }
+  }
+}
+function setMetricAttribute(metricAttributes, key, value, setEvenIfPresent = true) {
+  if (value && (setEvenIfPresent || !(key in metricAttributes))) {
+    metricAttributes[key] = value;
+  }
+}
+function _INTERNAL_captureSerializedMetric(client, serializedMetric) {
+  const bufferMap = _getBufferMap();
+  const metricBuffer = _INTERNAL_getMetricBuffer(client);
+  if (metricBuffer === void 0) {
+    bufferMap.set(client, [serializedMetric]);
+  } else {
+    bufferMap.set(client, [...metricBuffer, serializedMetric]);
+    if (metricBuffer.length >= MAX_METRIC_BUFFER_SIZE) {
+      _INTERNAL_flushMetricsBuffer(client, metricBuffer);
+    }
+  }
+}
+function _INTERNAL_captureMetric(beforeMetric, options) {
+  const currentScope = options?.scope ?? getCurrentScope();
+  const captureSerializedMetric = options?.captureSerializedMetric ?? _INTERNAL_captureSerializedMetric;
+  const client = currentScope?.getClient() ?? getClient();
+  if (!client) {
+    DEBUG_BUILD$4 && debug$2.warn("No client available to capture metric.");
+    return;
+  }
+  const { release, environment, _experiments } = client.getOptions();
+  if (!_experiments?.enableMetrics) {
+    DEBUG_BUILD$4 && debug$2.warn("metrics option not enabled, metric will not be captured.");
+    return;
+  }
+  const [, traceContext] = _getTraceInfoFromScope(client, currentScope);
+  const processedMetricAttributes = {
+    ...beforeMetric.attributes
+  };
+  const {
+    user: { id, email, username }
+  } = getMergedScopeData(currentScope);
+  setMetricAttribute(processedMetricAttributes, "user.id", id, false);
+  setMetricAttribute(processedMetricAttributes, "user.email", email, false);
+  setMetricAttribute(processedMetricAttributes, "user.name", username, false);
+  setMetricAttribute(processedMetricAttributes, "sentry.release", release);
+  setMetricAttribute(processedMetricAttributes, "sentry.environment", environment);
+  const { name, version } = client.getSdkMetadata()?.sdk ?? {};
+  setMetricAttribute(processedMetricAttributes, "sentry.sdk.name", name);
+  setMetricAttribute(processedMetricAttributes, "sentry.sdk.version", version);
+  const replay = client.getIntegrationByName("Replay");
+  const replayId = replay?.getReplayId(true);
+  setMetricAttribute(processedMetricAttributes, "sentry.replay_id", replayId);
+  if (replayId && replay?.getRecordingMode() === "buffer") {
+    setMetricAttribute(processedMetricAttributes, "sentry._internal.replay_is_buffering", replayId);
+  }
+  const metric = {
+    ...beforeMetric,
+    attributes: processedMetricAttributes
+  };
+  const processedMetric = _experiments?.beforeSendMetric ? _experiments.beforeSendMetric(metric) : metric;
+  if (!processedMetric) {
+    DEBUG_BUILD$4 && debug$2.log("`beforeSendMetric` returned `null`, will not send metric.");
+    return;
+  }
+  const serializedAttributes = {};
+  for (const key in processedMetric.attributes) {
+    if (processedMetric.attributes[key] !== void 0) {
+      serializedAttributes[key] = metricAttributeToSerializedMetricAttribute(processedMetric.attributes[key]);
+    }
+  }
+  const span = _getSpanForScope(currentScope);
+  const traceId = span ? span.spanContext().traceId : traceContext?.trace_id;
+  const spanId = span ? span.spanContext().spanId : void 0;
+  const serializedMetric = {
+    timestamp: timestampInSeconds(),
+    trace_id: traceId,
+    span_id: spanId,
+    name: processedMetric.name,
+    type: processedMetric.type,
+    unit: processedMetric.unit,
+    value: processedMetric.value,
+    attributes: serializedAttributes
+  };
+  consoleSandbox(() => {
+    DEBUG_BUILD$4 && console.log("[Metric]", serializedMetric);
+  });
+  captureSerializedMetric(client, serializedMetric);
+  client.emit("afterCaptureMetric", metric);
+}
 function _INTERNAL_flushMetricsBuffer(client, maybeMetricBuffer) {
-  const metricBuffer = _INTERNAL_getMetricBuffer(client) ?? [];
+  const metricBuffer = maybeMetricBuffer ?? _INTERNAL_getMetricBuffer(client) ?? [];
   if (metricBuffer.length === 0) {
     return;
   }
@@ -5517,13 +6064,19 @@ function _INTERNAL_flushMetricsBuffer(client, maybeMetricBuffer) {
 function _INTERNAL_getMetricBuffer(client) {
   return _getBufferMap().get(client);
 }
+function getMergedScopeData(currentScope) {
+  const scopeData = getGlobalScope().getScopeData();
+  mergeScopeData(scopeData, getIsolationScope().getScopeData());
+  mergeScopeData(scopeData, currentScope.getScopeData());
+  return scopeData;
+}
 function _getBufferMap() {
   return getGlobalSingleton("clientToMetricBufferMap", () => /* @__PURE__ */ new WeakMap());
 }
 function initAndBind(clientClass, options) {
   if (options.debug === true) {
-    if (DEBUG_BUILD$2) {
-      debug.enable();
+    if (DEBUG_BUILD$4) {
+      debug$2.enable();
     } else {
       consoleSandbox(() => {
         console.warn("[Sentry] Cannot initialize SDK with `debug` option using a non-debug bundle.");
@@ -5569,7 +6122,7 @@ function makePromiseBuffer(limit = 100) {
     if (!timeout) {
       return drainPromise;
     }
-    const promises = [drainPromise, new Promise((resolve) => setTimeout(() => resolve(false), timeout))];
+    const promises = [drainPromise, new Promise((resolve2) => setTimeout(() => resolve2(false), timeout))];
     return Promise.race(promises);
   }
   return {
@@ -5635,7 +6188,7 @@ function createTransport(options, makeRequest, buffer = makePromiseBuffer(
   options.bufferSize || DEFAULT_TRANSPORT_BUFFER_SIZE
 )) {
   let rateLimits = {};
-  const flush = (timeout) => buffer.drain(timeout);
+  const flush2 = (timeout) => buffer.drain(timeout);
   function send(envelope) {
     const filteredEnvelopeItems = [];
     forEachEnvelopeItem(envelope, (item, type) => {
@@ -5658,14 +6211,14 @@ function createTransport(options, makeRequest, buffer = makePromiseBuffer(
     const requestTask = () => makeRequest({ body: serializeEnvelope(filteredEnvelope) }).then(
       (response) => {
         if (response.statusCode !== void 0 && (response.statusCode < 200 || response.statusCode >= 300)) {
-          DEBUG_BUILD$2 && debug.warn(`Sentry responded with status code ${response.statusCode} to sent event.`);
+          DEBUG_BUILD$4 && debug$2.warn(`Sentry responded with status code ${response.statusCode} to sent event.`);
         }
         rateLimits = updateRateLimits(rateLimits, response);
         return response;
       },
       (error2) => {
         recordEnvelopeLoss("network_error");
-        DEBUG_BUILD$2 && debug.error("Encountered error running transport request:", error2);
+        DEBUG_BUILD$4 && debug$2.error("Encountered error running transport request:", error2);
         throw error2;
       }
     );
@@ -5673,7 +6226,7 @@ function createTransport(options, makeRequest, buffer = makePromiseBuffer(
       (result) => result,
       (error2) => {
         if (error2 === SENTRY_BUFFER_FULL_ERROR) {
-          DEBUG_BUILD$2 && debug.error("Skipped sending event because buffer is full.");
+          DEBUG_BUILD$4 && debug$2.error("Skipped sending event because buffer is full.");
           recordEnvelopeLoss("queue_overflow");
           return Promise.resolve({});
         } else {
@@ -5684,7 +6237,192 @@ function createTransport(options, makeRequest, buffer = makePromiseBuffer(
   }
   return {
     send,
-    flush
+    flush: flush2
+  };
+}
+const MIN_DELAY = 100;
+const START_DELAY = 5e3;
+const MAX_DELAY = 36e5;
+function makeOfflineTransport(createTransport2) {
+  function log2(...args) {
+    DEBUG_BUILD$4 && debug$2.log("[Offline]:", ...args);
+  }
+  return (options) => {
+    const transport = createTransport2(options);
+    if (!options.createStore) {
+      throw new Error("No `createStore` function was provided");
+    }
+    const store = options.createStore(options);
+    let retryDelay = START_DELAY;
+    let flushTimer;
+    function shouldQueue(env, error2, retryDelay2) {
+      if (envelopeContainsItemType(env, ["client_report"])) {
+        return false;
+      }
+      if (options.shouldStore) {
+        return options.shouldStore(env, error2, retryDelay2);
+      }
+      return true;
+    }
+    function flushIn(delay) {
+      if (flushTimer) {
+        clearTimeout(flushTimer);
+      }
+      flushTimer = setTimeout(async () => {
+        flushTimer = void 0;
+        const found = await store.shift();
+        if (found) {
+          log2("Attempting to send previously queued event");
+          found[0].sent_at = (/* @__PURE__ */ new Date()).toISOString();
+          void send(found, true).catch((e2) => {
+            log2("Failed to retry sending", e2);
+          });
+        }
+      }, delay);
+      if (typeof flushTimer !== "number" && flushTimer.unref) {
+        flushTimer.unref();
+      }
+    }
+    function flushWithBackOff() {
+      if (flushTimer) {
+        return;
+      }
+      flushIn(retryDelay);
+      retryDelay = Math.min(retryDelay * 2, MAX_DELAY);
+    }
+    async function send(envelope, isRetry = false) {
+      if (!isRetry && envelopeContainsItemType(envelope, ["replay_event", "replay_recording"])) {
+        await store.push(envelope);
+        flushIn(MIN_DELAY);
+        return {};
+      }
+      try {
+        if (options.shouldSend && await options.shouldSend(envelope) === false) {
+          throw new Error("Envelope not sent because `shouldSend` callback returned false");
+        }
+        const result = await transport.send(envelope);
+        let delay = MIN_DELAY;
+        if (result) {
+          if (result.headers?.["retry-after"]) {
+            delay = parseRetryAfterHeader(result.headers["retry-after"]);
+          } else if (result.headers?.["x-sentry-rate-limits"]) {
+            delay = 6e4;
+          } else if ((result.statusCode || 0) >= 400) {
+            return result;
+          }
+        }
+        flushIn(delay);
+        retryDelay = START_DELAY;
+        return result;
+      } catch (e2) {
+        if (await shouldQueue(envelope, e2, retryDelay)) {
+          if (isRetry) {
+            await store.unshift(envelope);
+          } else {
+            await store.push(envelope);
+          }
+          flushWithBackOff();
+          log2("Error sending. Event queued.", e2);
+          return {};
+        } else {
+          throw e2;
+        }
+      }
+    }
+    if (options.flushAtStartup) {
+      flushWithBackOff();
+    }
+    return {
+      send,
+      flush: (timeout) => {
+        if (timeout === void 0) {
+          retryDelay = START_DELAY;
+          flushIn(MIN_DELAY);
+        }
+        return transport.flush(timeout);
+      }
+    };
+  };
+}
+function eventFromEnvelope(env, types) {
+  let event;
+  forEachEnvelopeItem(env, (item, type) => {
+    if (types.includes(type)) {
+      event = Array.isArray(item) ? item[1] : void 0;
+    }
+    return !!event;
+  });
+  return event;
+}
+function makeOverrideReleaseTransport(createTransport2, release) {
+  return (options) => {
+    const transport = createTransport2(options);
+    return {
+      ...transport,
+      send: async (envelope) => {
+        const event = eventFromEnvelope(envelope, ["event", "transaction", "profile", "replay_event"]);
+        if (event) {
+          event.release = release;
+        }
+        return transport.send(envelope);
+      }
+    };
+  };
+}
+function overrideDsn(envelope, dsn) {
+  return createEnvelope(
+    dsn ? {
+      ...envelope[0],
+      dsn
+    } : envelope[0],
+    envelope[1]
+  );
+}
+function makeMultiplexedTransport(createTransport2, matcher) {
+  return (options) => {
+    const fallbackTransport = createTransport2(options);
+    const otherTransports = /* @__PURE__ */ new Map();
+    function getTransport(dsn, release) {
+      const key = release ? `${dsn}:${release}` : dsn;
+      let transport = otherTransports.get(key);
+      if (!transport) {
+        const validatedDsn = dsnFromString(dsn);
+        if (!validatedDsn) {
+          return void 0;
+        }
+        const url = getEnvelopeEndpointWithUrlEncodedAuth(validatedDsn, options.tunnel);
+        transport = release ? makeOverrideReleaseTransport(createTransport2, release)({ ...options, url }) : createTransport2({ ...options, url });
+        otherTransports.set(key, transport);
+      }
+      return [dsn, transport];
+    }
+    async function send(envelope) {
+      function getEvent(types) {
+        const eventTypes = types?.length ? types : ["event"];
+        return eventFromEnvelope(envelope, eventTypes);
+      }
+      const transports = matcher({ envelope, getEvent }).map((result) => {
+        if (typeof result === "string") {
+          return getTransport(result, void 0);
+        } else {
+          return getTransport(result.dsn, result.release);
+        }
+      }).filter((t2) => !!t2);
+      const transportsWithFallback = transports.length ? transports : [["", fallbackTransport]];
+      const results = await Promise.all(
+        transportsWithFallback.map(([dsn, transport]) => transport.send(overrideDsn(envelope, dsn)))
+      );
+      return results[0];
+    }
+    async function flush2(timeout) {
+      const allTransports = [...otherTransports.values(), fallbackTransport];
+      const results = await Promise.all(allTransports.map((transport) => transport.flush(timeout)));
+      return results.every((r2) => r2);
+    }
+    return {
+      send,
+      flush: flush2
+    };
   };
 }
 const DEFAULT_BASE_URL = "thismessage:/";
@@ -5774,6 +6512,13 @@ function checkDsn(url, dsn) {
 function removeTrailingSlash(str) {
   return str[str.length - 1] === "/" ? str.slice(0, -1) : str;
 }
+function parameterize(strings, ...values) {
+  const formatted = new String(String.raw(strings, ...values));
+  formatted.__sentry_template_string__ = strings.join("\0").replace(/%/g, "%%").replace(/\0/g, "%s");
+  formatted.__sentry_template_values__ = values;
+  return formatted;
+}
+const fmt = parameterize;
 function addAutoIpAddressToSession(session) {
   if ("aggregates" in session) {
     if (session.attrs?.["ip_address"] === void 0) {
@@ -5819,7 +6564,7 @@ function getTraceData(options = {}) {
   const baggage = dynamicSamplingContextToSentryBaggageHeader(dsc);
   const isValidSentryTraceHeader = TRACEPARENT_REGEXP.test(sentryTrace);
   if (!isValidSentryTraceHeader) {
-    debug.warn("Invalid sentry-trace data. Cannot generate trace data");
+    debug$2.warn("Invalid sentry-trace data. Cannot generate trace data");
     return {};
   }
   const traceData = {
@@ -5842,6 +6587,42 @@ function scopeToTraceparentHeader(scope) {
   const { traceId, sampled, propagationSpanId } = scope.getPropagationContext();
   return generateTraceparentHeader(traceId, propagationSpanId, sampled);
 }
+function debounce$1(func, wait, options) {
+  let callbackReturnValue;
+  let timerId;
+  let maxTimerId;
+  const maxWait = options?.maxWait ? Math.max(options.maxWait, wait) : 0;
+  const setTimeoutImpl = options?.setTimeoutImpl || setTimeout;
+  function invokeFunc() {
+    cancelTimers();
+    callbackReturnValue = func();
+    return callbackReturnValue;
+  }
+  function cancelTimers() {
+    timerId !== void 0 && clearTimeout(timerId);
+    maxTimerId !== void 0 && clearTimeout(maxTimerId);
+    timerId = maxTimerId = void 0;
+  }
+  function flush2() {
+    if (timerId !== void 0 || maxTimerId !== void 0) {
+      return invokeFunc();
+    }
+    return callbackReturnValue;
+  }
+  function debounced() {
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+    timerId = setTimeoutImpl(invokeFunc, wait);
+    if (maxWait && maxTimerId === void 0) {
+      maxTimerId = setTimeoutImpl(invokeFunc, maxWait);
+    }
+    return callbackReturnValue;
+  }
+  debounced.cancel = cancelTimers;
+  debounced.flush = flush2;
+  return debounced;
+}
 const DEFAULT_BREADCRUMBS = 100;
 function addBreadcrumb(breadcrumb, hint) {
   const client = getClient();
@@ -5859,24 +6640,24 @@ function addBreadcrumb(breadcrumb, hint) {
   isolationScope.addBreadcrumb(finalBreadcrumb, maxBreadcrumbs);
 }
 let originalFunctionToString;
-const INTEGRATION_NAME$9 = "FunctionToString";
-const SETUP_CLIENTS = /* @__PURE__ */ new WeakMap();
+const INTEGRATION_NAME$k = "FunctionToString";
+const SETUP_CLIENTS$1 = /* @__PURE__ */ new WeakMap();
 const _functionToStringIntegration = () => {
   return {
-    name: INTEGRATION_NAME$9,
+    name: INTEGRATION_NAME$k,
     setupOnce() {
       originalFunctionToString = Function.prototype.toString;
       try {
         Function.prototype.toString = function(...args) {
           const originalFunction = getOriginalFunction(this);
-          const context = SETUP_CLIENTS.has(getClient()) && originalFunction !== void 0 ? originalFunction : this;
+          const context = SETUP_CLIENTS$1.has(getClient()) && originalFunction !== void 0 ? originalFunction : this;
           return originalFunctionToString.apply(context, args);
         };
       } catch {
       }
     },
     setup(client) {
-      SETUP_CLIENTS.set(client, true);
+      SETUP_CLIENTS$1.set(client, true);
     }
   };
 };
@@ -5903,11 +6684,11 @@ const DEFAULT_IGNORE_ERRORS = [
   /^Java exception was raised during method invocation$/
   // error from Facebook Mobile browser (https://github.com/getsentry/sentry-javascript/issues/15065)
 ];
-const INTEGRATION_NAME$8 = "EventFilters";
+const INTEGRATION_NAME$j = "EventFilters";
 const eventFiltersIntegration = defineIntegration((options = {}) => {
   let mergedOptions;
   return {
-    name: INTEGRATION_NAME$8,
+    name: INTEGRATION_NAME$j,
     setup(client) {
       const clientOptions = client.getOptions();
       mergedOptions = _mergeOptions(options, clientOptions);
@@ -5942,14 +6723,14 @@ function _mergeOptions(internalOptions = {}, clientOptions = {}) {
 function _shouldDropEvent$1(event, options) {
   if (!event.type) {
     if (_isIgnoredError(event, options.ignoreErrors)) {
-      DEBUG_BUILD$2 && debug.warn(
+      DEBUG_BUILD$4 && debug$2.warn(
         `Event dropped due to being matched by \`ignoreErrors\` option.
 Event: ${getEventDescription(event)}`
       );
       return true;
     }
     if (_isUselessError(event)) {
-      DEBUG_BUILD$2 && debug.warn(
+      DEBUG_BUILD$4 && debug$2.warn(
         `Event dropped due to not having an error message, error type or stacktrace.
 Event: ${getEventDescription(
           event
@@ -5958,7 +6739,7 @@ Event: ${getEventDescription(
       return true;
     }
     if (_isDeniedUrl(event, options.denyUrls)) {
-      DEBUG_BUILD$2 && debug.warn(
+      DEBUG_BUILD$4 && debug$2.warn(
         `Event dropped due to being matched by \`denyUrls\` option.
 Event: ${getEventDescription(
           event
@@ -5968,7 +6749,7 @@ Url: ${_getEventFilterUrl(event)}`
       return true;
     }
     if (!_isAllowedUrl(event, options.allowUrls)) {
-      DEBUG_BUILD$2 && debug.warn(
+      DEBUG_BUILD$4 && debug$2.warn(
         `Event dropped due to not being matched by \`allowUrls\` option.
 Event: ${getEventDescription(
           event
@@ -5979,7 +6760,7 @@ Url: ${_getEventFilterUrl(event)}`
     }
   } else if (event.type === "transaction") {
     if (_isIgnoredTransaction(event, options.ignoreTransactions)) {
-      DEBUG_BUILD$2 && debug.warn(
+      DEBUG_BUILD$4 && debug$2.warn(
         `Event dropped due to being matched by \`ignoreTransactions\` option.
 Event: ${getEventDescription(event)}`
       );
@@ -6016,8 +6797,8 @@ function _isAllowedUrl(event, allowUrls) {
   return !url ? true : stringMatchesSomePattern(url, allowUrls);
 }
 function _getLastValidUrl(frames = []) {
-  for (let i = frames.length - 1; i >= 0; i--) {
-    const frame = frames[i];
+  for (let i2 = frames.length - 1; i2 >= 0; i2--) {
+    const frame = frames[i2];
     if (frame && frame.filename !== "<anonymous>" && frame.filename !== "[native code]") {
       return frame.filename || null;
     }
@@ -6030,7 +6811,7 @@ function _getEventFilterUrl(event) {
     const frames = rootException?.stacktrace?.frames;
     return frames ? _getLastValidUrl(frames) : null;
   } catch {
-    DEBUG_BUILD$2 && debug.error(`Cannot extract url for event ${getEventDescription(event)}`);
+    DEBUG_BUILD$4 && debug$2.error(`Cannot extract url for event ${getEventDescription(event)}`);
     return null;
   }
 }
@@ -6084,12 +6865,12 @@ function aggregateExceptionsFromError(exceptionFromErrorImplementation, parser, 
     );
   }
   if (Array.isArray(error2.errors)) {
-    error2.errors.forEach((childError, i) => {
+    error2.errors.forEach((childError, i2) => {
       if (isInstanceOf(childError, Error)) {
         applyExceptionGroupFieldsForParentException(exception, exceptionId);
         const newException = exceptionFromErrorImplementation(parser, childError);
         const newExceptionId = newExceptions.length;
-        applyExceptionGroupFieldsForChildException(newException, `errors[${i}]`, newExceptionId, exceptionId);
+        applyExceptionGroupFieldsForChildException(newException, `errors[${i2}]`, newExceptionId, exceptionId);
         newExceptions = aggregateExceptionsFromError(
           exceptionFromErrorImplementation,
           parser,
@@ -6124,6 +6905,76 @@ function applyExceptionGroupFieldsForChildException(exception, source, exception
     parent_id: parentId
   };
 }
+const filenameMetadataMap = /* @__PURE__ */ new Map();
+const parsedStacks = /* @__PURE__ */ new Set();
+function ensureMetadataStacksAreParsed(parser) {
+  if (!GLOBAL_OBJ._sentryModuleMetadata) {
+    return;
+  }
+  for (const stack of Object.keys(GLOBAL_OBJ._sentryModuleMetadata)) {
+    const metadata = GLOBAL_OBJ._sentryModuleMetadata[stack];
+    if (parsedStacks.has(stack)) {
+      continue;
+    }
+    parsedStacks.add(stack);
+    const frames = parser(stack);
+    for (const frame of frames.reverse()) {
+      if (frame.filename) {
+        filenameMetadataMap.set(frame.filename, metadata);
+        break;
+      }
+    }
+  }
+}
+function getMetadataForUrl(parser, filename) {
+  ensureMetadataStacksAreParsed(parser);
+  return filenameMetadataMap.get(filename);
+}
+function addMetadataToStackFrames(parser, event) {
+  event.exception?.values?.forEach((exception) => {
+    exception.stacktrace?.frames?.forEach((frame) => {
+      if (!frame.filename || frame.module_metadata) {
+        return;
+      }
+      const metadata = getMetadataForUrl(parser, frame.filename);
+      if (metadata) {
+        frame.module_metadata = metadata;
+      }
+    });
+  });
+}
+function stripMetadataFromStackFrames(event) {
+  event.exception?.values?.forEach((exception) => {
+    exception.stacktrace?.frames?.forEach((frame) => {
+      delete frame.module_metadata;
+    });
+  });
+}
+const moduleMetadataIntegration = defineIntegration(() => {
+  return {
+    name: "ModuleMetadata",
+    setup(client) {
+      client.on("beforeEnvelope", (envelope) => {
+        forEachEnvelopeItem(envelope, (item, type) => {
+          if (type === "event") {
+            const event = Array.isArray(item) ? item[1] : void 0;
+            if (event) {
+              stripMetadataFromStackFrames(event);
+              item[1] = event;
+            }
+          }
+        });
+      });
+      client.on("applyFrameMetadata", (event) => {
+        if (event.type) {
+          return;
+        }
+        const stackParser = client.getOptions().stackParser;
+        addMetadataToStackFrames(stackParser, event);
+      });
+    }
+  };
+});
 function addConsoleInstrumentationHandler(handler) {
   const type = "console";
   addHandler$1(type, handler);
@@ -6133,7 +6984,7 @@ function instrumentConsole() {
   if (!("console" in GLOBAL_OBJ)) {
     return;
   }
-  CONSOLE_LEVELS.forEach(function(level) {
+  CONSOLE_LEVELS$1.forEach(function(level) {
     if (!(level in GLOBAL_OBJ.console)) {
       return;
     }
@@ -6151,18 +7002,71 @@ function instrumentConsole() {
 function severityLevelFromString(level) {
   return level === "warn" ? "warning" : ["fatal", "error", "warning", "log", "info", "debug"].includes(level) ? level : "log";
 }
-const INTEGRATION_NAME$7 = "Dedupe";
+const INTEGRATION_NAME$i = "CaptureConsole";
+const _captureConsoleIntegration = (options = {}) => {
+  const levels = options.levels || CONSOLE_LEVELS$1;
+  const handled = options.handled ?? true;
+  return {
+    name: INTEGRATION_NAME$i,
+    setup(client) {
+      if (!("console" in GLOBAL_OBJ)) {
+        return;
+      }
+      addConsoleInstrumentationHandler(({ args, level }) => {
+        if (getClient() !== client || !levels.includes(level)) {
+          return;
+        }
+        consoleHandler(args, level, handled);
+      });
+    }
+  };
+};
+const captureConsoleIntegration = defineIntegration(_captureConsoleIntegration);
+function consoleHandler(args, level, handled) {
+  const captureContext = {
+    level: severityLevelFromString(level),
+    extra: {
+      arguments: args
+    }
+  };
+  withScope((scope) => {
+    scope.addEventProcessor((event) => {
+      event.logger = "console";
+      addExceptionMechanism(event, {
+        handled,
+        type: "auto.core.capture_console"
+      });
+      return event;
+    });
+    if (level === "assert") {
+      if (!args[0]) {
+        const message2 = `Assertion failed: ${safeJoin(args.slice(1), " ") || "console.assert"}`;
+        scope.setExtra("arguments", args.slice(1));
+        captureMessage(message2, captureContext);
+      }
+      return;
+    }
+    const error2 = args.find((arg) => arg instanceof Error);
+    if (error2) {
+      captureException(error2, captureContext);
+      return;
+    }
+    const message = safeJoin(args, " ");
+    captureMessage(message, captureContext);
+  });
+}
+const INTEGRATION_NAME$h = "Dedupe";
 const _dedupeIntegration = () => {
   let previousEvent;
   return {
-    name: INTEGRATION_NAME$7,
+    name: INTEGRATION_NAME$h,
     processEvent(currentEvent) {
       if (currentEvent.type) {
         return currentEvent;
       }
       try {
         if (_shouldDropEvent(currentEvent, previousEvent)) {
-          DEBUG_BUILD$2 && debug.warn("Event dropped due to being a duplicate of previously captured event.");
+          DEBUG_BUILD$4 && debug$2.warn("Event dropped due to being a duplicate of previously captured event.");
           return null;
         }
       } catch {
@@ -6235,9 +7139,9 @@ function _isSameStacktrace(currentEvent, previousEvent) {
   if (previousFrames.length !== currentFrames.length) {
     return false;
   }
-  for (let i = 0; i < previousFrames.length; i++) {
-    const frameA = previousFrames[i];
-    const frameB = currentFrames[i];
+  for (let i2 = 0; i2 < previousFrames.length; i2++) {
+    const frameA = previousFrames[i2];
+    const frameB = currentFrames[i2];
     if (frameA.filename !== frameB.filename || frameA.lineno !== frameB.lineno || frameA.colno !== frameB.colno || frameA.function !== frameB.function) {
       return false;
     }
@@ -6264,11 +7168,11 @@ function _isSameFingerprint(currentEvent, previousEvent) {
 function _getExceptionFromEvent(event) {
   return event.exception?.values?.[0];
 }
-const INTEGRATION_NAME$6 = "ExtraErrorData";
+const INTEGRATION_NAME$g = "ExtraErrorData";
 const _extraErrorDataIntegration = (options = {}) => {
   const { depth = 3, captureErrorCause = true } = options;
   return {
-    name: INTEGRATION_NAME$6,
+    name: INTEGRATION_NAME$g,
     processEvent(event, hint, client) {
       const { maxValueLength = 250 } = client.getOptions();
       return _enhanceEventWithErrorData(event, hint, depth, captureErrorCause, maxValueLength);
@@ -6336,10 +7240,760 @@ function _extractErrorData(error2, captureErrorCause, maxValueLength) {
     }
     return extraErrorInfo;
   } catch (oO) {
-    DEBUG_BUILD$2 && debug.error("Unable to extract extra data from the Error object:", oO);
+    DEBUG_BUILD$4 && debug$2.error("Unable to extract extra data from the Error object:", oO);
   }
   return null;
 }
+function normalizeArray(parts, allowAboveRoot) {
+  let up = 0;
+  for (let i2 = parts.length - 1; i2 >= 0; i2--) {
+    const last = parts[i2];
+    if (last === ".") {
+      parts.splice(i2, 1);
+    } else if (last === "..") {
+      parts.splice(i2, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i2, 1);
+      up--;
+    }
+  }
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift("..");
+    }
+  }
+  return parts;
+}
+const splitPathRe = /^(\S+:\\|\/?)([\s\S]*?)((?:\.{1,2}|[^/\\]+?|)(\.[^./\\]*|))(?:[/\\]*)$/;
+function splitPath(filename) {
+  const truncated = filename.length > 1024 ? `<truncated>${filename.slice(-1024)}` : filename;
+  const parts = splitPathRe.exec(truncated);
+  return parts ? parts.slice(1) : [];
+}
+function resolve(...args) {
+  let resolvedPath = "";
+  let resolvedAbsolute = false;
+  for (let i2 = args.length - 1; i2 >= -1 && !resolvedAbsolute; i2--) {
+    const path = i2 >= 0 ? args[i2] : "/";
+    if (!path) {
+      continue;
+    }
+    resolvedPath = `${path}/${resolvedPath}`;
+    resolvedAbsolute = path.charAt(0) === "/";
+  }
+  resolvedPath = normalizeArray(
+    resolvedPath.split("/").filter((p2) => !!p2),
+    !resolvedAbsolute
+  ).join("/");
+  return (resolvedAbsolute ? "/" : "") + resolvedPath || ".";
+}
+function trim(arr) {
+  let start = 0;
+  for (; start < arr.length; start++) {
+    if (arr[start] !== "") {
+      break;
+    }
+  }
+  let end = arr.length - 1;
+  for (; end >= 0; end--) {
+    if (arr[end] !== "") {
+      break;
+    }
+  }
+  if (start > end) {
+    return [];
+  }
+  return arr.slice(start, end - start + 1);
+}
+function relative(from, to) {
+  from = resolve(from).slice(1);
+  to = resolve(to).slice(1);
+  const fromParts = trim(from.split("/"));
+  const toParts = trim(to.split("/"));
+  const length = Math.min(fromParts.length, toParts.length);
+  let samePartsLength = length;
+  for (let i2 = 0; i2 < length; i2++) {
+    if (fromParts[i2] !== toParts[i2]) {
+      samePartsLength = i2;
+      break;
+    }
+  }
+  let outputParts = [];
+  for (let i2 = samePartsLength; i2 < fromParts.length; i2++) {
+    outputParts.push("..");
+  }
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+  return outputParts.join("/");
+}
+function basename(path, ext) {
+  let f2 = splitPath(path)[2] || "";
+  return f2;
+}
+const INTEGRATION_NAME$f = "RewriteFrames";
+const rewriteFramesIntegration = defineIntegration((options = {}) => {
+  const root = options.root;
+  const prefix = options.prefix || "app:///";
+  const isBrowser2 = "window" in GLOBAL_OBJ && !!GLOBAL_OBJ.window;
+  const iteratee = options.iteratee || generateIteratee({ isBrowser: isBrowser2, root, prefix });
+  function _processExceptionsEvent(event) {
+    try {
+      return {
+        ...event,
+        exception: {
+          ...event.exception,
+          // The check for this is performed inside `process` call itself, safe to skip here
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          values: event.exception.values.map((value) => ({
+            ...value,
+            ...value.stacktrace && { stacktrace: _processStacktrace(value.stacktrace) }
+          }))
+        }
+      };
+    } catch {
+      return event;
+    }
+  }
+  function _processStacktrace(stacktrace) {
+    return {
+      ...stacktrace,
+      frames: stacktrace?.frames?.map((f2) => iteratee(f2))
+    };
+  }
+  return {
+    name: INTEGRATION_NAME$f,
+    processEvent(originalEvent) {
+      let processedEvent = originalEvent;
+      if (originalEvent.exception && Array.isArray(originalEvent.exception.values)) {
+        processedEvent = _processExceptionsEvent(processedEvent);
+      }
+      return processedEvent;
+    }
+  };
+});
+function generateIteratee({
+  isBrowser: isBrowser2,
+  root,
+  prefix
+}) {
+  return (frame) => {
+    if (!frame.filename) {
+      return frame;
+    }
+    const isWindowsFrame = /^[a-zA-Z]:\\/.test(frame.filename) || // or the presence of a backslash without a forward slash (which are not allowed on Windows)
+    frame.filename.includes("\\") && !frame.filename.includes("/");
+    const startsWithSlash = /^\//.test(frame.filename);
+    if (isBrowser2) {
+      if (root) {
+        const oldFilename = frame.filename;
+        if (oldFilename.indexOf(root) === 0) {
+          frame.filename = oldFilename.replace(root, prefix);
+        }
+      }
+    } else {
+      if (isWindowsFrame || startsWithSlash) {
+        const filename = isWindowsFrame ? frame.filename.replace(/^[a-zA-Z]:/, "").replace(/\\/g, "/") : frame.filename;
+        const base = root ? relative(root, filename) : basename(filename);
+        frame.filename = `${prefix}${base}`;
+      }
+    }
+    return frame;
+  };
+}
+const AUTH_OPERATIONS_TO_INSTRUMENT = [
+  "reauthenticate",
+  "signInAnonymously",
+  "signInWithOAuth",
+  "signInWithIdToken",
+  "signInWithOtp",
+  "signInWithPassword",
+  "signInWithSSO",
+  "signOut",
+  "signUp",
+  "verifyOtp"
+];
+const AUTH_ADMIN_OPERATIONS_TO_INSTRUMENT = [
+  "createUser",
+  "deleteUser",
+  "listUsers",
+  "getUserById",
+  "updateUserById",
+  "inviteUserByEmail"
+];
+const FILTER_MAPPINGS = {
+  eq: "eq",
+  neq: "neq",
+  gt: "gt",
+  gte: "gte",
+  lt: "lt",
+  lte: "lte",
+  like: "like",
+  "like(all)": "likeAllOf",
+  "like(any)": "likeAnyOf",
+  ilike: "ilike",
+  "ilike(all)": "ilikeAllOf",
+  "ilike(any)": "ilikeAnyOf",
+  is: "is",
+  in: "in",
+  cs: "contains",
+  cd: "containedBy",
+  sr: "rangeGt",
+  nxl: "rangeGte",
+  sl: "rangeLt",
+  nxr: "rangeLte",
+  adj: "rangeAdjacent",
+  ov: "overlaps",
+  fts: "",
+  plfts: "plain",
+  phfts: "phrase",
+  wfts: "websearch",
+  not: "not"
+};
+const DB_OPERATIONS_TO_INSTRUMENT = ["select", "insert", "upsert", "update", "delete"];
+function markAsInstrumented(fn) {
+  try {
+    fn.__SENTRY_INSTRUMENTED__ = true;
+  } catch {
+  }
+}
+function isInstrumented(fn) {
+  try {
+    return fn.__SENTRY_INSTRUMENTED__;
+  } catch {
+    return false;
+  }
+}
+function extractOperation(method, headers = {}) {
+  switch (method) {
+    case "GET": {
+      return "select";
+    }
+    case "POST": {
+      if (headers["Prefer"]?.includes("resolution=")) {
+        return "upsert";
+      } else {
+        return "insert";
+      }
+    }
+    case "PATCH": {
+      return "update";
+    }
+    case "DELETE": {
+      return "delete";
+    }
+    default: {
+      return "<unknown-op>";
+    }
+  }
+}
+function translateFiltersIntoMethods(key, query) {
+  if (query === "" || query === "*") {
+    return "select(*)";
+  }
+  if (key === "select") {
+    return `select(${query})`;
+  }
+  if (key === "or" || key.endsWith(".or")) {
+    return `${key}${query}`;
+  }
+  const [filter, ...value] = query.split(".");
+  let method;
+  if (filter?.startsWith("fts")) {
+    method = "textSearch";
+  } else if (filter?.startsWith("plfts")) {
+    method = "textSearch[plain]";
+  } else if (filter?.startsWith("phfts")) {
+    method = "textSearch[phrase]";
+  } else if (filter?.startsWith("wfts")) {
+    method = "textSearch[websearch]";
+  } else {
+    method = filter && FILTER_MAPPINGS[filter] || "filter";
+  }
+  return `${method}(${key}, ${value.join(".")})`;
+}
+function instrumentAuthOperation(operation, isAdmin = false) {
+  return new Proxy(operation, {
+    apply(target, thisArg, argumentsList) {
+      return startSpan(
+        {
+          name: `auth ${isAdmin ? "(admin) " : ""}${operation.name}`,
+          attributes: {
+            [SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN]: "auto.db.supabase",
+            [SEMANTIC_ATTRIBUTE_SENTRY_OP]: "db",
+            "db.system": "postgresql",
+            "db.operation": `auth.${isAdmin ? "admin." : ""}${operation.name}`
+          }
+        },
+        (span) => {
+          return Reflect.apply(target, thisArg, argumentsList).then((res) => {
+            if (res && typeof res === "object" && "error" in res && res.error) {
+              span.setStatus({ code: SPAN_STATUS_ERROR });
+              captureException(res.error, {
+                mechanism: {
+                  handled: false,
+                  type: "auto.db.supabase.auth"
+                }
+              });
+            } else {
+              span.setStatus({ code: SPAN_STATUS_OK });
+            }
+            span.end();
+            return res;
+          }).catch((err) => {
+            span.setStatus({ code: SPAN_STATUS_ERROR });
+            span.end();
+            captureException(err, {
+              mechanism: {
+                handled: false,
+                type: "auto.db.supabase.auth"
+              }
+            });
+            throw err;
+          }).then(...argumentsList);
+        }
+      );
+    }
+  });
+}
+function instrumentSupabaseAuthClient(supabaseClientInstance) {
+  const auth = supabaseClientInstance.auth;
+  if (!auth || isInstrumented(supabaseClientInstance.auth)) {
+    return;
+  }
+  for (const operation of AUTH_OPERATIONS_TO_INSTRUMENT) {
+    const authOperation = auth[operation];
+    if (!authOperation) {
+      continue;
+    }
+    if (typeof supabaseClientInstance.auth[operation] === "function") {
+      supabaseClientInstance.auth[operation] = instrumentAuthOperation(authOperation);
+    }
+  }
+  for (const operation of AUTH_ADMIN_OPERATIONS_TO_INSTRUMENT) {
+    const authOperation = auth.admin[operation];
+    if (!authOperation) {
+      continue;
+    }
+    if (typeof supabaseClientInstance.auth.admin[operation] === "function") {
+      supabaseClientInstance.auth.admin[operation] = instrumentAuthOperation(authOperation, true);
+    }
+  }
+  markAsInstrumented(supabaseClientInstance.auth);
+}
+function instrumentSupabaseClientConstructor(SupabaseClient) {
+  if (isInstrumented(SupabaseClient.prototype.from)) {
+    return;
+  }
+  SupabaseClient.prototype.from = new Proxy(
+    SupabaseClient.prototype.from,
+    {
+      apply(target, thisArg, argumentsList) {
+        const rv = Reflect.apply(target, thisArg, argumentsList);
+        const PostgRESTQueryBuilder = rv.constructor;
+        instrumentPostgRESTQueryBuilder(PostgRESTQueryBuilder);
+        return rv;
+      }
+    }
+  );
+  markAsInstrumented(SupabaseClient.prototype.from);
+}
+function instrumentPostgRESTFilterBuilder(PostgRESTFilterBuilder) {
+  if (isInstrumented(PostgRESTFilterBuilder.prototype.then)) {
+    return;
+  }
+  PostgRESTFilterBuilder.prototype.then = new Proxy(
+    PostgRESTFilterBuilder.prototype.then,
+    {
+      apply(target, thisArg, argumentsList) {
+        const operations = DB_OPERATIONS_TO_INSTRUMENT;
+        const typedThis = thisArg;
+        const operation = extractOperation(typedThis.method, typedThis.headers);
+        if (!operations.includes(operation)) {
+          return Reflect.apply(target, thisArg, argumentsList);
+        }
+        if (!typedThis?.url?.pathname || typeof typedThis.url.pathname !== "string") {
+          return Reflect.apply(target, thisArg, argumentsList);
+        }
+        const pathParts = typedThis.url.pathname.split("/");
+        const table = pathParts.length > 0 ? pathParts[pathParts.length - 1] : "";
+        const queryItems = [];
+        for (const [key, value] of typedThis.url.searchParams.entries()) {
+          queryItems.push(translateFiltersIntoMethods(key, value));
+        }
+        const body = /* @__PURE__ */ Object.create(null);
+        if (isPlainObject(typedThis.body)) {
+          for (const [key, value] of Object.entries(typedThis.body)) {
+            body[key] = value;
+          }
+        }
+        const description = `${operation === "select" ? "" : `${operation}${body ? "(...) " : ""}`}${queryItems.join(
+          " "
+        )} from(${table})`;
+        const attributes = {
+          "db.table": table,
+          "db.schema": typedThis.schema,
+          "db.url": typedThis.url.origin,
+          "db.sdk": typedThis.headers["X-Client-Info"],
+          "db.system": "postgresql",
+          "db.operation": operation,
+          [SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN]: "auto.db.supabase",
+          [SEMANTIC_ATTRIBUTE_SENTRY_OP]: "db"
+        };
+        if (queryItems.length) {
+          attributes["db.query"] = queryItems;
+        }
+        if (Object.keys(body).length) {
+          attributes["db.body"] = body;
+        }
+        return startSpan(
+          {
+            name: description,
+            attributes
+          },
+          (span) => {
+            return Reflect.apply(target, thisArg, []).then(
+              (res) => {
+                if (span) {
+                  if (res && typeof res === "object" && "status" in res) {
+                    setHttpStatus(span, res.status || 500);
+                  }
+                  span.end();
+                }
+                if (res.error) {
+                  const err = new Error(res.error.message);
+                  if (res.error.code) {
+                    err.code = res.error.code;
+                  }
+                  if (res.error.details) {
+                    err.details = res.error.details;
+                  }
+                  const supabaseContext = {};
+                  if (queryItems.length) {
+                    supabaseContext.query = queryItems;
+                  }
+                  if (Object.keys(body).length) {
+                    supabaseContext.body = body;
+                  }
+                  captureException(err, (scope) => {
+                    scope.addEventProcessor((e2) => {
+                      addExceptionMechanism(e2, {
+                        handled: false,
+                        type: "auto.db.supabase.postgres"
+                      });
+                      return e2;
+                    });
+                    scope.setContext("supabase", supabaseContext);
+                    return scope;
+                  });
+                }
+                const breadcrumb = {
+                  type: "supabase",
+                  category: `db.${operation}`,
+                  message: description
+                };
+                const data = {};
+                if (queryItems.length) {
+                  data.query = queryItems;
+                }
+                if (Object.keys(body).length) {
+                  data.body = body;
+                }
+                if (Object.keys(data).length) {
+                  breadcrumb.data = data;
+                }
+                addBreadcrumb(breadcrumb);
+                return res;
+              },
+              (err) => {
+                if (span) {
+                  setHttpStatus(span, 500);
+                  span.end();
+                }
+                throw err;
+              }
+            ).then(...argumentsList);
+          }
+        );
+      }
+    }
+  );
+  markAsInstrumented(PostgRESTFilterBuilder.prototype.then);
+}
+function instrumentPostgRESTQueryBuilder(PostgRESTQueryBuilder) {
+  for (const operation of DB_OPERATIONS_TO_INSTRUMENT) {
+    if (isInstrumented(PostgRESTQueryBuilder.prototype[operation])) {
+      continue;
+    }
+    PostgRESTQueryBuilder.prototype[operation] = new Proxy(
+      PostgRESTQueryBuilder.prototype[operation],
+      {
+        apply(target, thisArg, argumentsList) {
+          const rv = Reflect.apply(target, thisArg, argumentsList);
+          const PostgRESTFilterBuilder = rv.constructor;
+          DEBUG_BUILD$4 && debug$2.log(`Instrumenting ${operation} operation's PostgRESTFilterBuilder`);
+          instrumentPostgRESTFilterBuilder(PostgRESTFilterBuilder);
+          return rv;
+        }
+      }
+    );
+    markAsInstrumented(PostgRESTQueryBuilder.prototype[operation]);
+  }
+}
+const instrumentSupabaseClient = (supabaseClient) => {
+  if (!supabaseClient) {
+    DEBUG_BUILD$4 && debug$2.warn("Supabase integration was not installed because no Supabase client was provided.");
+    return;
+  }
+  const SupabaseClientConstructor = supabaseClient.constructor === Function ? supabaseClient : supabaseClient.constructor;
+  instrumentSupabaseClientConstructor(SupabaseClientConstructor);
+  instrumentSupabaseAuthClient(supabaseClient);
+};
+const INTEGRATION_NAME$e = "Supabase";
+const _supabaseIntegration = (supabaseClient) => {
+  return {
+    setupOnce() {
+      instrumentSupabaseClient(supabaseClient);
+    },
+    name: INTEGRATION_NAME$e
+  };
+};
+const supabaseIntegration = defineIntegration((options) => {
+  return _supabaseIntegration(options.supabaseClient);
+});
+const DEFAULT_LIMIT$1 = 10;
+const INTEGRATION_NAME$d = "ZodErrors";
+function originalExceptionIsZodError(originalException) {
+  return isError(originalException) && originalException.name === "ZodError" && Array.isArray(originalException.issues);
+}
+function flattenIssue(issue) {
+  return {
+    ...issue,
+    path: "path" in issue && Array.isArray(issue.path) ? issue.path.join(".") : void 0,
+    keys: "keys" in issue ? JSON.stringify(issue.keys) : void 0,
+    unionErrors: "unionErrors" in issue ? JSON.stringify(issue.unionErrors) : void 0
+  };
+}
+function flattenIssuePath(path) {
+  return path.map((p2) => {
+    if (typeof p2 === "number") {
+      return "<array>";
+    } else {
+      return p2;
+    }
+  }).join(".");
+}
+function formatIssueMessage(zodError) {
+  const errorKeyMap = /* @__PURE__ */ new Set();
+  for (const iss of zodError.issues) {
+    const issuePath = flattenIssuePath(iss.path);
+    if (issuePath.length > 0) {
+      errorKeyMap.add(issuePath);
+    }
+  }
+  const errorKeys = Array.from(errorKeyMap);
+  if (errorKeys.length === 0) {
+    let rootExpectedType = "variable";
+    if (zodError.issues.length > 0) {
+      const iss = zodError.issues[0];
+      if (iss !== void 0 && "expected" in iss && typeof iss.expected === "string") {
+        rootExpectedType = iss.expected;
+      }
+    }
+    return `Failed to validate ${rootExpectedType}`;
+  }
+  return `Failed to validate keys: ${truncate(errorKeys.join(", "), 100)}`;
+}
+function applyZodErrorsToEvent(limit, saveZodIssuesAsAttachment = false, event, hint) {
+  if (!event.exception?.values || !hint.originalException || !originalExceptionIsZodError(hint.originalException) || hint.originalException.issues.length === 0) {
+    return event;
+  }
+  try {
+    const issuesToFlatten = saveZodIssuesAsAttachment ? hint.originalException.issues : hint.originalException.issues.slice(0, limit);
+    const flattenedIssues = issuesToFlatten.map(flattenIssue);
+    if (saveZodIssuesAsAttachment) {
+      if (!Array.isArray(hint.attachments)) {
+        hint.attachments = [];
+      }
+      hint.attachments.push({
+        filename: "zod_issues.json",
+        data: JSON.stringify({
+          issues: flattenedIssues
+        })
+      });
+    }
+    return {
+      ...event,
+      exception: {
+        ...event.exception,
+        values: [
+          {
+            ...event.exception.values[0],
+            value: formatIssueMessage(hint.originalException)
+          },
+          ...event.exception.values.slice(1)
+        ]
+      },
+      extra: {
+        ...event.extra,
+        "zoderror.issues": flattenedIssues.slice(0, limit)
+      }
+    };
+  } catch (e2) {
+    return {
+      ...event,
+      extra: {
+        ...event.extra,
+        "zoderrors sentry integration parse error": {
+          message: "an exception was thrown while processing ZodError within applyZodErrorsToEvent()",
+          error: e2 instanceof Error ? `${e2.name}: ${e2.message}
+${e2.stack}` : "unknown"
+        }
+      }
+    };
+  }
+}
+const _zodErrorsIntegration = (options = {}) => {
+  const limit = options.limit ?? DEFAULT_LIMIT$1;
+  return {
+    name: INTEGRATION_NAME$d,
+    processEvent(originalEvent, hint) {
+      const processedEvent = applyZodErrorsToEvent(limit, options.saveZodIssuesAsAttachment, originalEvent, hint);
+      return processedEvent;
+    }
+  };
+};
+const zodErrorsIntegration = defineIntegration(_zodErrorsIntegration);
+const thirdPartyErrorFilterIntegration = defineIntegration((options) => {
+  return {
+    name: "ThirdPartyErrorsFilter",
+    setup(client) {
+      client.on("beforeEnvelope", (envelope) => {
+        forEachEnvelopeItem(envelope, (item, type) => {
+          if (type === "event") {
+            const event = Array.isArray(item) ? item[1] : void 0;
+            if (event) {
+              stripMetadataFromStackFrames(event);
+              item[1] = event;
+            }
+          }
+        });
+      });
+      client.on("applyFrameMetadata", (event) => {
+        if (event.type) {
+          return;
+        }
+        const stackParser = client.getOptions().stackParser;
+        addMetadataToStackFrames(stackParser, event);
+      });
+    },
+    processEvent(event) {
+      const frameKeys = getBundleKeysForAllFramesWithFilenames(event);
+      if (frameKeys) {
+        const arrayMethod = options.behaviour === "drop-error-if-contains-third-party-frames" || options.behaviour === "apply-tag-if-contains-third-party-frames" ? "some" : "every";
+        const behaviourApplies = frameKeys[arrayMethod]((keys2) => !keys2.some((key) => options.filterKeys.includes(key)));
+        if (behaviourApplies) {
+          const shouldDrop = options.behaviour === "drop-error-if-contains-third-party-frames" || options.behaviour === "drop-error-if-exclusively-contains-third-party-frames";
+          if (shouldDrop) {
+            return null;
+          } else {
+            event.tags = {
+              ...event.tags,
+              third_party_code: true
+            };
+          }
+        }
+      }
+      return event;
+    }
+  };
+});
+function getBundleKeysForAllFramesWithFilenames(event) {
+  const frames = getFramesFromEvent(event);
+  if (!frames) {
+    return void 0;
+  }
+  return frames.filter((frame) => !!frame.filename && (frame.lineno ?? frame.colno) != null).map((frame) => {
+    if (frame.module_metadata) {
+      return Object.keys(frame.module_metadata).filter((key) => key.startsWith(BUNDLER_PLUGIN_APP_KEY_PREFIX)).map((key) => key.slice(BUNDLER_PLUGIN_APP_KEY_PREFIX.length));
+    }
+    return [];
+  });
+}
+const BUNDLER_PLUGIN_APP_KEY_PREFIX = "_sentryBundlerPluginAppKey:";
+const _INTERNAL_FLAG_BUFFER_SIZE = 100;
+const _INTERNAL_MAX_FLAGS_PER_SPAN = 10;
+const SPAN_FLAG_ATTRIBUTE_PREFIX = "flag.evaluation.";
+function _INTERNAL_copyFlagsFromScopeToEvent(event) {
+  const scope = getCurrentScope();
+  const flagContext = scope.getScopeData().contexts.flags;
+  const flagBuffer = flagContext ? flagContext.values : [];
+  if (!flagBuffer.length) {
+    return event;
+  }
+  if (event.contexts === void 0) {
+    event.contexts = {};
+  }
+  event.contexts.flags = { values: [...flagBuffer] };
+  return event;
+}
+function _INTERNAL_insertFlagToScope(name, value, maxSize = _INTERNAL_FLAG_BUFFER_SIZE) {
+  const scopeContexts = getCurrentScope().getScopeData().contexts;
+  if (!scopeContexts.flags) {
+    scopeContexts.flags = { values: [] };
+  }
+  const flags = scopeContexts.flags.values;
+  _INTERNAL_insertToFlagBuffer(flags, name, value, maxSize);
+}
+function _INTERNAL_insertToFlagBuffer(flags, name, value, maxSize) {
+  if (typeof value !== "boolean") {
+    return;
+  }
+  if (flags.length > maxSize) {
+    DEBUG_BUILD$4 && debug$2.error(`[Feature Flags] insertToFlagBuffer called on a buffer larger than maxSize=${maxSize}`);
+    return;
+  }
+  const index = flags.findIndex((f2) => f2.flag === name);
+  if (index !== -1) {
+    flags.splice(index, 1);
+  }
+  if (flags.length === maxSize) {
+    flags.shift();
+  }
+  flags.push({
+    flag: name,
+    result: value
+  });
+}
+function _INTERNAL_addFeatureFlagToActiveSpan(name, value, maxFlagsPerSpan = _INTERNAL_MAX_FLAGS_PER_SPAN) {
+  if (typeof value !== "boolean") {
+    return;
+  }
+  const span = getActiveSpan();
+  if (!span) {
+    return;
+  }
+  const attributes = spanToJSON(span).data;
+  if (`${SPAN_FLAG_ATTRIBUTE_PREFIX}${name}` in attributes) {
+    span.setAttribute(`${SPAN_FLAG_ATTRIBUTE_PREFIX}${name}`, value);
+    return;
+  }
+  const numOfAddedFlags = Object.keys(attributes).filter((key) => key.startsWith(SPAN_FLAG_ATTRIBUTE_PREFIX)).length;
+  if (numOfAddedFlags < maxFlagsPerSpan) {
+    span.setAttribute(`${SPAN_FLAG_ATTRIBUTE_PREFIX}${name}`, value);
+  }
+}
+const featureFlagsIntegration = defineIntegration(() => {
+  return {
+    name: "FeatureFlags",
+    processEvent(event, _hint, _client) {
+      return _INTERNAL_copyFlagsFromScopeToEvent(event);
+    },
+    addFeatureFlag(name, value) {
+      _INTERNAL_insertFlagToScope(name, value);
+      _INTERNAL_addFeatureFlagToActiveSpan(name, value);
+    }
+  };
+});
 function instrumentFetchRequest(handlerData, shouldCreateSpan, shouldAttachHeaders2, spans, spanOriginOrOptions) {
   if (!handlerData.fetchData) {
     return void 0;
@@ -6503,6 +8157,243 @@ function getFetchSpanAttributes(url, parsedUrl, method, spanOrigin) {
   }
   return attributes;
 }
+function captureFeedback(params, hint = {}, scope = getCurrentScope()) {
+  const { message, name, email, url, source, associatedEventId, tags } = params;
+  const feedbackEvent = {
+    contexts: {
+      feedback: {
+        contact_email: email,
+        name,
+        message,
+        url,
+        source,
+        associated_event_id: associatedEventId
+      }
+    },
+    type: "feedback",
+    level: "info",
+    tags
+  };
+  const client = scope?.getClient() || getClient();
+  if (client) {
+    client.emit("beforeSendFeedback", feedbackEvent, hint);
+  }
+  const eventId = scope.captureEvent(feedbackEvent, hint);
+  return eventId;
+}
+function captureLog(level, message, attributes, scope, severityNumber) {
+  _INTERNAL_captureLog({ level, message, attributes, severityNumber }, scope);
+}
+function trace(message, attributes, { scope } = {}) {
+  captureLog("trace", message, attributes, scope);
+}
+function debug$1(message, attributes, { scope } = {}) {
+  captureLog("debug", message, attributes, scope);
+}
+function info(message, attributes, { scope } = {}) {
+  captureLog("info", message, attributes, scope);
+}
+function warn(message, attributes, { scope } = {}) {
+  captureLog("warn", message, attributes, scope);
+}
+function error(message, attributes, { scope } = {}) {
+  captureLog("error", message, attributes, scope);
+}
+function fatal(message, attributes, { scope } = {}) {
+  captureLog("fatal", message, attributes, scope);
+}
+const publicApi$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  debug: debug$1,
+  error,
+  fatal,
+  fmt,
+  info,
+  trace,
+  warn
+}, Symbol.toStringTag, { value: "Module" }));
+function formatConsoleArgs(values, normalizeDepth, normalizeMaxBreadth) {
+  return "util" in GLOBAL_OBJ && typeof GLOBAL_OBJ.util.format === "function" ? GLOBAL_OBJ.util.format(...values) : safeJoinConsoleArgs(values, normalizeDepth, normalizeMaxBreadth);
+}
+function safeJoinConsoleArgs(values, normalizeDepth, normalizeMaxBreadth) {
+  return values.map(
+    (value) => isPrimitive(value) ? String(value) : JSON.stringify(normalize(value, normalizeDepth, normalizeMaxBreadth))
+  ).join(" ");
+}
+function hasConsoleSubstitutions(str) {
+  return /%[sdifocO]/.test(str);
+}
+function createConsoleTemplateAttributes(firstArg, followingArgs) {
+  const attributes = {};
+  const template = new Array(followingArgs.length).fill("{}").join(" ");
+  attributes["sentry.message.template"] = `${firstArg} ${template}`;
+  followingArgs.forEach((arg, index) => {
+    attributes[`sentry.message.parameter.${index}`] = arg;
+  });
+  return attributes;
+}
+const INTEGRATION_NAME$c = "ConsoleLogs";
+const DEFAULT_ATTRIBUTES = {
+  [SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN]: "auto.console.logging"
+};
+const _consoleLoggingIntegration = (options = {}) => {
+  const levels = options.levels || CONSOLE_LEVELS$1;
+  return {
+    name: INTEGRATION_NAME$c,
+    setup(client) {
+      const { enableLogs, normalizeDepth = 3, normalizeMaxBreadth = 1e3 } = client.getOptions();
+      if (!enableLogs) {
+        DEBUG_BUILD$4 && debug$2.warn("`enableLogs` is not enabled, ConsoleLogs integration disabled");
+        return;
+      }
+      addConsoleInstrumentationHandler(({ args, level }) => {
+        if (getClient() !== client || !levels.includes(level)) {
+          return;
+        }
+        const firstArg = args[0];
+        const followingArgs = args.slice(1);
+        if (level === "assert") {
+          if (!firstArg) {
+            const assertionMessage = followingArgs.length > 0 ? `Assertion failed: ${formatConsoleArgs(followingArgs, normalizeDepth, normalizeMaxBreadth)}` : "Assertion failed";
+            _INTERNAL_captureLog({ level: "error", message: assertionMessage, attributes: DEFAULT_ATTRIBUTES });
+          }
+          return;
+        }
+        const isLevelLog = level === "log";
+        const shouldGenerateTemplate = args.length > 1 && typeof args[0] === "string" && !hasConsoleSubstitutions(args[0]);
+        const attributes = {
+          ...DEFAULT_ATTRIBUTES,
+          ...shouldGenerateTemplate ? createConsoleTemplateAttributes(firstArg, followingArgs) : {}
+        };
+        _INTERNAL_captureLog({
+          level: isLevelLog ? "info" : level,
+          message: formatConsoleArgs(args, normalizeDepth, normalizeMaxBreadth),
+          severityNumber: isLevelLog ? 10 : void 0,
+          attributes
+        });
+      });
+    }
+  };
+};
+const consoleLoggingIntegration = defineIntegration(_consoleLoggingIntegration);
+function captureMetric(type, name, value, options) {
+  _INTERNAL_captureMetric(
+    { type, name, value, unit: options?.unit, attributes: options?.attributes },
+    { scope: options?.scope }
+  );
+}
+function count(name, value = 1, options) {
+  captureMetric("counter", name, value, options);
+}
+function gauge(name, value, options) {
+  captureMetric("gauge", name, value, options);
+}
+function distribution(name, value, options) {
+  captureMetric("distribution", name, value, options);
+}
+const publicApi = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  count,
+  distribution,
+  gauge
+}, Symbol.toStringTag, { value: "Module" }));
+const DEFAULT_CAPTURED_LEVELS = ["trace", "debug", "info", "warn", "error", "fatal"];
+function createConsolaReporter(options = {}) {
+  const levels = new Set(options.levels ?? DEFAULT_CAPTURED_LEVELS);
+  const providedClient = options.client;
+  return {
+    log(logObj) {
+      const { type, level, message: consolaMessage, args, tag, date: _date, ...attributes } = logObj;
+      const client = providedClient || getClient();
+      if (!client) {
+        return;
+      }
+      const logSeverityLevel = getLogSeverityLevel(type, level);
+      if (!levels.has(logSeverityLevel)) {
+        return;
+      }
+      const { normalizeDepth = 3, normalizeMaxBreadth = 1e3 } = client.getOptions();
+      const messageParts = [];
+      if (consolaMessage) {
+        messageParts.push(consolaMessage);
+      }
+      if (args && args.length > 0) {
+        messageParts.push(formatConsoleArgs(args, normalizeDepth, normalizeMaxBreadth));
+      }
+      const message = messageParts.join(" ");
+      attributes["sentry.origin"] = "auto.logging.consola";
+      if (tag) {
+        attributes["consola.tag"] = tag;
+      }
+      if (type) {
+        attributes["consola.type"] = type;
+      }
+      if (level != null && typeof level === "number") {
+        attributes["consola.level"] = level;
+      }
+      _INTERNAL_captureLog({
+        level: logSeverityLevel,
+        message,
+        attributes
+      });
+    }
+  };
+}
+const CONSOLA_TYPE_TO_LOG_SEVERITY_LEVEL_MAP = {
+  // Consola built-in types
+  silent: "trace",
+  fatal: "fatal",
+  error: "error",
+  warn: "warn",
+  log: "info",
+  info: "info",
+  success: "info",
+  fail: "error",
+  ready: "info",
+  start: "info",
+  box: "info",
+  debug: "debug",
+  trace: "trace",
+  verbose: "debug",
+  // Custom types that might exist
+  critical: "fatal",
+  notice: "info"
+};
+const CONSOLA_LEVEL_TO_LOG_SEVERITY_LEVEL_MAP = {
+  0: "fatal",
+  // Fatal and Error
+  1: "warn",
+  // Warnings
+  2: "info",
+  // Normal logs
+  3: "info",
+  // Informational logs, success, fail, ready, start, ...
+  4: "debug",
+  // Debug logs
+  5: "trace"
+  // Trace logs
+};
+function getLogSeverityLevel(type, level) {
+  if (type === "verbose") {
+    return "debug";
+  }
+  if (type === "silent") {
+    return "trace";
+  }
+  if (type) {
+    const mappedLevel = CONSOLA_TYPE_TO_LOG_SEVERITY_LEVEL_MAP[type];
+    if (mappedLevel) {
+      return mappedLevel;
+    }
+  }
+  if (typeof level === "number") {
+    const mappedLevel = CONSOLA_LEVEL_TO_LOG_SEVERITY_LEVEL_MAP[level];
+    if (mappedLevel) {
+      return mappedLevel;
+    }
+  }
+  return "info";
+}
 function getBreadcrumbLogLevelFromHttpStatusCode(statusCode) {
   if (statusCode === void 0) {
     return void 0;
@@ -6514,12 +8405,12 @@ function getBreadcrumbLogLevelFromHttpStatusCode(statusCode) {
     return void 0;
   }
 }
-const WINDOW$3 = GLOBAL_OBJ;
+const WINDOW$6 = GLOBAL_OBJ;
 function supportsHistory() {
-  return "history" in WINDOW$3 && !!WINDOW$3.history;
+  return "history" in WINDOW$6 && !!WINDOW$6.history;
 }
 function _isFetchSupported() {
-  if (!("fetch" in WINDOW$3)) {
+  if (!("fetch" in WINDOW$6)) {
     return false;
   }
   try {
@@ -6541,11 +8432,11 @@ function supportsNativeFetch() {
   if (!_isFetchSupported()) {
     return false;
   }
-  if (isNativeFunction(WINDOW$3.fetch)) {
+  if (isNativeFunction(WINDOW$6.fetch)) {
     return true;
   }
   let result = false;
-  const doc = WINDOW$3.document;
+  const doc = WINDOW$6.document;
   if (doc && typeof doc.createElement === "function") {
     try {
       const sandbox = doc.createElement("iframe");
@@ -6556,10 +8447,13 @@ function supportsNativeFetch() {
       }
       doc.head.removeChild(sandbox);
     } catch (err) {
-      DEBUG_BUILD$2 && debug.warn("Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ", err);
+      DEBUG_BUILD$4 && debug$2.warn("Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ", err);
     }
   }
   return result;
+}
+function supportsReportingObserver() {
+  return "ReportingObserver" in WINDOW$6;
 }
 function addFetchInstrumentationHandler(handler, skipNativeFetchCheck) {
   const type = "fetch";
@@ -6731,10 +8625,2277 @@ function getHeadersFromFetchArgs(fetchArgs) {
   }
   return;
 }
+function isBrowserBundle() {
+  return typeof __SENTRY_BROWSER_BUNDLE__ !== "undefined" && !!__SENTRY_BROWSER_BUNDLE__;
+}
 function getSDKSource() {
   return "npm";
 }
-const WINDOW$2 = GLOBAL_OBJ;
+function isNodeEnv() {
+  return !isBrowserBundle() && Object.prototype.toString.call(typeof process !== "undefined" ? process : 0) === "[object process]";
+}
+function isBrowser() {
+  return typeof window !== "undefined" && (!isNodeEnv() || isElectronNodeRenderer());
+}
+function isElectronNodeRenderer() {
+  const process2 = GLOBAL_OBJ.process;
+  return process2?.type === "renderer";
+}
+const WINDOW$5 = GLOBAL_OBJ;
+const DOCUMENT = WINDOW$5.document;
+const NAVIGATOR$1 = WINDOW$5.navigator;
+const TRIGGER_LABEL = "Report a Bug";
+const CANCEL_BUTTON_LABEL = "Cancel";
+const SUBMIT_BUTTON_LABEL = "Send Bug Report";
+const CONFIRM_BUTTON_LABEL = "Confirm";
+const FORM_TITLE = "Report a Bug";
+const EMAIL_PLACEHOLDER = "your.email@example.org";
+const EMAIL_LABEL = "Email";
+const MESSAGE_PLACEHOLDER = "What's the bug? What did you expect?";
+const MESSAGE_LABEL = "Description";
+const NAME_PLACEHOLDER = "Your Name";
+const NAME_LABEL = "Name";
+const SUCCESS_MESSAGE_TEXT = "Thank you for your report!";
+const IS_REQUIRED_LABEL = "(required)";
+const ADD_SCREENSHOT_LABEL = "Add a screenshot";
+const REMOVE_SCREENSHOT_LABEL = "Remove screenshot";
+const HIGHLIGHT_TOOL_TEXT = "Highlight";
+const HIDE_TOOL_TEXT = "Hide";
+const REMOVE_HIGHLIGHT_TEXT = "Remove";
+const FEEDBACK_WIDGET_SOURCE = "widget";
+const FEEDBACK_API_SOURCE = "api";
+const SUCCESS_MESSAGE_TIMEOUT = 5e3;
+const sendFeedback = (params, hint = { includeReplay: true }) => {
+  if (!params.message) {
+    throw new Error("Unable to submit feedback with empty message");
+  }
+  const client = getClient();
+  if (!client) {
+    throw new Error("No client setup, cannot send feedback.");
+  }
+  if (params.tags && Object.keys(params.tags).length) {
+    getCurrentScope().setTags(params.tags);
+  }
+  const eventId = captureFeedback(
+    {
+      source: FEEDBACK_API_SOURCE,
+      url: getLocationHref(),
+      ...params
+    },
+    hint
+  );
+  return new Promise((resolve2, reject) => {
+    const timeout = setTimeout(() => reject("Unable to determine if Feedback was correctly sent."), 3e4);
+    const cleanup = client.on("afterSendEvent", (event, response) => {
+      if (event.event_id !== eventId) {
+        return;
+      }
+      clearTimeout(timeout);
+      cleanup();
+      if (response?.statusCode && response.statusCode >= 200 && response.statusCode < 300) {
+        return resolve2(eventId);
+      }
+      if (response?.statusCode === 403) {
+        return reject(
+          "Unable to send feedback. This could be because this domain is not in your list of allowed domains."
+        );
+      }
+      return reject(
+        "Unable to send feedback. This could be because of network issues, or because you are using an ad-blocker."
+      );
+    });
+  });
+};
+const DEBUG_BUILD$3 = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
+function isScreenshotSupported() {
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(NAVIGATOR$1.userAgent)) {
+    return false;
+  }
+  if (/Macintosh/i.test(NAVIGATOR$1.userAgent) && NAVIGATOR$1.maxTouchPoints && NAVIGATOR$1.maxTouchPoints > 1) {
+    return false;
+  }
+  if (!isSecureContext) {
+    return false;
+  }
+  return true;
+}
+function mergeOptions(defaultOptions, optionOverrides) {
+  return {
+    ...defaultOptions,
+    ...optionOverrides,
+    tags: {
+      ...defaultOptions.tags,
+      ...optionOverrides.tags
+    },
+    onFormOpen: () => {
+      optionOverrides.onFormOpen?.();
+      defaultOptions.onFormOpen?.();
+    },
+    onFormClose: () => {
+      optionOverrides.onFormClose?.();
+      defaultOptions.onFormClose?.();
+    },
+    onSubmitSuccess: (data, eventId) => {
+      optionOverrides.onSubmitSuccess?.(data, eventId);
+      defaultOptions.onSubmitSuccess?.(data, eventId);
+    },
+    onSubmitError: (error2) => {
+      optionOverrides.onSubmitError?.(error2);
+      defaultOptions.onSubmitError?.(error2);
+    },
+    onFormSubmitted: () => {
+      optionOverrides.onFormSubmitted?.();
+      defaultOptions.onFormSubmitted?.();
+    },
+    themeDark: {
+      ...defaultOptions.themeDark,
+      ...optionOverrides.themeDark
+    },
+    themeLight: {
+      ...defaultOptions.themeLight,
+      ...optionOverrides.themeLight
+    }
+  };
+}
+function createActorStyles(styleNonce) {
+  const style = DOCUMENT.createElement("style");
+  style.textContent = `
+.widget__actor {
+  position: fixed;
+  z-index: var(--z-index);
+  margin: var(--page-margin);
+  inset: var(--actor-inset);
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+
+  font-family: inherit;
+  font-size: var(--font-size);
+  font-weight: 600;
+  line-height: 1.14em;
+  text-decoration: none;
+
+  background: var(--actor-background, var(--background));
+  border-radius: var(--actor-border-radius, 1.7em/50%);
+  border: var(--actor-border, var(--border));
+  box-shadow: var(--actor-box-shadow, var(--box-shadow));
+  color: var(--actor-color, var(--foreground));
+  fill: var(--actor-color, var(--foreground));
+  cursor: pointer;
+  opacity: 1;
+  transition: transform 0.2s ease-in-out;
+  transform: translate(0, 0) scale(1);
+}
+.widget__actor[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transform: translate(0, 16px) scale(0.98);
+}
+
+.widget__actor:hover {
+  background: var(--actor-hover-background, var(--background));
+  filter: var(--interactive-filter);
+}
+
+.widget__actor svg {
+  width: 1.14em;
+  height: 1.14em;
+}
+
+@media (max-width: 600px) {
+  .widget__actor span {
+    display: none;
+  }
+}
+`;
+  if (styleNonce) {
+    style.setAttribute("nonce", styleNonce);
+  }
+  return style;
+}
+function setAttributesNS(el, attributes) {
+  Object.entries(attributes).forEach(([key, val]) => {
+    el.setAttributeNS(null, key, val);
+  });
+  return el;
+}
+const SIZE = 20;
+const XMLNS$2 = "http://www.w3.org/2000/svg";
+function FeedbackIcon() {
+  const createElementNS = (tagName) => WINDOW$5.document.createElementNS(XMLNS$2, tagName);
+  const svg = setAttributesNS(createElementNS("svg"), {
+    width: `${SIZE}`,
+    height: `${SIZE}`,
+    viewBox: `0 0 ${SIZE} ${SIZE}`,
+    fill: "var(--actor-color, var(--foreground))"
+  });
+  const g2 = setAttributesNS(createElementNS("g"), {
+    clipPath: "url(#clip0_57_80)"
+  });
+  const path = setAttributesNS(createElementNS("path"), {
+    ["fill-rule"]: "evenodd",
+    ["clip-rule"]: "evenodd",
+    d: "M15.6622 15H12.3997C12.2129 14.9959 12.031 14.9396 11.8747 14.8375L8.04965 12.2H7.49956V19.1C7.4875 19.3348 7.3888 19.5568 7.22256 19.723C7.05632 19.8892 6.83435 19.9879 6.59956 20H2.04956C1.80193 19.9968 1.56535 19.8969 1.39023 19.7218C1.21511 19.5467 1.1153 19.3101 1.11206 19.0625V12.2H0.949652C0.824431 12.2017 0.700142 12.1783 0.584123 12.1311C0.468104 12.084 0.362708 12.014 0.274155 11.9255C0.185602 11.8369 0.115689 11.7315 0.0685419 11.6155C0.0213952 11.4995 -0.00202913 11.3752 -0.00034808 11.25V3.75C-0.00900498 3.62067 0.0092504 3.49095 0.0532651 3.36904C0.0972798 3.24712 0.166097 3.13566 0.255372 3.04168C0.344646 2.94771 0.452437 2.87327 0.571937 2.82307C0.691437 2.77286 0.82005 2.74798 0.949652 2.75H8.04965L11.8747 0.1625C12.031 0.0603649 12.2129 0.00407221 12.3997 0H15.6622C15.9098 0.00323746 16.1464 0.103049 16.3215 0.278167C16.4966 0.453286 16.5964 0.689866 16.5997 0.9375V3.25269C17.3969 3.42959 18.1345 3.83026 18.7211 4.41679C19.5322 5.22788 19.9878 6.32796 19.9878 7.47502C19.9878 8.62209 19.5322 9.72217 18.7211 10.5333C18.1345 11.1198 17.3969 11.5205 16.5997 11.6974V14.0125C16.6047 14.1393 16.5842 14.2659 16.5395 14.3847C16.4948 14.5035 16.4268 14.6121 16.3394 14.7042C16.252 14.7962 16.147 14.8698 16.0307 14.9206C15.9144 14.9714 15.7891 14.9984 15.6622 15ZM1.89695 10.325H1.88715V4.625H8.33715C8.52423 4.62301 8.70666 4.56654 8.86215 4.4625L12.6872 1.875H14.7247V13.125H12.6872L8.86215 10.4875C8.70666 10.3835 8.52423 10.327 8.33715 10.325H2.20217C2.15205 10.3167 2.10102 10.3125 2.04956 10.3125C1.9981 10.3125 1.94708 10.3167 1.89695 10.325ZM2.98706 12.2V18.1625H5.66206V12.2H2.98706ZM16.5997 9.93612V5.01393C16.6536 5.02355 16.7072 5.03495 16.7605 5.04814C17.1202 5.13709 17.4556 5.30487 17.7425 5.53934C18.0293 5.77381 18.2605 6.06912 18.4192 6.40389C18.578 6.73866 18.6603 7.10452 18.6603 7.47502C18.6603 7.84552 18.578 8.21139 18.4192 8.54616C18.2605 8.88093 18.0293 9.17624 17.7425 9.41071C17.4556 9.64518 17.1202 9.81296 16.7605 9.90191C16.7072 9.91509 16.6536 9.9265 16.5997 9.93612Z"
+  });
+  svg.appendChild(g2).appendChild(path);
+  const speakerDefs = createElementNS("defs");
+  const speakerClipPathDef = setAttributesNS(createElementNS("clipPath"), {
+    id: "clip0_57_80"
+  });
+  const speakerRect = setAttributesNS(createElementNS("rect"), {
+    width: `${SIZE}`,
+    height: `${SIZE}`,
+    fill: "white"
+  });
+  speakerClipPathDef.appendChild(speakerRect);
+  speakerDefs.appendChild(speakerClipPathDef);
+  svg.appendChild(speakerDefs).appendChild(speakerClipPathDef).appendChild(speakerRect);
+  return svg;
+}
+function Actor({ triggerLabel, triggerAriaLabel, shadow, styleNonce }) {
+  const el = DOCUMENT.createElement("button");
+  el.type = "button";
+  el.className = "widget__actor";
+  el.ariaHidden = "false";
+  el.ariaLabel = triggerAriaLabel || triggerLabel || TRIGGER_LABEL;
+  el.appendChild(FeedbackIcon());
+  if (triggerLabel) {
+    const label = DOCUMENT.createElement("span");
+    label.appendChild(DOCUMENT.createTextNode(triggerLabel));
+    el.appendChild(label);
+  }
+  const style = createActorStyles(styleNonce);
+  return {
+    el,
+    appendToDom() {
+      shadow.appendChild(style);
+      shadow.appendChild(el);
+    },
+    removeFromDom() {
+      el.remove();
+      style.remove();
+    },
+    show() {
+      el.ariaHidden = "false";
+    },
+    hide() {
+      el.ariaHidden = "true";
+    }
+  };
+}
+const PURPLE = "rgba(88, 74, 192, 1)";
+const DEFAULT_LIGHT = {
+  foreground: "#2b2233",
+  background: "#ffffff",
+  accentForeground: "white",
+  accentBackground: PURPLE,
+  successColor: "#268d75",
+  errorColor: "#df3338",
+  border: "1.5px solid rgba(41, 35, 47, 0.13)",
+  boxShadow: "0px 4px 24px 0px rgba(43, 34, 51, 0.12)",
+  outline: "1px auto var(--accent-background)",
+  interactiveFilter: "brightness(95%)"
+};
+const DEFAULT_DARK = {
+  foreground: "#ebe6ef",
+  background: "#29232f",
+  accentForeground: "white",
+  accentBackground: PURPLE,
+  successColor: "#2da98c",
+  errorColor: "#f55459",
+  border: "1.5px solid rgba(235, 230, 239, 0.15)",
+  boxShadow: "0px 4px 24px 0px rgba(43, 34, 51, 0.12)",
+  outline: "1px auto var(--accent-background)",
+  interactiveFilter: "brightness(150%)"
+};
+function getThemedCssVariables(theme) {
+  return `
+  --foreground: ${theme.foreground};
+  --background: ${theme.background};
+  --accent-foreground: ${theme.accentForeground};
+  --accent-background: ${theme.accentBackground};
+  --success-color: ${theme.successColor};
+  --error-color: ${theme.errorColor};
+  --border: ${theme.border};
+  --box-shadow: ${theme.boxShadow};
+  --outline: ${theme.outline};
+  --interactive-filter: ${theme.interactiveFilter};
+  `;
+}
+function createMainStyles({
+  colorScheme,
+  themeDark,
+  themeLight,
+  styleNonce
+}) {
+  const style = DOCUMENT.createElement("style");
+  style.textContent = `
+:host {
+  --font-family: system-ui, 'Helvetica Neue', Arial, sans-serif;
+  --font-size: 14px;
+  --z-index: 100000;
+
+  --page-margin: 16px;
+  --inset: auto 0 0 auto;
+  --actor-inset: var(--inset);
+
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+
+  ${colorScheme !== "system" ? "color-scheme: only light;" : ""}
+
+  ${getThemedCssVariables(
+    colorScheme === "dark" ? { ...DEFAULT_DARK, ...themeDark } : { ...DEFAULT_LIGHT, ...themeLight }
+  )}
+}
+
+${colorScheme === "system" ? `
+@media (prefers-color-scheme: dark) {
+  :host {
+    ${getThemedCssVariables({ ...DEFAULT_DARK, ...themeDark })}
+  }
+}` : ""}
+}
+`;
+  if (styleNonce) {
+    style.setAttribute("nonce", styleNonce);
+  }
+  return style;
+}
+const buildFeedbackIntegration = ({
+  lazyLoadIntegration: lazyLoadIntegration2,
+  getModalIntegration,
+  getScreenshotIntegration
+}) => {
+  const feedbackIntegration = ({
+    // FeedbackGeneralConfiguration
+    id = "sentry-feedback",
+    autoInject = true,
+    showBranding = true,
+    isEmailRequired = false,
+    isNameRequired = false,
+    showEmail = true,
+    showName = true,
+    enableScreenshot = true,
+    useSentryUser = {
+      email: "email",
+      name: "username"
+    },
+    tags,
+    styleNonce,
+    scriptNonce,
+    // FeedbackThemeConfiguration
+    colorScheme = "system",
+    themeLight = {},
+    themeDark = {},
+    // FeedbackTextConfiguration
+    addScreenshotButtonLabel = ADD_SCREENSHOT_LABEL,
+    cancelButtonLabel = CANCEL_BUTTON_LABEL,
+    confirmButtonLabel = CONFIRM_BUTTON_LABEL,
+    emailLabel = EMAIL_LABEL,
+    emailPlaceholder = EMAIL_PLACEHOLDER,
+    formTitle = FORM_TITLE,
+    isRequiredLabel = IS_REQUIRED_LABEL,
+    messageLabel = MESSAGE_LABEL,
+    messagePlaceholder = MESSAGE_PLACEHOLDER,
+    nameLabel = NAME_LABEL,
+    namePlaceholder = NAME_PLACEHOLDER,
+    removeScreenshotButtonLabel = REMOVE_SCREENSHOT_LABEL,
+    submitButtonLabel = SUBMIT_BUTTON_LABEL,
+    successMessageText = SUCCESS_MESSAGE_TEXT,
+    triggerLabel = TRIGGER_LABEL,
+    triggerAriaLabel = "",
+    highlightToolText = HIGHLIGHT_TOOL_TEXT,
+    hideToolText = HIDE_TOOL_TEXT,
+    removeHighlightText = REMOVE_HIGHLIGHT_TEXT,
+    // FeedbackCallbacks
+    onFormOpen,
+    onFormClose,
+    onSubmitSuccess,
+    onSubmitError,
+    onFormSubmitted
+  } = {}) => {
+    const _options = {
+      id,
+      autoInject,
+      showBranding,
+      isEmailRequired,
+      isNameRequired,
+      showEmail,
+      showName,
+      enableScreenshot,
+      useSentryUser,
+      tags,
+      styleNonce,
+      scriptNonce,
+      colorScheme,
+      themeDark,
+      themeLight,
+      triggerLabel,
+      triggerAriaLabel,
+      cancelButtonLabel,
+      submitButtonLabel,
+      confirmButtonLabel,
+      formTitle,
+      emailLabel,
+      emailPlaceholder,
+      messageLabel,
+      messagePlaceholder,
+      nameLabel,
+      namePlaceholder,
+      successMessageText,
+      isRequiredLabel,
+      addScreenshotButtonLabel,
+      removeScreenshotButtonLabel,
+      highlightToolText,
+      hideToolText,
+      removeHighlightText,
+      onFormClose,
+      onFormOpen,
+      onSubmitError,
+      onSubmitSuccess,
+      onFormSubmitted
+    };
+    let _shadow = null;
+    let _subscriptions = [];
+    const _createShadow = (options) => {
+      if (!_shadow) {
+        const host = DOCUMENT.createElement("div");
+        host.id = String(options.id);
+        DOCUMENT.body.appendChild(host);
+        _shadow = host.attachShadow({ mode: "open" });
+        _shadow.appendChild(createMainStyles(options));
+      }
+      return _shadow;
+    };
+    const _loadAndRenderDialog = async (options) => {
+      const screenshotRequired = options.enableScreenshot && isScreenshotSupported();
+      let modalIntegration;
+      let screenshotIntegration;
+      try {
+        const modalIntegrationFn = getModalIntegration ? getModalIntegration() : await lazyLoadIntegration2("feedbackModalIntegration", scriptNonce);
+        modalIntegration = modalIntegrationFn();
+        addIntegration(modalIntegration);
+      } catch {
+        DEBUG_BUILD$3 && debug$2.error(
+          "[Feedback] Error when trying to load feedback integrations. Try using `feedbackSyncIntegration` in your `Sentry.init`."
+        );
+        throw new Error("[Feedback] Missing feedback modal integration!");
+      }
+      try {
+        const screenshotIntegrationFn = screenshotRequired ? getScreenshotIntegration ? getScreenshotIntegration() : await lazyLoadIntegration2("feedbackScreenshotIntegration", scriptNonce) : void 0;
+        if (screenshotIntegrationFn) {
+          screenshotIntegration = screenshotIntegrationFn();
+          addIntegration(screenshotIntegration);
+        }
+      } catch {
+        DEBUG_BUILD$3 && debug$2.error("[Feedback] Missing feedback screenshot integration. Proceeding without screenshots.");
+      }
+      const dialog = modalIntegration.createDialog({
+        options: {
+          ...options,
+          onFormClose: () => {
+            dialog?.close();
+            options.onFormClose?.();
+          },
+          onFormSubmitted: () => {
+            dialog?.close();
+            options.onFormSubmitted?.();
+          }
+        },
+        screenshotIntegration,
+        sendFeedback,
+        shadow: _createShadow(options)
+      });
+      return dialog;
+    };
+    const _attachTo = (el, optionOverrides = {}) => {
+      const mergedOptions = mergeOptions(_options, optionOverrides);
+      const targetEl = typeof el === "string" ? DOCUMENT.querySelector(el) : typeof el.addEventListener === "function" ? el : null;
+      if (!targetEl) {
+        DEBUG_BUILD$3 && debug$2.error("[Feedback] Unable to attach to target element");
+        throw new Error("Unable to attach to target element");
+      }
+      let dialog = null;
+      const handleClick2 = async () => {
+        if (!dialog) {
+          dialog = await _loadAndRenderDialog({
+            ...mergedOptions,
+            onFormSubmitted: () => {
+              dialog?.removeFromDom();
+              mergedOptions.onFormSubmitted?.();
+            }
+          });
+        }
+        dialog.appendToDom();
+        dialog.open();
+      };
+      targetEl.addEventListener("click", handleClick2);
+      const unsubscribe = () => {
+        _subscriptions = _subscriptions.filter((sub) => sub !== unsubscribe);
+        dialog?.removeFromDom();
+        dialog = null;
+        targetEl.removeEventListener("click", handleClick2);
+      };
+      _subscriptions.push(unsubscribe);
+      return unsubscribe;
+    };
+    const _createActor = (optionOverrides = {}) => {
+      const mergedOptions = mergeOptions(_options, optionOverrides);
+      const shadow = _createShadow(mergedOptions);
+      const actor = Actor({
+        triggerLabel: mergedOptions.triggerLabel,
+        triggerAriaLabel: mergedOptions.triggerAriaLabel,
+        shadow,
+        styleNonce
+      });
+      _attachTo(actor.el, {
+        ...mergedOptions,
+        onFormOpen() {
+          actor.hide();
+        },
+        onFormClose() {
+          actor.show();
+        },
+        onFormSubmitted() {
+          actor.show();
+        }
+      });
+      return actor;
+    };
+    return {
+      name: "Feedback",
+      setupOnce() {
+        if (!isBrowser() || !_options.autoInject) {
+          return;
+        }
+        if (DOCUMENT.readyState === "loading") {
+          DOCUMENT.addEventListener("DOMContentLoaded", () => _createActor().appendToDom());
+        } else {
+          _createActor().appendToDom();
+        }
+      },
+      /**
+       * Adds click listener to the element to open a feedback dialog
+       *
+       * The returned function can be used to remove the click listener
+       */
+      attachTo: _attachTo,
+      /**
+       * Creates a new widget which is composed of a Button which triggers a Dialog.
+       * Accepts partial options to override any options passed to constructor.
+       */
+      createWidget(optionOverrides = {}) {
+        const actor = _createActor(mergeOptions(_options, optionOverrides));
+        actor.appendToDom();
+        return actor;
+      },
+      /**
+       * Creates a new Form which you can
+       * Accepts partial options to override any options passed to constructor.
+       */
+      async createForm(optionOverrides = {}) {
+        return _loadAndRenderDialog(mergeOptions(_options, optionOverrides));
+      },
+      /**
+       * Removes the Feedback integration (including host, shadow DOM, and all widgets)
+       */
+      remove() {
+        if (_shadow) {
+          _shadow.parentElement?.remove();
+          _shadow = null;
+        }
+        _subscriptions.forEach((sub) => sub());
+        _subscriptions = [];
+      }
+    };
+  };
+  return feedbackIntegration;
+};
+function getFeedback() {
+  const client = getClient();
+  return client?.getIntegrationByName("Feedback");
+}
+var n$2, l$1, u$1, i$1$2, o$1, r$1$1, f$1, c$1 = {}, s$1 = [], a$1 = /acit|ex(?:s|g|n|p|$)|rph|grid|ows|mnc|ntw|ine[ch]|zoo|^ord|itera/i, h$1 = Array.isArray;
+function v$1(n2, l2) {
+  for (var u2 in l2) n2[u2] = l2[u2];
+  return n2;
+}
+function p$1(n2) {
+  var l2 = n2.parentNode;
+  l2 && l2.removeChild(n2);
+}
+function y$1(l2, u2, t2) {
+  var i2, o2, r2, f2 = {};
+  for (r2 in u2) "key" == r2 ? i2 = u2[r2] : "ref" == r2 ? o2 = u2[r2] : f2[r2] = u2[r2];
+  if (arguments.length > 2 && (f2.children = arguments.length > 3 ? n$2.call(arguments, 2) : t2), "function" == typeof l2 && null != l2.defaultProps) for (r2 in l2.defaultProps) void 0 === f2[r2] && (f2[r2] = l2.defaultProps[r2]);
+  return d$1(l2, f2, i2, o2, null);
+}
+function d$1(n2, t2, i2, o2, r2) {
+  var f2 = { type: n2, props: t2, key: i2, ref: o2, __k: null, __: null, __b: 0, __e: null, __d: void 0, __c: null, constructor: void 0, __v: null == r2 ? ++u$1 : r2, __i: -1, __u: 0 };
+  return null == r2 && null != l$1.vnode && l$1.vnode(f2), f2;
+}
+function g$1(n2) {
+  return n2.children;
+}
+function b$1(n2, l2) {
+  this.props = n2, this.context = l2;
+}
+function m$1(n2, l2) {
+  if (null == l2) return n2.__ ? m$1(n2.__, n2.__i + 1) : null;
+  for (var u2; l2 < n2.__k.length; l2++) if (null != (u2 = n2.__k[l2]) && null != u2.__e) return u2.__e;
+  return "function" == typeof n2.type ? m$1(n2) : null;
+}
+function w$1(n2, u2, t2) {
+  var i2, o2 = n2.__v, r2 = o2.__e, f2 = n2.__P;
+  if (f2) return (i2 = v$1({}, o2)).__v = o2.__v + 1, l$1.vnode && l$1.vnode(i2), M(f2, i2, o2, n2.__n, void 0 !== f2.ownerSVGElement, 32 & o2.__u ? [r2] : null, u2, null == r2 ? m$1(o2) : r2, !!(32 & o2.__u), t2), i2.__.__k[i2.__i] = i2, i2.__d = void 0, i2.__e != r2 && k$1(i2), i2;
+}
+function k$1(n2) {
+  var l2, u2;
+  if (null != (n2 = n2.__) && null != n2.__c) {
+    for (n2.__e = n2.__c.base = null, l2 = 0; l2 < n2.__k.length; l2++) if (null != (u2 = n2.__k[l2]) && null != u2.__e) {
+      n2.__e = n2.__c.base = u2.__e;
+      break;
+    }
+    return k$1(n2);
+  }
+}
+function x$1(n2) {
+  (!n2.__d && (n2.__d = true) && i$1$2.push(n2) && !C$1.__r++ || o$1 !== l$1.debounceRendering) && ((o$1 = l$1.debounceRendering) || r$1$1)(C$1);
+}
+function C$1() {
+  var n2, u2, t2, o2 = [], r2 = [];
+  for (i$1$2.sort(f$1); n2 = i$1$2.shift(); ) n2.__d && (t2 = i$1$2.length, u2 = w$1(n2, o2, r2) || u2, 0 === t2 || i$1$2.length > t2 ? (j$1(o2, u2, r2), r2.length = o2.length = 0, u2 = void 0, i$1$2.sort(f$1)) : u2 && l$1.__c && l$1.__c(u2, s$1));
+  u2 && j$1(o2, u2, r2), C$1.__r = 0;
+}
+function P$1(n2, l2, u2, t2, i2, o2, r2, f2, e2, a2, h2) {
+  var v2, p2, y2, d2, _2, g2 = t2 && t2.__k || s$1, b2 = l2.length;
+  for (u2.__d = e2, S(u2, l2, g2), e2 = u2.__d, v2 = 0; v2 < b2; v2++) null != (y2 = u2.__k[v2]) && "boolean" != typeof y2 && "function" != typeof y2 && (p2 = -1 === y2.__i ? c$1 : g2[y2.__i] || c$1, y2.__i = v2, M(n2, y2, p2, i2, o2, r2, f2, e2, a2, h2), d2 = y2.__e, y2.ref && p2.ref != y2.ref && (p2.ref && N(p2.ref, null, y2), h2.push(y2.ref, y2.__c || d2, y2)), null == _2 && null != d2 && (_2 = d2), 65536 & y2.__u || p2.__k === y2.__k ? e2 = $(y2, e2, n2) : "function" == typeof y2.type && void 0 !== y2.__d ? e2 = y2.__d : d2 && (e2 = d2.nextSibling), y2.__d = void 0, y2.__u &= -196609);
+  u2.__d = e2, u2.__e = _2;
+}
+function S(n2, l2, u2) {
+  var t2, i2, o2, r2, f2, e2 = l2.length, c2 = u2.length, s2 = c2, a2 = 0;
+  for (n2.__k = [], t2 = 0; t2 < e2; t2++) null != (i2 = n2.__k[t2] = null == (i2 = l2[t2]) || "boolean" == typeof i2 || "function" == typeof i2 ? null : "string" == typeof i2 || "number" == typeof i2 || "bigint" == typeof i2 || i2.constructor == String ? d$1(null, i2, null, null, i2) : h$1(i2) ? d$1(g$1, { children: i2 }, null, null, null) : void 0 === i2.constructor && i2.__b > 0 ? d$1(i2.type, i2.props, i2.key, i2.ref ? i2.ref : null, i2.__v) : i2) ? (i2.__ = n2, i2.__b = n2.__b + 1, f2 = I(i2, u2, r2 = t2 + a2, s2), i2.__i = f2, o2 = null, -1 !== f2 && (s2--, (o2 = u2[f2]) && (o2.__u |= 131072)), null == o2 || null === o2.__v ? (-1 == f2 && a2--, "function" != typeof i2.type && (i2.__u |= 65536)) : f2 !== r2 && (f2 === r2 + 1 ? a2++ : f2 > r2 ? s2 > e2 - r2 ? a2 += f2 - r2 : a2-- : a2 = f2 < r2 && f2 == r2 - 1 ? f2 - r2 : 0, f2 !== t2 + a2 && (i2.__u |= 65536))) : (o2 = u2[t2]) && null == o2.key && o2.__e && (o2.__e == n2.__d && (n2.__d = m$1(o2)), O(o2, o2, false), u2[t2] = null, s2--);
+  if (s2) for (t2 = 0; t2 < c2; t2++) null != (o2 = u2[t2]) && 0 == (131072 & o2.__u) && (o2.__e == n2.__d && (n2.__d = m$1(o2)), O(o2, o2));
+}
+function $(n2, l2, u2) {
+  var t2, i2;
+  if ("function" == typeof n2.type) {
+    for (t2 = n2.__k, i2 = 0; t2 && i2 < t2.length; i2++) t2[i2] && (t2[i2].__ = n2, l2 = $(t2[i2], l2, u2));
+    return l2;
+  }
+  n2.__e != l2 && (u2.insertBefore(n2.__e, l2 || null), l2 = n2.__e);
+  do {
+    l2 = l2 && l2.nextSibling;
+  } while (null != l2 && 8 === l2.nodeType);
+  return l2;
+}
+function I(n2, l2, u2, t2) {
+  var i2 = n2.key, o2 = n2.type, r2 = u2 - 1, f2 = u2 + 1, e2 = l2[u2];
+  if (null === e2 || e2 && i2 == e2.key && o2 === e2.type) return u2;
+  if (t2 > (null != e2 && 0 == (131072 & e2.__u) ? 1 : 0)) for (; r2 >= 0 || f2 < l2.length; ) {
+    if (r2 >= 0) {
+      if ((e2 = l2[r2]) && 0 == (131072 & e2.__u) && i2 == e2.key && o2 === e2.type) return r2;
+      r2--;
+    }
+    if (f2 < l2.length) {
+      if ((e2 = l2[f2]) && 0 == (131072 & e2.__u) && i2 == e2.key && o2 === e2.type) return f2;
+      f2++;
+    }
+  }
+  return -1;
+}
+function T$1(n2, l2, u2) {
+  "-" === l2[0] ? n2.setProperty(l2, null == u2 ? "" : u2) : n2[l2] = null == u2 ? "" : "number" != typeof u2 || a$1.test(l2) ? u2 : u2 + "px";
+}
+function A$1(n2, l2, u2, t2, i2) {
+  var o2;
+  n: if ("style" === l2) if ("string" == typeof u2) n2.style.cssText = u2;
+  else {
+    if ("string" == typeof t2 && (n2.style.cssText = t2 = ""), t2) for (l2 in t2) u2 && l2 in u2 || T$1(n2.style, l2, "");
+    if (u2) for (l2 in u2) t2 && u2[l2] === t2[l2] || T$1(n2.style, l2, u2[l2]);
+  }
+  else if ("o" === l2[0] && "n" === l2[1]) o2 = l2 !== (l2 = l2.replace(/(PointerCapture)$|Capture$/i, "$1")), l2 = l2.toLowerCase() in n2 ? l2.toLowerCase().slice(2) : l2.slice(2), n2.l || (n2.l = {}), n2.l[l2 + o2] = u2, u2 ? t2 ? u2.u = t2.u : (u2.u = Date.now(), n2.addEventListener(l2, o2 ? L : D$1, o2)) : n2.removeEventListener(l2, o2 ? L : D$1, o2);
+  else {
+    if (i2) l2 = l2.replace(/xlink(H|:h)/, "h").replace(/sName$/, "s");
+    else if ("width" !== l2 && "height" !== l2 && "href" !== l2 && "list" !== l2 && "form" !== l2 && "tabIndex" !== l2 && "download" !== l2 && "rowSpan" !== l2 && "colSpan" !== l2 && "role" !== l2 && l2 in n2) try {
+      n2[l2] = null == u2 ? "" : u2;
+      break n;
+    } catch (n3) {
+    }
+    "function" == typeof u2 || (null == u2 || false === u2 && "-" !== l2[4] ? n2.removeAttribute(l2) : n2.setAttribute(l2, u2));
+  }
+}
+function D$1(n2) {
+  if (this.l) {
+    var u2 = this.l[n2.type + false];
+    if (n2.t) {
+      if (n2.t <= u2.u) return;
+    } else n2.t = Date.now();
+    return u2(l$1.event ? l$1.event(n2) : n2);
+  }
+}
+function L(n2) {
+  if (this.l) return this.l[n2.type + true](l$1.event ? l$1.event(n2) : n2);
+}
+function M(n2, u2, t2, i2, o2, r2, f2, e2, c2, s2) {
+  var a2, p2, y2, d2, _2, m2, w2, k2, x2, C2, S2, $2, H, I2, T2, A2 = u2.type;
+  if (void 0 !== u2.constructor) return null;
+  128 & t2.__u && (c2 = !!(32 & t2.__u), r2 = [e2 = u2.__e = t2.__e]), (a2 = l$1.__b) && a2(u2);
+  n: if ("function" == typeof A2) try {
+    if (k2 = u2.props, x2 = (a2 = A2.contextType) && i2[a2.__c], C2 = a2 ? x2 ? x2.props.value : a2.__ : i2, t2.__c ? w2 = (p2 = u2.__c = t2.__c).__ = p2.__E : ("prototype" in A2 && A2.prototype.render ? u2.__c = p2 = new A2(k2, C2) : (u2.__c = p2 = new b$1(k2, C2), p2.constructor = A2, p2.render = q$1), x2 && x2.sub(p2), p2.props = k2, p2.state || (p2.state = {}), p2.context = C2, p2.__n = i2, y2 = p2.__d = true, p2.__h = [], p2._sb = []), null == p2.__s && (p2.__s = p2.state), null != A2.getDerivedStateFromProps && (p2.__s == p2.state && (p2.__s = v$1({}, p2.__s)), v$1(p2.__s, A2.getDerivedStateFromProps(k2, p2.__s))), d2 = p2.props, _2 = p2.state, p2.__v = u2, y2) null == A2.getDerivedStateFromProps && null != p2.componentWillMount && p2.componentWillMount(), null != p2.componentDidMount && p2.__h.push(p2.componentDidMount);
+    else {
+      if (null == A2.getDerivedStateFromProps && k2 !== d2 && null != p2.componentWillReceiveProps && p2.componentWillReceiveProps(k2, C2), !p2.__e && (null != p2.shouldComponentUpdate && false === p2.shouldComponentUpdate(k2, p2.__s, C2) || u2.__v === t2.__v)) {
+        for (u2.__v !== t2.__v && (p2.props = k2, p2.state = p2.__s, p2.__d = false), u2.__e = t2.__e, u2.__k = t2.__k, u2.__k.forEach(function(n3) {
+          n3 && (n3.__ = u2);
+        }), S2 = 0; S2 < p2._sb.length; S2++) p2.__h.push(p2._sb[S2]);
+        p2._sb = [], p2.__h.length && f2.push(p2);
+        break n;
+      }
+      null != p2.componentWillUpdate && p2.componentWillUpdate(k2, p2.__s, C2), null != p2.componentDidUpdate && p2.__h.push(function() {
+        p2.componentDidUpdate(d2, _2, m2);
+      });
+    }
+    if (p2.context = C2, p2.props = k2, p2.__P = n2, p2.__e = false, $2 = l$1.__r, H = 0, "prototype" in A2 && A2.prototype.render) {
+      for (p2.state = p2.__s, p2.__d = false, $2 && $2(u2), a2 = p2.render(p2.props, p2.state, p2.context), I2 = 0; I2 < p2._sb.length; I2++) p2.__h.push(p2._sb[I2]);
+      p2._sb = [];
+    } else do {
+      p2.__d = false, $2 && $2(u2), a2 = p2.render(p2.props, p2.state, p2.context), p2.state = p2.__s;
+    } while (p2.__d && ++H < 25);
+    p2.state = p2.__s, null != p2.getChildContext && (i2 = v$1(v$1({}, i2), p2.getChildContext())), y2 || null == p2.getSnapshotBeforeUpdate || (m2 = p2.getSnapshotBeforeUpdate(d2, _2)), P$1(n2, h$1(T2 = null != a2 && a2.type === g$1 && null == a2.key ? a2.props.children : a2) ? T2 : [T2], u2, t2, i2, o2, r2, f2, e2, c2, s2), p2.base = u2.__e, u2.__u &= -161, p2.__h.length && f2.push(p2), w2 && (p2.__E = p2.__ = null);
+  } catch (n3) {
+    u2.__v = null, c2 || null != r2 ? (u2.__e = e2, u2.__u |= c2 ? 160 : 32, r2[r2.indexOf(e2)] = null) : (u2.__e = t2.__e, u2.__k = t2.__k), l$1.__e(n3, u2, t2);
+  }
+  else null == r2 && u2.__v === t2.__v ? (u2.__k = t2.__k, u2.__e = t2.__e) : u2.__e = z$1(t2.__e, u2, t2, i2, o2, r2, f2, c2, s2);
+  (a2 = l$1.diffed) && a2(u2);
+}
+function j$1(n2, u2, t2) {
+  for (var i2 = 0; i2 < t2.length; i2++) N(t2[i2], t2[++i2], t2[++i2]);
+  l$1.__c && l$1.__c(u2, n2), n2.some(function(u3) {
+    try {
+      n2 = u3.__h, u3.__h = [], n2.some(function(n3) {
+        n3.call(u3);
+      });
+    } catch (n3) {
+      l$1.__e(n3, u3.__v);
+    }
+  });
+}
+function z$1(l2, u2, t2, i2, o2, r2, f2, e2, s2) {
+  var a2, v2, y2, d2, _2, g2, b2, w2 = t2.props, k2 = u2.props, x2 = u2.type;
+  if ("svg" === x2 && (o2 = true), null != r2) {
+    for (a2 = 0; a2 < r2.length; a2++) if ((_2 = r2[a2]) && "setAttribute" in _2 == !!x2 && (x2 ? _2.localName === x2 : 3 === _2.nodeType)) {
+      l2 = _2, r2[a2] = null;
+      break;
+    }
+  }
+  if (null == l2) {
+    if (null === x2) return document.createTextNode(k2);
+    l2 = o2 ? document.createElementNS("http://www.w3.org/2000/svg", x2) : document.createElement(x2, k2.is && k2), r2 = null, e2 = false;
+  }
+  if (null === x2) w2 === k2 || e2 && l2.data === k2 || (l2.data = k2);
+  else {
+    if (r2 = r2 && n$2.call(l2.childNodes), w2 = t2.props || c$1, !e2 && null != r2) for (w2 = {}, a2 = 0; a2 < l2.attributes.length; a2++) w2[(_2 = l2.attributes[a2]).name] = _2.value;
+    for (a2 in w2) _2 = w2[a2], "children" == a2 || ("dangerouslySetInnerHTML" == a2 ? y2 = _2 : "key" === a2 || a2 in k2 || A$1(l2, a2, null, _2, o2));
+    for (a2 in k2) _2 = k2[a2], "children" == a2 ? d2 = _2 : "dangerouslySetInnerHTML" == a2 ? v2 = _2 : "value" == a2 ? g2 = _2 : "checked" == a2 ? b2 = _2 : "key" === a2 || e2 && "function" != typeof _2 || w2[a2] === _2 || A$1(l2, a2, _2, w2[a2], o2);
+    if (v2) e2 || y2 && (v2.__html === y2.__html || v2.__html === l2.innerHTML) || (l2.innerHTML = v2.__html), u2.__k = [];
+    else if (y2 && (l2.innerHTML = ""), P$1(l2, h$1(d2) ? d2 : [d2], u2, t2, i2, o2 && "foreignObject" !== x2, r2, f2, r2 ? r2[0] : t2.__k && m$1(t2, 0), e2, s2), null != r2) for (a2 = r2.length; a2--; ) null != r2[a2] && p$1(r2[a2]);
+    e2 || (a2 = "value", void 0 !== g2 && (g2 !== l2[a2] || "progress" === x2 && !g2 || "option" === x2 && g2 !== w2[a2]) && A$1(l2, a2, g2, w2[a2], false), a2 = "checked", void 0 !== b2 && b2 !== l2[a2] && A$1(l2, a2, b2, w2[a2], false));
+  }
+  return l2;
+}
+function N(n2, u2, t2) {
+  try {
+    "function" == typeof n2 ? n2(u2) : n2.current = u2;
+  } catch (n3) {
+    l$1.__e(n3, t2);
+  }
+}
+function O(n2, u2, t2) {
+  var i2, o2;
+  if (l$1.unmount && l$1.unmount(n2), (i2 = n2.ref) && (i2.current && i2.current !== n2.__e || N(i2, null, u2)), null != (i2 = n2.__c)) {
+    if (i2.componentWillUnmount) try {
+      i2.componentWillUnmount();
+    } catch (n3) {
+      l$1.__e(n3, u2);
+    }
+    i2.base = i2.__P = null, n2.__c = void 0;
+  }
+  if (i2 = n2.__k) for (o2 = 0; o2 < i2.length; o2++) i2[o2] && O(i2[o2], u2, t2 || "function" != typeof n2.type);
+  t2 || null == n2.__e || p$1(n2.__e), n2.__ = n2.__e = n2.__d = void 0;
+}
+function q$1(n2, l2, u2) {
+  return this.constructor(n2, u2);
+}
+function B$1(u2, t2, i2) {
+  var o2, r2, f2, e2;
+  l$1.__ && l$1.__(u2, t2), r2 = (o2 = false) ? null : t2.__k, f2 = [], e2 = [], M(t2, u2 = t2.__k = y$1(g$1, null, [u2]), r2 || c$1, c$1, void 0 !== t2.ownerSVGElement, r2 ? null : t2.firstChild ? n$2.call(t2.childNodes) : null, f2, r2 ? r2.__e : t2.firstChild, o2, e2), u2.__d = void 0, j$1(f2, u2, e2);
+}
+n$2 = s$1.slice, l$1 = { __e: function(n2, l2, u2, t2) {
+  for (var i2, o2, r2; l2 = l2.__; ) if ((i2 = l2.__c) && !i2.__) try {
+    if ((o2 = i2.constructor) && null != o2.getDerivedStateFromError && (i2.setState(o2.getDerivedStateFromError(n2)), r2 = i2.__d), null != i2.componentDidCatch && (i2.componentDidCatch(n2, t2 || {}), r2 = i2.__d), r2) return i2.__E = i2;
+  } catch (l3) {
+    n2 = l3;
+  }
+  throw n2;
+} }, u$1 = 0, b$1.prototype.setState = function(n2, l2) {
+  var u2;
+  u2 = null != this.__s && this.__s !== this.state ? this.__s : this.__s = v$1({}, this.state), "function" == typeof n2 && (n2 = n2(v$1({}, u2), this.props)), n2 && v$1(u2, n2), null != n2 && this.__v && (l2 && this._sb.push(l2), x$1(this));
+}, b$1.prototype.forceUpdate = function(n2) {
+  this.__v && (this.__e = true, n2 && this.__h.push(n2), x$1(this));
+}, b$1.prototype.render = g$1, i$1$2 = [], r$1$1 = "function" == typeof Promise ? Promise.prototype.then.bind(Promise.resolve()) : setTimeout, f$1 = function(n2, l2) {
+  return n2.__v.__b - l2.__v.__b;
+}, C$1.__r = 0;
+var t, r$2, u, i, o = 0, f = [], c = [], e$1 = l$1, a = e$1.__b, v = e$1.__r, l = e$1.diffed, m = e$1.__c, s = e$1.unmount, d = e$1.__;
+function h(n2, t2) {
+  e$1.__h && e$1.__h(r$2, n2, o || t2), o = 0;
+  var u2 = r$2.__H || (r$2.__H = { __: [], __h: [] });
+  return n2 >= u2.__.length && u2.__.push({ __V: c }), u2.__[n2];
+}
+function p(n2) {
+  return o = 1, y(D, n2);
+}
+function y(n2, u2, i2) {
+  var o2 = h(t++, 2);
+  if (o2.t = n2, !o2.__c && (o2.__ = [i2 ? i2(u2) : D(void 0, u2), function(n3) {
+    var t2 = o2.__N ? o2.__N[0] : o2.__[0], r2 = o2.t(t2, n3);
+    t2 !== r2 && (o2.__N = [r2, o2.__[1]], o2.__c.setState({}));
+  }], o2.__c = r$2, !r$2.u)) {
+    var f2 = function(n3, t2, r2) {
+      if (!o2.__c.__H) return true;
+      var u3 = o2.__c.__H.__.filter(function(n4) {
+        return !!n4.__c;
+      });
+      if (u3.every(function(n4) {
+        return !n4.__N;
+      })) return !c2 || c2.call(this, n3, t2, r2);
+      var i3 = false;
+      return u3.forEach(function(n4) {
+        if (n4.__N) {
+          var t3 = n4.__[0];
+          n4.__ = n4.__N, n4.__N = void 0, t3 !== n4.__[0] && (i3 = true);
+        }
+      }), !(!i3 && o2.__c.props === n3) && (!c2 || c2.call(this, n3, t2, r2));
+    };
+    r$2.u = true;
+    var c2 = r$2.shouldComponentUpdate, e2 = r$2.componentWillUpdate;
+    r$2.componentWillUpdate = function(n3, t2, r2) {
+      if (this.__e) {
+        var u3 = c2;
+        c2 = void 0, f2(n3, t2, r2), c2 = u3;
+      }
+      e2 && e2.call(this, n3, t2, r2);
+    }, r$2.shouldComponentUpdate = f2;
+  }
+  return o2.__N || o2.__;
+}
+function _(n2, u2) {
+  var i2 = h(t++, 3);
+  !e$1.__s && C(i2.__H, u2) && (i2.__ = n2, i2.i = u2, r$2.__H.__h.push(i2));
+}
+function A(n2, u2) {
+  var i2 = h(t++, 4);
+  !e$1.__s && C(i2.__H, u2) && (i2.__ = n2, i2.i = u2, r$2.__h.push(i2));
+}
+function F(n2) {
+  return o = 5, q(function() {
+    return { current: n2 };
+  }, []);
+}
+function T(n2, t2, r2) {
+  o = 6, A(function() {
+    return "function" == typeof n2 ? (n2(t2()), function() {
+      return n2(null);
+    }) : n2 ? (n2.current = t2(), function() {
+      return n2.current = null;
+    }) : void 0;
+  }, null == r2 ? r2 : r2.concat(n2));
+}
+function q(n2, r2) {
+  var u2 = h(t++, 7);
+  return C(u2.__H, r2) ? (u2.__V = n2(), u2.i = r2, u2.__h = n2, u2.__V) : u2.__;
+}
+function x(n2, t2) {
+  return o = 8, q(function() {
+    return n2;
+  }, t2);
+}
+function P(n2) {
+  var u2 = r$2.context[n2.__c], i2 = h(t++, 9);
+  return i2.c = n2, u2 ? (null == i2.__ && (i2.__ = true, u2.sub(r$2)), u2.props.value) : n2.__;
+}
+function V(n2, t2) {
+  e$1.useDebugValue && e$1.useDebugValue(t2 ? t2(n2) : n2);
+}
+function b(n2) {
+  var u2 = h(t++, 10), i2 = p();
+  return u2.__ = n2, r$2.componentDidCatch || (r$2.componentDidCatch = function(n3, t2) {
+    u2.__ && u2.__(n3, t2), i2[1](n3);
+  }), [i2[0], function() {
+    i2[1](void 0);
+  }];
+}
+function g() {
+  var n2 = h(t++, 11);
+  if (!n2.__) {
+    for (var u2 = r$2.__v; null !== u2 && !u2.__m && null !== u2.__; ) u2 = u2.__;
+    var i2 = u2.__m || (u2.__m = [0, 0]);
+    n2.__ = "P" + i2[0] + "-" + i2[1]++;
+  }
+  return n2.__;
+}
+function j() {
+  for (var n2; n2 = f.shift(); ) if (n2.__P && n2.__H) try {
+    n2.__H.__h.forEach(z), n2.__H.__h.forEach(B), n2.__H.__h = [];
+  } catch (t2) {
+    n2.__H.__h = [], e$1.__e(t2, n2.__v);
+  }
+}
+e$1.__b = function(n2) {
+  r$2 = null, a && a(n2);
+}, e$1.__ = function(n2, t2) {
+  t2.__k && t2.__k.__m && (n2.__m = t2.__k.__m), d && d(n2, t2);
+}, e$1.__r = function(n2) {
+  v && v(n2), t = 0;
+  var i2 = (r$2 = n2.__c).__H;
+  i2 && (u === r$2 ? (i2.__h = [], r$2.__h = [], i2.__.forEach(function(n3) {
+    n3.__N && (n3.__ = n3.__N), n3.__V = c, n3.__N = n3.i = void 0;
+  })) : (i2.__h.forEach(z), i2.__h.forEach(B), i2.__h = [], t = 0)), u = r$2;
+}, e$1.diffed = function(n2) {
+  l && l(n2);
+  var t2 = n2.__c;
+  t2 && t2.__H && (t2.__H.__h.length && (1 !== f.push(t2) && i === e$1.requestAnimationFrame || ((i = e$1.requestAnimationFrame) || w)(j)), t2.__H.__.forEach(function(n3) {
+    n3.i && (n3.__H = n3.i), n3.__V !== c && (n3.__ = n3.__V), n3.i = void 0, n3.__V = c;
+  })), u = r$2 = null;
+}, e$1.__c = function(n2, t2) {
+  t2.some(function(n3) {
+    try {
+      n3.__h.forEach(z), n3.__h = n3.__h.filter(function(n4) {
+        return !n4.__ || B(n4);
+      });
+    } catch (r2) {
+      t2.some(function(n4) {
+        n4.__h && (n4.__h = []);
+      }), t2 = [], e$1.__e(r2, n3.__v);
+    }
+  }), m && m(n2, t2);
+}, e$1.unmount = function(n2) {
+  s && s(n2);
+  var t2, r2 = n2.__c;
+  r2 && r2.__H && (r2.__H.__.forEach(function(n3) {
+    try {
+      z(n3);
+    } catch (n4) {
+      t2 = n4;
+    }
+  }), r2.__H = void 0, t2 && e$1.__e(t2, r2.__v));
+};
+var k = "function" == typeof requestAnimationFrame;
+function w(n2) {
+  var t2, r2 = function() {
+    clearTimeout(u2), k && cancelAnimationFrame(t2), setTimeout(n2);
+  }, u2 = setTimeout(r2, 100);
+  k && (t2 = requestAnimationFrame(r2));
+}
+function z(n2) {
+  var t2 = r$2, u2 = n2.__c;
+  "function" == typeof u2 && (n2.__c = void 0, u2()), r$2 = t2;
+}
+function B(n2) {
+  var t2 = r$2;
+  n2.__c = n2.__(), r$2 = t2;
+}
+function C(n2, t2) {
+  return !n2 || n2.length !== t2.length || t2.some(function(t3, r2) {
+    return t3 !== n2[r2];
+  });
+}
+function D(n2, t2) {
+  return "function" == typeof t2 ? t2(n2) : t2;
+}
+const hooks = /* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  useCallback: x,
+  useContext: P,
+  useDebugValue: V,
+  useEffect: _,
+  useErrorBoundary: b,
+  useId: g,
+  useImperativeHandle: T,
+  useLayoutEffect: A,
+  useMemo: q,
+  useReducer: y,
+  useRef: F,
+  useState: p
+}, Symbol.toStringTag, { value: "Module" });
+const XMLNS$1 = "http://www.w3.org/2000/svg";
+function SentryLogo() {
+  const createElementNS = (tagName) => DOCUMENT.createElementNS(XMLNS$1, tagName);
+  const svg = setAttributesNS(createElementNS("svg"), {
+    width: "32",
+    height: "30",
+    viewBox: "0 0 72 66",
+    fill: "inherit"
+  });
+  const path = setAttributesNS(createElementNS("path"), {
+    transform: "translate(11, 11)",
+    d: "M29,2.26a4.67,4.67,0,0,0-8,0L14.42,13.53A32.21,32.21,0,0,1,32.17,40.19H27.55A27.68,27.68,0,0,0,12.09,17.47L6,28a15.92,15.92,0,0,1,9.23,12.17H4.62A.76.76,0,0,1,4,39.06l2.94-5a10.74,10.74,0,0,0-3.36-1.9l-2.91,5a4.54,4.54,0,0,0,1.69,6.24A4.66,4.66,0,0,0,4.62,44H19.15a19.4,19.4,0,0,0-8-17.31l2.31-4A23.87,23.87,0,0,1,23.76,44H36.07a35.88,35.88,0,0,0-16.41-31.8l4.67-8a.77.77,0,0,1,1.05-.27c.53.29,20.29,34.77,20.66,35.17a.76.76,0,0,1-.68,1.13H40.6q.09,1.91,0,3.81h4.78A4.59,4.59,0,0,0,50,39.43a4.49,4.49,0,0,0-.62-2.28Z"
+  });
+  svg.appendChild(path);
+  return svg;
+}
+function DialogHeader({ options }) {
+  const logoHtml = q(() => ({ __html: SentryLogo().outerHTML }), []);
+  return y$1(
+    "h2",
+    { class: "dialog__header" },
+    y$1("span", { class: "dialog__title" }, options.formTitle),
+    options.showBranding ? y$1(
+      "a",
+      {
+        class: "brand-link",
+        target: "_blank",
+        href: "https://sentry.io/welcome/",
+        title: "Powered by Sentry",
+        rel: "noopener noreferrer",
+        dangerouslySetInnerHTML: logoHtml
+      }
+    ) : null
+  );
+}
+function getMissingFields(feedback, props) {
+  const emptyFields = [];
+  if (props.isNameRequired && !feedback.name) {
+    emptyFields.push(props.nameLabel);
+  }
+  if (props.isEmailRequired && !feedback.email) {
+    emptyFields.push(props.emailLabel);
+  }
+  if (!feedback.message) {
+    emptyFields.push(props.messageLabel);
+  }
+  return emptyFields;
+}
+function retrieveStringValue(formData, key) {
+  const value = formData.get(key);
+  if (typeof value === "string") {
+    return value.trim();
+  }
+  return "";
+}
+function Form({
+  options,
+  defaultEmail,
+  defaultName,
+  onFormClose,
+  onSubmit,
+  onSubmitSuccess,
+  onSubmitError,
+  showEmail,
+  showName,
+  screenshotInput
+}) {
+  const {
+    tags,
+    addScreenshotButtonLabel,
+    removeScreenshotButtonLabel,
+    cancelButtonLabel,
+    emailLabel,
+    emailPlaceholder,
+    isEmailRequired,
+    isNameRequired,
+    messageLabel,
+    messagePlaceholder,
+    nameLabel,
+    namePlaceholder,
+    submitButtonLabel,
+    isRequiredLabel
+  } = options;
+  const [isSubmitting, setIsSubmitting] = p(false);
+  const [error2, setError] = p(null);
+  const [showScreenshotInput, setShowScreenshotInput] = p(false);
+  const ScreenshotInputComponent = screenshotInput?.input;
+  const [screenshotError, setScreenshotError] = p(null);
+  const onScreenshotError = x((error3) => {
+    setScreenshotError(error3);
+    setShowScreenshotInput(false);
+  }, []);
+  const hasAllRequiredFields = x(
+    (data) => {
+      const missingFields = getMissingFields(data, {
+        emailLabel,
+        isEmailRequired,
+        isNameRequired,
+        messageLabel,
+        nameLabel
+      });
+      if (missingFields.length > 0) {
+        setError(`Please enter in the following required fields: ${missingFields.join(", ")}`);
+      } else {
+        setError(null);
+      }
+      return missingFields.length === 0;
+    },
+    [emailLabel, isEmailRequired, isNameRequired, messageLabel, nameLabel]
+  );
+  const handleSubmit = x(
+    async (e2) => {
+      setIsSubmitting(true);
+      try {
+        e2.preventDefault();
+        if (!(e2.target instanceof HTMLFormElement)) {
+          return;
+        }
+        const formData = new FormData(e2.target);
+        const attachment = await (screenshotInput && showScreenshotInput ? screenshotInput.value() : void 0);
+        const data = {
+          name: retrieveStringValue(formData, "name"),
+          email: retrieveStringValue(formData, "email"),
+          message: retrieveStringValue(formData, "message"),
+          attachments: attachment ? [attachment] : void 0
+        };
+        if (!hasAllRequiredFields(data)) {
+          return;
+        }
+        try {
+          const eventId = await onSubmit(
+            {
+              name: data.name,
+              email: data.email,
+              message: data.message,
+              source: FEEDBACK_WIDGET_SOURCE,
+              tags
+            },
+            { attachments: data.attachments }
+          );
+          onSubmitSuccess(data, eventId);
+        } catch (error3) {
+          DEBUG_BUILD$3 && debug$2.error(error3);
+          setError(error3);
+          onSubmitError(error3);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [screenshotInput && showScreenshotInput, onSubmitSuccess, onSubmitError]
+  );
+  return y$1(
+    "form",
+    { class: "form", onSubmit: handleSubmit },
+    ScreenshotInputComponent && showScreenshotInput ? y$1(ScreenshotInputComponent, { onError: onScreenshotError }) : null,
+    y$1(
+      "fieldset",
+      { class: "form__right", "data-sentry-feedback": true, disabled: isSubmitting },
+      y$1(
+        "div",
+        { class: "form__top" },
+        error2 ? y$1("div", { class: "form__error-container" }, error2) : null,
+        showName ? y$1(
+          "label",
+          { for: "name", class: "form__label" },
+          y$1(LabelText, { label: nameLabel, isRequiredLabel, isRequired: isNameRequired }),
+          y$1(
+            "input",
+            {
+              class: "form__input",
+              defaultValue: defaultName,
+              id: "name",
+              name: "name",
+              placeholder: namePlaceholder,
+              required: isNameRequired,
+              type: "text"
+            }
+          )
+        ) : y$1("input", { "aria-hidden": true, value: defaultName, name: "name", type: "hidden" }),
+        showEmail ? y$1(
+          "label",
+          { for: "email", class: "form__label" },
+          y$1(LabelText, { label: emailLabel, isRequiredLabel, isRequired: isEmailRequired }),
+          y$1(
+            "input",
+            {
+              class: "form__input",
+              defaultValue: defaultEmail,
+              id: "email",
+              name: "email",
+              placeholder: emailPlaceholder,
+              required: isEmailRequired,
+              type: "email"
+            }
+          )
+        ) : y$1("input", { "aria-hidden": true, value: defaultEmail, name: "email", type: "hidden" }),
+        y$1(
+          "label",
+          { for: "message", class: "form__label" },
+          y$1(LabelText, { label: messageLabel, isRequiredLabel, isRequired: true }),
+          y$1(
+            "textarea",
+            {
+              autoFocus: true,
+              class: "form__input form__input--textarea",
+              id: "message",
+              name: "message",
+              placeholder: messagePlaceholder,
+              required: true,
+              rows: 5
+            }
+          )
+        ),
+        ScreenshotInputComponent ? y$1(
+          "label",
+          { for: "screenshot", class: "form__label" },
+          y$1(
+            "button",
+            {
+              class: "btn btn--default",
+              disabled: isSubmitting,
+              type: "button",
+              onClick: () => {
+                setScreenshotError(null);
+                setShowScreenshotInput((prev) => !prev);
+              }
+            },
+            showScreenshotInput ? removeScreenshotButtonLabel : addScreenshotButtonLabel
+          ),
+          screenshotError ? y$1("div", { class: "form__error-container" }, screenshotError.message) : null
+        ) : null
+      ),
+      y$1(
+        "div",
+        { class: "btn-group" },
+        y$1(
+          "button",
+          { class: "btn btn--primary", disabled: isSubmitting, type: "submit" },
+          submitButtonLabel
+        ),
+        y$1(
+          "button",
+          { class: "btn btn--default", disabled: isSubmitting, type: "button", onClick: onFormClose },
+          cancelButtonLabel
+        )
+      )
+    )
+  );
+}
+function LabelText({
+  label,
+  isRequired,
+  isRequiredLabel
+}) {
+  return y$1(
+    "span",
+    { class: "form__label__text" },
+    label,
+    isRequired && y$1("span", { class: "form__label__text--required" }, isRequiredLabel)
+  );
+}
+const WIDTH = 16;
+const HEIGHT = 17;
+const XMLNS = "http://www.w3.org/2000/svg";
+function SuccessIcon() {
+  const createElementNS = (tagName) => WINDOW$5.document.createElementNS(XMLNS, tagName);
+  const svg = setAttributesNS(createElementNS("svg"), {
+    width: `${WIDTH}`,
+    height: `${HEIGHT}`,
+    viewBox: `0 0 ${WIDTH} ${HEIGHT}`,
+    fill: "inherit"
+  });
+  const g2 = setAttributesNS(createElementNS("g"), {
+    clipPath: "url(#clip0_57_156)"
+  });
+  const path2 = setAttributesNS(createElementNS("path"), {
+    ["fill-rule"]: "evenodd",
+    ["clip-rule"]: "evenodd",
+    d: "M3.55544 15.1518C4.87103 16.0308 6.41775 16.5 8 16.5C10.1217 16.5 12.1566 15.6571 13.6569 14.1569C15.1571 12.6566 16 10.6217 16 8.5C16 6.91775 15.5308 5.37103 14.6518 4.05544C13.7727 2.73985 12.5233 1.71447 11.0615 1.10897C9.59966 0.503466 7.99113 0.34504 6.43928 0.653721C4.88743 0.962403 3.46197 1.72433 2.34315 2.84315C1.22433 3.96197 0.462403 5.38743 0.153721 6.93928C-0.15496 8.49113 0.00346625 10.0997 0.608967 11.5615C1.21447 13.0233 2.23985 14.2727 3.55544 15.1518ZM4.40546 3.1204C5.46945 2.40946 6.72036 2.03 8 2.03C9.71595 2.03 11.3616 2.71166 12.575 3.92502C13.7883 5.13838 14.47 6.78405 14.47 8.5C14.47 9.77965 14.0905 11.0306 13.3796 12.0945C12.6687 13.1585 11.6582 13.9878 10.476 14.4775C9.29373 14.9672 7.99283 15.0953 6.73777 14.8457C5.48271 14.596 4.32987 13.9798 3.42502 13.075C2.52018 12.1701 1.90397 11.0173 1.65432 9.76224C1.40468 8.50718 1.5328 7.20628 2.0225 6.02404C2.5122 4.8418 3.34148 3.83133 4.40546 3.1204Z"
+  });
+  const path = setAttributesNS(createElementNS("path"), {
+    d: "M6.68775 12.4297C6.78586 12.4745 6.89218 12.4984 7 12.5C7.11275 12.4955 7.22315 12.4664 7.32337 12.4145C7.4236 12.3627 7.51121 12.2894 7.58 12.2L12 5.63999C12.0848 5.47724 12.1071 5.28902 12.0625 5.11098C12.0178 4.93294 11.9095 4.77744 11.7579 4.67392C11.6064 4.57041 11.4221 4.52608 11.24 4.54931C11.0579 4.57254 10.8907 4.66173 10.77 4.79999L6.88 10.57L5.13 8.56999C5.06508 8.49566 4.98613 8.43488 4.89768 8.39111C4.80922 8.34735 4.713 8.32148 4.61453 8.31498C4.51605 8.30847 4.41727 8.32147 4.32382 8.35322C4.23038 8.38497 4.14413 8.43484 4.07 8.49999C3.92511 8.63217 3.83692 8.81523 3.82387 9.01092C3.81083 9.2066 3.87393 9.39976 4 9.54999L6.43 12.24C6.50187 12.3204 6.58964 12.385 6.68775 12.4297Z"
+  });
+  svg.appendChild(g2).append(path, path2);
+  const speakerDefs = createElementNS("defs");
+  const speakerClipPathDef = setAttributesNS(createElementNS("clipPath"), {
+    id: "clip0_57_156"
+  });
+  const speakerRect = setAttributesNS(createElementNS("rect"), {
+    width: `${WIDTH}`,
+    height: `${WIDTH}`,
+    fill: "white",
+    transform: "translate(0 0.5)"
+  });
+  speakerClipPathDef.appendChild(speakerRect);
+  speakerDefs.appendChild(speakerClipPathDef);
+  svg.appendChild(speakerDefs).appendChild(speakerClipPathDef).appendChild(speakerRect);
+  return svg;
+}
+function Dialog({ open, onFormSubmitted, ...props }) {
+  const options = props.options;
+  const successIconHtml = q(() => ({ __html: SuccessIcon().outerHTML }), []);
+  const [timeoutId, setTimeoutId] = p(null);
+  const handleOnSuccessClick = x(() => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+    onFormSubmitted();
+  }, [timeoutId]);
+  const onSubmitSuccess = x(
+    (data, eventId) => {
+      props.onSubmitSuccess(data, eventId);
+      setTimeoutId(
+        setTimeout(() => {
+          onFormSubmitted();
+          setTimeoutId(null);
+        }, SUCCESS_MESSAGE_TIMEOUT)
+      );
+    },
+    [onFormSubmitted]
+  );
+  return y$1(
+    g$1,
+    null,
+    timeoutId ? y$1(
+      "div",
+      { class: "success__position", onClick: handleOnSuccessClick },
+      y$1(
+        "div",
+        { class: "success__content" },
+        options.successMessageText,
+        y$1("span", { class: "success__icon", dangerouslySetInnerHTML: successIconHtml })
+      )
+    ) : y$1(
+      "dialog",
+      { class: "dialog", onClick: options.onFormClose, open },
+      y$1(
+        "div",
+        { class: "dialog__position" },
+        y$1(
+          "div",
+          {
+            class: "dialog__content",
+            onClick: (e2) => {
+              e2.stopPropagation();
+            }
+          },
+          y$1(DialogHeader, { options }),
+          y$1(Form, { ...props, onSubmitSuccess })
+        )
+      )
+    )
+  );
+}
+const DIALOG = `
+.dialog {
+  position: fixed;
+  z-index: var(--z-index);
+  margin: 0;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+
+  color: var(--dialog-color, var(--foreground));
+  fill: var(--dialog-color, var(--foreground));
+  line-height: 1.75em;
+
+  background-color: rgba(0, 0, 0, 0.05);
+  border: none;
+  inset: 0;
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.dialog__position {
+  position: fixed;
+  z-index: var(--z-index);
+  inset: var(--dialog-inset);
+  padding: var(--page-margin);
+  display: flex;
+  max-height: calc(100vh - (2 * var(--page-margin)));
+}
+@media (max-width: 600px) {
+  .dialog__position {
+    inset: var(--page-margin);
+    padding: 0;
+  }
+}
+
+.dialog__position:has(.editor) {
+  inset: var(--page-margin);
+  padding: 0;
+}
+
+.dialog:not([open]) {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.dialog:not([open]) .dialog__content {
+  transform: translate(0, -16px) scale(0.98);
+}
+
+.dialog__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: var(--dialog-padding, 24px);
+  max-width: 100%;
+  width: 100%;
+  max-height: 100%;
+  overflow: auto;
+
+  background: var(--dialog-background, var(--background));
+  border-radius: var(--dialog-border-radius, 20px);
+  border: var(--dialog-border, var(--border));
+  box-shadow: var(--dialog-box-shadow, var(--box-shadow));
+  transform: translate(0, 0) scale(1);
+  transition: transform 0.2s ease-in-out;
+}
+
+`;
+const DIALOG_HEADER = `
+.dialog__header {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  font-weight: var(--dialog-header-weight, 600);
+  margin: 0;
+}
+.dialog__title {
+  align-self: center;
+  width: var(--form-width, 272px);
+}
+
+@media (max-width: 600px) {
+  .dialog__title {
+    width: auto;
+  }
+}
+
+.dialog__position:has(.editor) .dialog__title {
+  width: auto;
+}
+
+
+.brand-link {
+  display: inline-flex;
+}
+.brand-link:focus-visible {
+  outline: var(--outline);
+}
+`;
+const FORM = `
+.form {
+  display: flex;
+  overflow: auto;
+  flex-direction: row;
+  gap: 16px;
+  flex: 1 0;
+}
+
+.form fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.form__right {
+  flex: 0 0 auto;
+  display: flex;
+  overflow: auto;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  width: var(--form-width, 100%);
+}
+
+.dialog__position:has(.editor) .form__right {
+  width: var(--form-width, 272px);
+}
+
+.form__top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form__error-container {
+  color: var(--error-color);
+  fill: var(--error-color);
+}
+
+.form__label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0px;
+}
+
+.form__label__text {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.form__label__text--required {
+  font-size: 0.85em;
+}
+
+.form__input {
+  font-family: inherit;
+  line-height: inherit;
+  background: transparent;
+  box-sizing: border-box;
+  border: var(--input-border, var(--border));
+  border-radius: var(--input-border-radius, 6px);
+  color: var(--input-color, inherit);
+  fill: var(--input-color, inherit);
+  font-size: var(--input-font-size, inherit);
+  font-weight: var(--input-font-weight, 500);
+  padding: 6px 12px;
+}
+
+.form__input::placeholder {
+  opacity: 0.65;
+  color: var(--input-placeholder-color, inherit);
+  filter: var(--interactive-filter);
+}
+
+.form__input:focus-visible {
+  outline: var(--input-focus-outline, var(--outline));
+}
+
+.form__input--textarea {
+  font-family: inherit;
+  resize: vertical;
+}
+
+.error {
+  color: var(--error-color);
+  fill: var(--error-color);
+}
+`;
+const BUTTON = `
+.btn-group {
+  display: grid;
+  gap: 8px;
+}
+
+.btn {
+  line-height: inherit;
+  border: var(--button-border, var(--border));
+  border-radius: var(--button-border-radius, 6px);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--button-font-size, inherit);
+  font-weight: var(--button-font-weight, 600);
+  padding: var(--button-padding, 6px 16px);
+}
+.btn[disabled] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.btn--primary {
+  color: var(--button-primary-color, var(--accent-foreground));
+  fill: var(--button-primary-color, var(--accent-foreground));
+  background: var(--button-primary-background, var(--accent-background));
+  border: var(--button-primary-border, var(--border));
+  border-radius: var(--button-primary-border-radius, 6px);
+  font-weight: var(--button-primary-font-weight, 500);
+}
+.btn--primary:hover {
+  color: var(--button-primary-hover-color, var(--accent-foreground));
+  fill: var(--button-primary-hover-color, var(--accent-foreground));
+  background: var(--button-primary-hover-background, var(--accent-background));
+  filter: var(--interactive-filter);
+}
+.btn--primary:focus-visible {
+  background: var(--button-primary-hover-background, var(--accent-background));
+  filter: var(--interactive-filter);
+  outline: var(--button-primary-focus-outline, var(--outline));
+}
+
+.btn--default {
+  color: var(--button-color, var(--foreground));
+  fill: var(--button-color, var(--foreground));
+  background: var(--button-background, var(--background));
+  border: var(--button-border, var(--border));
+  border-radius: var(--button-border-radius, 6px);
+  font-weight: var(--button-font-weight, 500);
+}
+.btn--default:hover {
+  color: var(--button-color, var(--foreground));
+  fill: var(--button-color, var(--foreground));
+  background: var(--button-hover-background, var(--background));
+  filter: var(--interactive-filter);
+}
+.btn--default:focus-visible {
+  background: var(--button-hover-background, var(--background));
+  filter: var(--interactive-filter);
+  outline: var(--button-focus-outline, var(--outline));
+}
+`;
+const SUCCESS = `
+.success__position {
+  position: fixed;
+  inset: var(--dialog-inset);
+  padding: var(--page-margin);
+  z-index: var(--z-index);
+}
+.success__content {
+  background: var(--success-background, var(--background));
+  border: var(--success-border, var(--border));
+  border-radius: var(--success-border-radius, 1.7em/50%);
+  box-shadow: var(--success-box-shadow, var(--box-shadow));
+  font-weight: var(--success-font-weight, 600);
+  color: var(--success-color);
+  fill: var(--success-color);
+  padding: 12px 24px;
+  line-height: 1.75em;
+
+  display: grid;
+  align-items: center;
+  grid-auto-flow: column;
+  gap: 6px;
+  cursor: default;
+}
+
+.success__icon {
+  display: flex;
+}
+`;
+function createDialogStyles(styleNonce) {
+  const style = DOCUMENT.createElement("style");
+  style.textContent = `
+:host {
+  --dialog-inset: var(--inset);
+}
+
+${DIALOG}
+${DIALOG_HEADER}
+${FORM}
+${BUTTON}
+${SUCCESS}
+`;
+  if (styleNonce) {
+    style.setAttribute("nonce", styleNonce);
+  }
+  return style;
+}
+function getUser() {
+  const currentUser = getCurrentScope().getUser();
+  const isolationUser = getIsolationScope().getUser();
+  const globalUser = getGlobalScope().getUser();
+  if (currentUser && Object.keys(currentUser).length) {
+    return currentUser;
+  }
+  if (isolationUser && Object.keys(isolationUser).length) {
+    return isolationUser;
+  }
+  return globalUser;
+}
+const feedbackModalIntegration = () => {
+  return {
+    name: "FeedbackModal",
+    setupOnce() {
+    },
+    createDialog: ({ options, screenshotIntegration, sendFeedback: sendFeedback2, shadow }) => {
+      const shadowRoot = shadow;
+      const userKey = options.useSentryUser;
+      const user = getUser();
+      const el = DOCUMENT.createElement("div");
+      const style = createDialogStyles(options.styleNonce);
+      let originalOverflow = "";
+      const dialog = {
+        get el() {
+          return el;
+        },
+        appendToDom() {
+          if (!shadowRoot.contains(style) && !shadowRoot.contains(el)) {
+            shadowRoot.appendChild(style);
+            shadowRoot.appendChild(el);
+          }
+        },
+        removeFromDom() {
+          el.remove();
+          style.remove();
+          DOCUMENT.body.style.overflow = originalOverflow;
+        },
+        open() {
+          renderContent(true);
+          options.onFormOpen?.();
+          getClient()?.emit("openFeedbackWidget");
+          originalOverflow = DOCUMENT.body.style.overflow;
+          DOCUMENT.body.style.overflow = "hidden";
+        },
+        close() {
+          renderContent(false);
+          DOCUMENT.body.style.overflow = originalOverflow;
+        }
+      };
+      const screenshotInput = screenshotIntegration?.createInput({ h: y$1, hooks, dialog, options });
+      const renderContent = (open) => {
+        B$1(
+          y$1(
+            Dialog,
+            {
+              options,
+              screenshotInput,
+              showName: options.showName || options.isNameRequired,
+              showEmail: options.showEmail || options.isEmailRequired,
+              defaultName: userKey && user?.[userKey.name] || "",
+              defaultEmail: userKey && user?.[userKey.email] || "",
+              onFormClose: () => {
+                renderContent(false);
+                options.onFormClose?.();
+              },
+              onSubmit: sendFeedback2,
+              onSubmitSuccess: (data, eventId) => {
+                renderContent(false);
+                options.onSubmitSuccess?.(data, eventId);
+              },
+              onSubmitError: (error2) => {
+                options.onSubmitError?.(error2);
+              },
+              onFormSubmitted: () => {
+                options.onFormSubmitted?.();
+              },
+              open
+            }
+          ),
+          el
+        );
+      };
+      return dialog;
+    }
+  };
+};
+function IconCloseFactory({
+  h: h2
+  // eslint-disable-line @typescript-eslint/no-unused-vars
+}) {
+  return function IconClose() {
+    return h2(
+      "svg",
+      { "data-test-id": "icon-close", viewBox: "0 0 16 16", fill: "#2B2233", height: "25px", width: "25px" },
+      h2("circle", { r: "7", cx: "8", cy: "8", fill: "white" }),
+      h2(
+        "path",
+        {
+          strokeWidth: "1.5",
+          d: "M8,16a8,8,0,1,1,8-8A8,8,0,0,1,8,16ZM8,1.53A6.47,6.47,0,1,0,14.47,8,6.47,6.47,0,0,0,8,1.53Z"
+        }
+      ),
+      h2(
+        "path",
+        {
+          strokeWidth: "1.5",
+          d: "M5.34,11.41a.71.71,0,0,1-.53-.22.74.74,0,0,1,0-1.06l5.32-5.32a.75.75,0,0,1,1.06,1.06L5.87,11.19A.74.74,0,0,1,5.34,11.41Z"
+        }
+      ),
+      h2(
+        "path",
+        {
+          strokeWidth: "1.5",
+          d: "M10.66,11.41a.74.74,0,0,1-.53-.22L4.81,5.87A.75.75,0,0,1,5.87,4.81l5.32,5.32a.74.74,0,0,1,0,1.06A.71.71,0,0,1,10.66,11.41Z"
+        }
+      )
+    );
+  };
+}
+function createScreenshotInputStyles(styleNonce) {
+  const style = DOCUMENT.createElement("style");
+  const surface200 = "#1A141F";
+  const gray100 = "#302735";
+  style.textContent = `
+.editor {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.editor__image-container {
+  justify-items: center;
+  padding: 15px;
+  position: relative;
+  height: 100%;
+  border-radius: var(--menu-border-radius, 6px);
+
+  background-color: ${surface200};
+  background-image: repeating-linear-gradient(
+      -145deg,
+      transparent,
+      transparent 8px,
+      ${surface200} 8px,
+      ${surface200} 11px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 15px,
+      ${gray100} 15px,
+      ${gray100} 16px
+    );
+}
+
+.editor__canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor__canvas-container > * {
+  object-fit: contain;
+  position: absolute;
+}
+
+.editor__tool-container {
+  padding-top: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.editor__tool-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.editor__tool {
+  display: flex;
+  padding: 8px 12px;
+  justify-content: center;
+  align-items: center;
+  border: var(--button-border, var(--border));
+  border-radius: var(--button-border-radius, 6px);
+  background: var(--button-background, var(--background));
+  color: var(--button-color, var(--foreground));
+}
+
+.editor__tool--active {
+  background: var(--button-primary-background, var(--accent-background));
+  color: var(--button-primary-color, var(--accent-foreground));
+}
+
+.editor__rect {
+  position: absolute;
+  z-index: 2;
+}
+
+.editor__rect button {
+  opacity: 0;
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  cursor: pointer;
+  padding: 0;
+  z-index: 3;
+  border: none;
+  background: none;
+}
+
+.editor__rect:hover button {
+  opacity: 1;
+}
+`;
+  if (styleNonce) {
+    style.setAttribute("nonce", styleNonce);
+  }
+  return style;
+}
+function ToolbarFactory({
+  h: h2
+  // eslint-disable-line @typescript-eslint/no-unused-vars
+}) {
+  return function Toolbar({
+    action,
+    setAction,
+    options
+  }) {
+    return h2(
+      "div",
+      { class: "editor__tool-container" },
+      h2(
+        "div",
+        { class: "editor__tool-bar" },
+        h2(
+          "button",
+          {
+            type: "button",
+            class: `editor__tool ${action === "highlight" ? "editor__tool--active" : ""}`,
+            onClick: () => {
+              setAction(action === "highlight" ? "" : "highlight");
+            }
+          },
+          options.highlightToolText
+        ),
+        h2(
+          "button",
+          {
+            type: "button",
+            class: `editor__tool ${action === "hide" ? "editor__tool--active" : ""}`,
+            onClick: () => {
+              setAction(action === "hide" ? "" : "hide");
+            }
+          },
+          options.hideToolText
+        )
+      )
+    );
+  };
+}
+function useTakeScreenshotFactory({ hooks: hooks2 }) {
+  function useDpi() {
+    const [dpi, setDpi] = hooks2.useState(WINDOW$5.devicePixelRatio ?? 1);
+    hooks2.useEffect(() => {
+      const onChange = () => {
+        setDpi(WINDOW$5.devicePixelRatio);
+      };
+      const media = matchMedia(`(resolution: ${WINDOW$5.devicePixelRatio}dppx)`);
+      media.addEventListener("change", onChange);
+      return () => {
+        media.removeEventListener("change", onChange);
+      };
+    }, []);
+    return dpi;
+  }
+  return function useTakeScreenshot({ onBeforeScreenshot, onScreenshot, onAfterScreenshot, onError }) {
+    const dpi = useDpi();
+    hooks2.useEffect(() => {
+      const takeScreenshot = async () => {
+        onBeforeScreenshot();
+        const stream = await NAVIGATOR$1.mediaDevices.getDisplayMedia({
+          video: {
+            width: WINDOW$5.innerWidth * dpi,
+            height: WINDOW$5.innerHeight * dpi
+          },
+          audio: false,
+          // @ts-expect-error experimental flags: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia#prefercurrenttab
+          monitorTypeSurfaces: "exclude",
+          preferCurrentTab: true,
+          selfBrowserSurface: "include",
+          surfaceSwitching: "exclude"
+        });
+        const video = DOCUMENT.createElement("video");
+        await new Promise((resolve2, reject) => {
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+            onScreenshot(video, dpi);
+            stream.getTracks().forEach((track) => track.stop());
+            resolve2();
+          };
+          video.play().catch(reject);
+        });
+        onAfterScreenshot();
+      };
+      takeScreenshot().catch(onError);
+    }, []);
+  };
+}
+function drawRect(command, ctx, color) {
+  switch (command.type) {
+    case "highlight": {
+      ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+      ctx.shadowBlur = 50;
+      ctx.fillStyle = color;
+      ctx.fillRect(command.x - 1, command.y - 1, command.w + 2, command.h + 2);
+      ctx.clearRect(command.x, command.y, command.w, command.h);
+      break;
+    }
+    case "hide":
+      ctx.fillStyle = "rgb(0, 0, 0)";
+      ctx.fillRect(command.x, command.y, command.w, command.h);
+      break;
+  }
+}
+function with2dContext(canvas, options, callback) {
+  if (!canvas) {
+    return;
+  }
+  const ctx = canvas.getContext("2d", options);
+  if (!ctx) {
+    return;
+  }
+  callback(canvas, ctx);
+}
+function paintImage(maybeDest, source) {
+  with2dContext(maybeDest, { alpha: true }, (destCanvas, destCtx) => {
+    destCtx.drawImage(source, 0, 0, source.width, source.height, 0, 0, destCanvas.width, destCanvas.height);
+  });
+}
+function paintForeground(maybeCanvas, strokeColor, drawCommands) {
+  with2dContext(maybeCanvas, { alpha: true }, (canvas, ctx) => {
+    if (drawCommands.length) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    drawCommands.forEach((command) => {
+      drawRect(command, ctx, strokeColor);
+    });
+  });
+}
+function ScreenshotEditorFactory({
+  h: h2,
+  hooks: hooks2,
+  outputBuffer,
+  dialog,
+  options
+}) {
+  const useTakeScreenshot = useTakeScreenshotFactory({ hooks: hooks2 });
+  const Toolbar = ToolbarFactory({ h: h2 });
+  const IconClose = IconCloseFactory({ h: h2 });
+  const editorStyleInnerText = { __html: createScreenshotInputStyles(options.styleNonce).innerText };
+  const dialogStyle = dialog.el.style;
+  const ScreenshotEditor = ({ screenshot }) => {
+    const [action, setAction] = hooks2.useState("highlight");
+    const [drawCommands, setDrawCommands] = hooks2.useState([]);
+    const measurementRef = hooks2.useRef(null);
+    const backgroundRef = hooks2.useRef(null);
+    const foregroundRef = hooks2.useRef(null);
+    const mouseRef = hooks2.useRef(null);
+    const [scaleFactor, setScaleFactor] = hooks2.useState(1);
+    const strokeColor = hooks2.useMemo(() => {
+      const sentryFeedback = DOCUMENT.getElementById(options.id);
+      if (!sentryFeedback) {
+        return "white";
+      }
+      const computedStyle = getComputedStyle(sentryFeedback);
+      return computedStyle.getPropertyValue("--button-primary-background") || computedStyle.getPropertyValue("--accent-background");
+    }, [options.id]);
+    hooks2.useLayoutEffect(() => {
+      const handleResize = () => {
+        const measurementDiv = measurementRef.current;
+        if (!measurementDiv) {
+          return;
+        }
+        with2dContext(screenshot.canvas, { alpha: false }, (canvas) => {
+          const scale = Math.min(
+            measurementDiv.clientWidth / canvas.width,
+            measurementDiv.clientHeight / canvas.height
+          );
+          setScaleFactor(scale);
+        });
+        if (measurementDiv.clientHeight === 0 || measurementDiv.clientWidth === 0) {
+          setTimeout(handleResize, 0);
+        }
+      };
+      handleResize();
+      WINDOW$5.addEventListener("resize", handleResize);
+      return () => {
+        WINDOW$5.removeEventListener("resize", handleResize);
+      };
+    }, [screenshot]);
+    const setCanvasSize = hooks2.useCallback(
+      (maybeCanvas, scale) => {
+        with2dContext(maybeCanvas, { alpha: true }, (canvas, ctx) => {
+          ctx.scale(scale, scale);
+          canvas.width = screenshot.canvas.width;
+          canvas.height = screenshot.canvas.height;
+        });
+      },
+      [screenshot]
+    );
+    hooks2.useEffect(() => {
+      setCanvasSize(backgroundRef.current, screenshot.dpi);
+      paintImage(backgroundRef.current, screenshot.canvas);
+    }, [screenshot]);
+    hooks2.useEffect(() => {
+      setCanvasSize(foregroundRef.current, screenshot.dpi);
+      with2dContext(foregroundRef.current, { alpha: true }, (canvas, ctx) => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+      paintForeground(foregroundRef.current, strokeColor, drawCommands);
+    }, [drawCommands, strokeColor]);
+    hooks2.useEffect(() => {
+      setCanvasSize(outputBuffer, screenshot.dpi);
+      paintImage(outputBuffer, screenshot.canvas);
+      with2dContext(DOCUMENT.createElement("canvas"), { alpha: true }, (foreground, ctx) => {
+        ctx.scale(screenshot.dpi, screenshot.dpi);
+        foreground.width = screenshot.canvas.width;
+        foreground.height = screenshot.canvas.height;
+        paintForeground(foreground, strokeColor, drawCommands);
+        paintImage(outputBuffer, foreground);
+      });
+    }, [drawCommands, screenshot, strokeColor]);
+    const handleMouseDown = (e2) => {
+      if (!action || !mouseRef.current) {
+        return;
+      }
+      const boundingRect = mouseRef.current.getBoundingClientRect();
+      const startingPoint = {
+        type: action,
+        x: e2.offsetX / scaleFactor,
+        y: e2.offsetY / scaleFactor
+      };
+      const getDrawCommand = (startingPoint2, e3) => {
+        const x2 = (e3.clientX - boundingRect.x) / scaleFactor;
+        const y2 = (e3.clientY - boundingRect.y) / scaleFactor;
+        return {
+          type: startingPoint2.type,
+          x: Math.min(startingPoint2.x, x2),
+          y: Math.min(startingPoint2.y, y2),
+          w: Math.abs(x2 - startingPoint2.x),
+          h: Math.abs(y2 - startingPoint2.y)
+        };
+      };
+      const handleMouseMove = (e3) => {
+        with2dContext(foregroundRef.current, { alpha: true }, (canvas, ctx) => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        paintForeground(foregroundRef.current, strokeColor, [...drawCommands, getDrawCommand(startingPoint, e3)]);
+      };
+      const handleMouseUp = (e3) => {
+        const drawCommand = getDrawCommand(startingPoint, e3);
+        if (drawCommand.w * scaleFactor >= 1 && drawCommand.h * scaleFactor >= 1) {
+          setDrawCommands((prev) => [...prev, drawCommand]);
+        }
+        DOCUMENT.removeEventListener("mousemove", handleMouseMove);
+        DOCUMENT.removeEventListener("mouseup", handleMouseUp);
+      };
+      DOCUMENT.addEventListener("mousemove", handleMouseMove);
+      DOCUMENT.addEventListener("mouseup", handleMouseUp);
+    };
+    const deleteRect = hooks2.useCallback((index) => {
+      return (e2) => {
+        e2.preventDefault();
+        e2.stopPropagation();
+        setDrawCommands((prev) => {
+          const updatedRects = [...prev];
+          updatedRects.splice(index, 1);
+          return updatedRects;
+        });
+      };
+    }, []);
+    const dimensions = {
+      width: `${screenshot.canvas.width * scaleFactor}px`,
+      height: `${screenshot.canvas.height * scaleFactor}px`
+    };
+    const handleStopPropagation = (e2) => {
+      e2.stopPropagation();
+    };
+    return h2(
+      "div",
+      { class: "editor" },
+      h2("style", { nonce: options.styleNonce, dangerouslySetInnerHTML: editorStyleInnerText }),
+      h2(
+        "div",
+        { class: "editor__image-container" },
+        h2(
+          "div",
+          { class: "editor__canvas-container", ref: measurementRef },
+          h2("canvas", { ref: backgroundRef, id: "background", style: dimensions }),
+          h2("canvas", { ref: foregroundRef, id: "foreground", style: dimensions }),
+          h2(
+            "div",
+            { ref: mouseRef, onMouseDown: handleMouseDown, style: dimensions },
+            drawCommands.map((rect, index) => h2(
+              "div",
+              {
+                key: index,
+                class: "editor__rect",
+                style: {
+                  top: `${rect.y * scaleFactor}px`,
+                  left: `${rect.x * scaleFactor}px`,
+                  width: `${rect.w * scaleFactor}px`,
+                  height: `${rect.h * scaleFactor}px`
+                }
+              },
+              h2(
+                "button",
+                {
+                  "aria-label": options.removeHighlightText,
+                  onClick: deleteRect(index),
+                  onMouseDown: handleStopPropagation,
+                  onMouseUp: handleStopPropagation,
+                  type: "button"
+                },
+                h2(IconClose, null)
+              )
+            ))
+          )
+        )
+      ),
+      h2(Toolbar, { options, action, setAction })
+    );
+  };
+  return function Wrapper({ onError }) {
+    const [screenshot, setScreenshot] = hooks2.useState();
+    useTakeScreenshot({
+      onBeforeScreenshot: hooks2.useCallback(() => {
+        dialogStyle.display = "none";
+      }, []),
+      onScreenshot: hooks2.useCallback((screenshotVideo, dpi) => {
+        with2dContext(DOCUMENT.createElement("canvas"), { alpha: false }, (canvas, ctx) => {
+          ctx.scale(dpi, dpi);
+          canvas.width = screenshotVideo.videoWidth;
+          canvas.height = screenshotVideo.videoHeight;
+          ctx.drawImage(screenshotVideo, 0, 0, canvas.width, canvas.height);
+          setScreenshot({ canvas, dpi });
+        });
+        outputBuffer.width = screenshotVideo.videoWidth;
+        outputBuffer.height = screenshotVideo.videoHeight;
+      }, []),
+      onAfterScreenshot: hooks2.useCallback(() => {
+        dialogStyle.display = "block";
+      }, []),
+      onError: hooks2.useCallback((error2) => {
+        dialogStyle.display = "block";
+        onError(error2);
+      }, [])
+    });
+    if (screenshot) {
+      return h2(ScreenshotEditor, { screenshot });
+    }
+    return h2("div", null);
+  };
+}
+const feedbackScreenshotIntegration = () => {
+  return {
+    name: "FeedbackScreenshot",
+    setupOnce() {
+    },
+    createInput: ({ h: h2, hooks: hooks2, dialog, options }) => {
+      const outputBuffer = DOCUMENT.createElement("canvas");
+      return {
+        input: ScreenshotEditorFactory({
+          h: h2,
+          hooks: hooks2,
+          outputBuffer,
+          dialog,
+          options
+        }),
+        // eslint-disable-line @typescript-eslint/no-explicit-any
+        value: async () => {
+          const blob = await new Promise((resolve2) => {
+            outputBuffer.toBlob(resolve2, "image/png");
+          });
+          if (blob) {
+            const data = new Uint8Array(await blob.arrayBuffer());
+            const attachment = {
+              data,
+              filename: "screenshot.png",
+              contentType: "application/png"
+              // attachmentType?: string;
+            };
+            return attachment;
+          }
+          return void 0;
+        }
+      };
+    }
+  };
+};
+const WINDOW$4 = GLOBAL_OBJ;
 let ignoreOnError = 0;
 function shouldIgnoreOnError() {
   return ignoreOnError > 0;
@@ -6815,8 +10976,8 @@ function wrap(fn, options = {}) {
 }
 function getHttpRequestData() {
   const url = getLocationHref();
-  const { referrer } = WINDOW$2.document || {};
-  const { userAgent } = WINDOW$2.navigator || {};
+  const { referrer } = WINDOW$4.document || {};
+  const { userAgent } = WINDOW$4.navigator || {};
   const headers = {
     ...referrer && { Referer: referrer },
     ...userAgent && { "User-Agent": userAgent }
@@ -6827,6 +10988,77 @@ function getHttpRequestData() {
   };
   return request;
 }
+const LazyLoadableIntegrations = {
+  replayIntegration: "replay",
+  replayCanvasIntegration: "replay-canvas",
+  feedbackIntegration: "feedback",
+  feedbackModalIntegration: "feedback-modal",
+  feedbackScreenshotIntegration: "feedback-screenshot",
+  captureConsoleIntegration: "captureconsole",
+  contextLinesIntegration: "contextlines",
+  linkedErrorsIntegration: "linkederrors",
+  dedupeIntegration: "dedupe",
+  extraErrorDataIntegration: "extraerrordata",
+  graphqlClientIntegration: "graphqlclient",
+  httpClientIntegration: "httpclient",
+  reportingObserverIntegration: "reportingobserver",
+  rewriteFramesIntegration: "rewriteframes",
+  browserProfilingIntegration: "browserprofiling",
+  moduleMetadataIntegration: "modulemetadata"
+};
+const WindowWithMaybeIntegration = WINDOW$4;
+async function lazyLoadIntegration(name, scriptNonce) {
+  const bundle = LazyLoadableIntegrations[name];
+  const sentryOnWindow = WindowWithMaybeIntegration.Sentry = WindowWithMaybeIntegration.Sentry || {};
+  if (!bundle) {
+    throw new Error(`Cannot lazy load integration: ${name}`);
+  }
+  const existing = sentryOnWindow[name];
+  if (typeof existing === "function" && !("_isShim" in existing)) {
+    return existing;
+  }
+  const url = getScriptURL(bundle);
+  const script = WINDOW$4.document.createElement("script");
+  script.src = url;
+  script.crossOrigin = "anonymous";
+  script.referrerPolicy = "strict-origin";
+  if (scriptNonce) {
+    script.setAttribute("nonce", scriptNonce);
+  }
+  const waitForLoad = new Promise((resolve2, reject) => {
+    script.addEventListener("load", () => resolve2());
+    script.addEventListener("error", reject);
+  });
+  const currentScript = WINDOW$4.document.currentScript;
+  const parent = WINDOW$4.document.body || WINDOW$4.document.head || currentScript?.parentElement;
+  if (parent) {
+    parent.appendChild(script);
+  } else {
+    throw new Error(`Could not find parent element to insert lazy-loaded ${name} script`);
+  }
+  try {
+    await waitForLoad;
+  } catch {
+    throw new Error(`Error when loading integration: ${name}`);
+  }
+  const integrationFn = sentryOnWindow[name];
+  if (typeof integrationFn !== "function") {
+    throw new Error(`Could not load integration: ${name}`);
+  }
+  return integrationFn;
+}
+function getScriptURL(bundle) {
+  const client = getClient();
+  const baseURL = client?.getOptions()?.cdnBaseUrl || "https://browser.sentry-cdn.com";
+  return new URL(`/${SDK_VERSION}/${bundle}.min.js`, baseURL).toString();
+}
+const feedbackAsyncIntegration = buildFeedbackIntegration({
+  lazyLoadIntegration
+});
+const feedbackSyncIntegration = buildFeedbackIntegration({
+  getModalIntegration: () => feedbackModalIntegration,
+  getScreenshotIntegration: () => feedbackScreenshotIntegration
+});
 function exceptionFromError(stackParser, ex) {
   const frames = parseStackFrames(stackParser, ex);
   const exception = {
@@ -6957,7 +11189,7 @@ function eventFromMessage(stackParser, message, level = "info", hint, attachStac
 }
 function eventFromUnknownInput(stackParser, exception, syntheticException, attachStacktrace, isUnhandledRejection) {
   let event;
-  if (isErrorEvent$1(exception) && exception.error) {
+  if (isErrorEvent$2(exception) && exception.error) {
     const errorEvent = exception;
     return eventFromError(stackParser, errorEvent.error);
   }
@@ -7017,16 +11249,16 @@ function eventFromString(stackParser, message, syntheticException, attachStacktr
   return event;
 }
 function getNonErrorObjectExceptionValue(exception, { isUnhandledRejection }) {
-  const keys = extractExceptionKeysForMessage(exception);
+  const keys2 = extractExceptionKeysForMessage(exception);
   const captureType = isUnhandledRejection ? "promise rejection" : "exception";
-  if (isErrorEvent$1(exception)) {
+  if (isErrorEvent$2(exception)) {
     return `Event \`ErrorEvent\` captured as ${captureType} with message \`${exception.message}\``;
   }
   if (isEvent(exception)) {
     const className = getObjectClassName(exception);
     return `Event \`${className}\` (type=${exception.type}) captured as ${captureType}`;
   }
-  return `Object captured as ${captureType} with keys: ${keys}`;
+  return `Object captured as ${captureType} with keys: ${keys2}`;
 }
 function getObjectClassName(obj) {
   try {
@@ -7055,7 +11287,7 @@ class BrowserClient extends Client {
    */
   constructor(options) {
     const opts = applyDefaultOptions(options);
-    const sdkSource = WINDOW$2.SENTRY_SDK_SOURCE || getSDKSource();
+    const sdkSource = WINDOW$4.SENTRY_SDK_SOURCE || getSDKSource();
     applySdkMetadata(opts, "browser", ["browser"], sdkSource);
     if (opts._metadata?.sdk) {
       opts._metadata.sdk.settings = {
@@ -7066,9 +11298,9 @@ class BrowserClient extends Client {
     }
     super(opts);
     const { sendDefaultPii, sendClientReports, enableLogs, _experiments } = this._options;
-    if (WINDOW$2.document && (sendClientReports || enableLogs || _experiments?.enableMetrics)) {
-      WINDOW$2.document.addEventListener("visibilitychange", () => {
-        if (WINDOW$2.document.visibilityState === "hidden") {
+    if (WINDOW$4.document && (sendClientReports || enableLogs || _experiments?.enableMetrics)) {
+      WINDOW$4.document.addEventListener("visibilitychange", () => {
+        if (WINDOW$4.document.visibilityState === "hidden") {
           if (sendClientReports) {
             this._flushOutcomes();
           }
@@ -7133,7 +11365,7 @@ class BrowserClient extends Client {
 }
 function applyDefaultOptions(optionsArg) {
   return {
-    release: typeof __SENTRY_RELEASE__ === "string" ? __SENTRY_RELEASE__ : WINDOW$2.SENTRY_RELEASE?.id,
+    release: typeof __SENTRY_RELEASE__ === "string" ? __SENTRY_RELEASE__ : WINDOW$4.SENTRY_RELEASE?.id,
     // This supports the variable that sentry-webpack-plugin injects
     sendClientReports: true,
     // We default this to true, as it is the safer scenario
@@ -7141,8 +11373,8 @@ function applyDefaultOptions(optionsArg) {
     ...optionsArg
   };
 }
-const DEBUG_BUILD$1 = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
-const WINDOW$1 = GLOBAL_OBJ;
+const DEBUG_BUILD$2 = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
+const WINDOW$3 = GLOBAL_OBJ;
 const getRating = (value, thresholds) => {
   if (value > thresholds[1]) {
     return "poor";
@@ -7173,7 +11405,7 @@ const generateUniqueID = () => {
   return `v5-${Date.now()}-${Math.floor(Math.random() * (9e12 - 1)) + 1e12}`;
 };
 const getNavigationEntry = (checkResponseStart = true) => {
-  const navigationEntry = WINDOW$1.performance?.getEntriesByType?.("navigation")[0];
+  const navigationEntry = WINDOW$3.performance?.getEntriesByType?.("navigation")[0];
   if (
     // sentry-specific change:
     // We don't want to check for responseStart for our own use of `getNavigationEntry`
@@ -7190,9 +11422,9 @@ const initMetric = (name, value = -1) => {
   const navEntry = getNavigationEntry();
   let navigationType = "navigate";
   if (navEntry) {
-    if (WINDOW$1.document?.prerendering || getActivationStart() > 0) {
+    if (WINDOW$3.document?.prerendering || getActivationStart() > 0) {
       navigationType = "prerender";
-    } else if (WINDOW$1.document?.wasDiscarded) {
+    } else if (WINDOW$3.document?.wasDiscarded) {
       navigationType = "restore";
     } else if (navEntry.type) {
       navigationType = navEntry.type.replace(/_/g, "-");
@@ -7272,10 +11504,10 @@ const runOnce = (cb) => {
 };
 let firstHiddenTime = -1;
 const initHiddenTime = () => {
-  return WINDOW$1.document?.visibilityState === "hidden" && !WINDOW$1.document?.prerendering ? 0 : Infinity;
+  return WINDOW$3.document?.visibilityState === "hidden" && !WINDOW$3.document?.prerendering ? 0 : Infinity;
 };
 const onVisibilityUpdate = (event) => {
-  if (WINDOW$1.document.visibilityState === "hidden" && firstHiddenTime > -1) {
+  if (WINDOW$3.document.visibilityState === "hidden" && firstHiddenTime > -1) {
     firstHiddenTime = event.type === "visibilitychange" ? event.timeStamp : 0;
     removeChangeListeners();
   }
@@ -7289,9 +11521,9 @@ const removeChangeListeners = () => {
   removeEventListener("prerenderingchange", onVisibilityUpdate, true);
 };
 const getVisibilityWatcher = () => {
-  if (WINDOW$1.document && firstHiddenTime < 0) {
+  if (WINDOW$3.document && firstHiddenTime < 0) {
     const activationStart = getActivationStart();
-    const firstVisibilityStateHiddenTime = !WINDOW$1.document.prerendering ? globalThis.performance.getEntriesByType("visibility-state").filter((e) => e.name === "hidden" && e.startTime > activationStart)[0]?.startTime : void 0;
+    const firstVisibilityStateHiddenTime = !WINDOW$3.document.prerendering ? globalThis.performance.getEntriesByType("visibility-state").filter((e2) => e2.name === "hidden" && e2.startTime > activationStart)[0]?.startTime : void 0;
     firstHiddenTime = firstVisibilityStateHiddenTime ?? initHiddenTime();
     addChangeListeners();
   }
@@ -7302,7 +11534,7 @@ const getVisibilityWatcher = () => {
   };
 };
 const whenActivated = (callback) => {
-  if (WINDOW$1.document?.prerendering) {
+  if (WINDOW$3.document?.prerendering) {
     addEventListener("prerenderingchange", () => callback(), true);
   } else {
     callback();
@@ -7352,13 +11584,13 @@ const onCLS = (onReport, opts = {}) => {
       const po2 = observe("layout-shift", handleEntries);
       if (po2) {
         report = bindReporter(onReport, metric, CLSThresholds, opts.reportAllChanges);
-        WINDOW$1.document?.addEventListener("visibilitychange", () => {
-          if (WINDOW$1.document?.visibilityState === "hidden") {
+        WINDOW$3.document?.addEventListener("visibilitychange", () => {
+          if (WINDOW$3.document?.visibilityState === "hidden") {
             handleEntries(po2.takeRecords());
             report(true);
           }
         });
-        WINDOW$1?.setTimeout?.(report);
+        WINDOW$3?.setTimeout?.(report);
       }
     })
   );
@@ -7367,10 +11599,10 @@ let interactionCountEstimate = 0;
 let minKnownInteractionId = Infinity;
 let maxKnownInteractionId = 0;
 const updateEstimate = (entries) => {
-  entries.forEach((e) => {
-    if (e.interactionId) {
-      minKnownInteractionId = Math.min(minKnownInteractionId, e.interactionId);
-      maxKnownInteractionId = Math.max(maxKnownInteractionId, e.interactionId);
+  entries.forEach((e2) => {
+    if (e2.interactionId) {
+      minKnownInteractionId = Math.min(minKnownInteractionId, e2.interactionId);
+      maxKnownInteractionId = Math.max(maxKnownInteractionId, e2.interactionId);
       interactionCountEstimate = maxKnownInteractionId ? (maxKnownInteractionId - minKnownInteractionId) / 7 + 1 : 0;
     }
   });
@@ -7464,7 +11696,7 @@ class InteractionManager {
         this._longestInteractionMap.set(interaction.id, interaction);
         this._longestInteractionList.push(interaction);
       }
-      this._longestInteractionList.sort((a, b) => b._latency - a._latency);
+      this._longestInteractionList.sort((a2, b2) => b2._latency - a2._latency);
       if (this._longestInteractionList.length > MAX_INTERACTIONS_TO_CONSIDER) {
         const removedInteractions = this._longestInteractionList.splice(MAX_INTERACTIONS_TO_CONSIDER);
         for (const interaction2 of removedInteractions) {
@@ -7477,18 +11709,18 @@ class InteractionManager {
 }
 const onHidden = (cb) => {
   const onHiddenOrPageHide = (event) => {
-    if (event.type === "pagehide" || WINDOW$1.document?.visibilityState === "hidden") {
+    if (event.type === "pagehide" || WINDOW$3.document?.visibilityState === "hidden") {
       cb(event);
     }
   };
-  if (WINDOW$1.document) {
+  if (WINDOW$3.document) {
     addEventListener("visibilitychange", onHiddenOrPageHide, true);
     addEventListener("pagehide", onHiddenOrPageHide, true);
   }
 };
 const whenIdleOrHidden = (cb) => {
-  const rIC = WINDOW$1.requestIdleCallback || WINDOW$1.setTimeout;
-  if (WINDOW$1.document?.visibilityState === "hidden") {
+  const rIC = WINDOW$3.requestIdleCallback || WINDOW$3.setTimeout;
+  if (WINDOW$3.document?.visibilityState === "hidden") {
     cb();
   } else {
     cb = runOnce(cb);
@@ -7575,7 +11807,7 @@ const onLCP = (onReport, opts = {}) => {
         report(true);
       });
       for (const type of ["keydown", "click", "visibilitychange"]) {
-        if (WINDOW$1.document) {
+        if (WINDOW$3.document) {
           addEventListener(type, () => whenIdleOrHidden(stopListening), {
             capture: true,
             once: true
@@ -7587,9 +11819,9 @@ const onLCP = (onReport, opts = {}) => {
 };
 const TTFBThresholds = [800, 1800];
 const whenReady = (callback) => {
-  if (WINDOW$1.document?.prerendering) {
+  if (WINDOW$3.document?.prerendering) {
     whenActivated(() => whenReady(callback));
-  } else if (WINDOW$1.document?.readyState !== "complete") {
+  } else if (WINDOW$3.document?.readyState !== "complete") {
     addEventListener("load", () => whenReady(callback), true);
   } else {
     setTimeout(callback);
@@ -7607,7 +11839,7 @@ const onTTFB = (onReport, opts = {}) => {
     }
   });
 };
-const handlers = {};
+const handlers$1 = {};
 const instrumented = {};
 let _previousCls;
 let _previousLcp;
@@ -7634,20 +11866,20 @@ function addPerformanceInstrumentationHandler(type, callback) {
   return getCleanupCallback(type, callback);
 }
 function triggerHandlers(type, data) {
-  const typeHandlers = handlers[type];
+  const typeHandlers = handlers$1[type];
   if (!typeHandlers?.length) {
     return;
   }
   for (const handler of typeHandlers) {
     try {
       handler(data);
-    } catch (e) {
-      DEBUG_BUILD$1 && debug.error(
+    } catch (e2) {
+      DEBUG_BUILD$2 && debug$2.error(
         `Error while triggering instrumentation handler.
 Type: ${type}
 Name: ${getFunctionName(handler)}
 Error:`,
-        e
+        e2
       );
     }
   }
@@ -7720,15 +11952,15 @@ function instrumentPerformanceObserver(type) {
   );
 }
 function addHandler(type, handler) {
-  handlers[type] = handlers[type] || [];
-  handlers[type].push(handler);
+  handlers$1[type] = handlers$1[type] || [];
+  handlers$1[type].push(handler);
 }
 function getCleanupCallback(type, callback, stopListening) {
   return () => {
     if (stopListening) {
       stopListening();
     }
-    const typeHandlers = handlers[type];
+    const typeHandlers = handlers$1[type];
     if (!typeHandlers) {
       return;
     }
@@ -7789,7 +12021,7 @@ function startStandaloneWebVitalSpan(options) {
     // Web vital score calculation relies on the user agent to account for different
     // browsers setting different thresholds for what is considered a good/meh/bad value.
     // For example: Chrome vs. Chrome Mobile
-    "user_agent.original": WINDOW$1.navigator?.userAgent,
+    "user_agent.original": WINDOW$3.navigator?.userAgent,
     // This tells Sentry to infer the IP address from the request
     "client.address": sendDefaultPii ? "{{auto}}" : void 0,
     ...passedAttributes
@@ -7804,7 +12036,7 @@ function startStandaloneWebVitalSpan(options) {
   });
 }
 function getBrowserPerformanceAPI() {
-  return WINDOW$1.addEventListener && WINDOW$1.performance;
+  return WINDOW$3.addEventListener && WINDOW$3.performance;
 }
 function msToSec(time) {
   return time / 1e3;
@@ -7849,7 +12081,7 @@ function listenForWebVitalReportEvents(client, collectorCallback) {
   onHidden(() => {
     _runCollectorCallbackOnce("pagehide");
   });
-  const unsubscribeStartNavigation = client.on("beforeStartNavigationSpan", (_, options) => {
+  const unsubscribeStartNavigation = client.on("beforeStartNavigationSpan", (_2, options) => {
     if (!options?.isRedirect) {
       _runCollectorCallbackOnce("navigation");
       unsubscribeStartNavigation();
@@ -7881,7 +12113,7 @@ function trackClsAsStandaloneSpan(client) {
   });
 }
 function _sendStandaloneClsSpan(clsValue, entry, pageloadSpanId, reportEvent) {
-  DEBUG_BUILD$1 && debug.log(`Sending CLS span (${clsValue})`);
+  DEBUG_BUILD$2 && debug$2.log(`Sending CLS span (${clsValue})`);
   const startTime = entry ? msToSec((browserPerformanceTimeOrigin() || 0) + entry.startTime) : timestampInSeconds();
   const routeName = getCurrentScope().getScopeData().transactionName;
   const name = entry ? htmlTreeAsString(entry.sources[0]?.node) : "Layout shift";
@@ -7933,7 +12165,7 @@ function trackLcpAsStandaloneSpan(client) {
   });
 }
 function _sendStandaloneLcpSpan(lcpValue, entry, pageloadSpanId, reportEvent) {
-  DEBUG_BUILD$1 && debug.log(`Sending LCP span (${lcpValue})`);
+  DEBUG_BUILD$2 && debug$2.log(`Sending LCP span (${lcpValue})`);
   const startTime = msToSec((browserPerformanceTimeOrigin() || 0) + (entry?.startTime || 0));
   const routeName = getCurrentScope().getScopeData().transactionName;
   const name = entry ? htmlTreeAsString(entry.element) : "Largest contentful paint";
@@ -7969,7 +12201,7 @@ function _sendStandaloneLcpSpan(lcpValue, entry, pageloadSpanId, reportEvent) {
     span.end(startTime);
   }
 }
-function getAbsoluteTime(time) {
+function getAbsoluteTime$1(time) {
   return time ? ((browserPerformanceTimeOrigin() || performance.timeOrigin) + time) / 1e3 : time;
 }
 function resourceTimingToSpanAttributes(resourceTiming) {
@@ -7984,18 +12216,18 @@ function resourceTimingToSpanAttributes(resourceTiming) {
   }
   return dropUndefinedKeysFromObject({
     ...timingSpanData,
-    "http.request.redirect_start": getAbsoluteTime(resourceTiming.redirectStart),
-    "http.request.redirect_end": getAbsoluteTime(resourceTiming.redirectEnd),
-    "http.request.worker_start": getAbsoluteTime(resourceTiming.workerStart),
-    "http.request.fetch_start": getAbsoluteTime(resourceTiming.fetchStart),
-    "http.request.domain_lookup_start": getAbsoluteTime(resourceTiming.domainLookupStart),
-    "http.request.domain_lookup_end": getAbsoluteTime(resourceTiming.domainLookupEnd),
-    "http.request.connect_start": getAbsoluteTime(resourceTiming.connectStart),
-    "http.request.secure_connection_start": getAbsoluteTime(resourceTiming.secureConnectionStart),
-    "http.request.connection_end": getAbsoluteTime(resourceTiming.connectEnd),
-    "http.request.request_start": getAbsoluteTime(resourceTiming.requestStart),
-    "http.request.response_start": getAbsoluteTime(resourceTiming.responseStart),
-    "http.request.response_end": getAbsoluteTime(resourceTiming.responseEnd),
+    "http.request.redirect_start": getAbsoluteTime$1(resourceTiming.redirectStart),
+    "http.request.redirect_end": getAbsoluteTime$1(resourceTiming.redirectEnd),
+    "http.request.worker_start": getAbsoluteTime$1(resourceTiming.workerStart),
+    "http.request.fetch_start": getAbsoluteTime$1(resourceTiming.fetchStart),
+    "http.request.domain_lookup_start": getAbsoluteTime$1(resourceTiming.domainLookupStart),
+    "http.request.domain_lookup_end": getAbsoluteTime$1(resourceTiming.domainLookupEnd),
+    "http.request.connect_start": getAbsoluteTime$1(resourceTiming.connectStart),
+    "http.request.secure_connection_start": getAbsoluteTime$1(resourceTiming.secureConnectionStart),
+    "http.request.connection_end": getAbsoluteTime$1(resourceTiming.connectEnd),
+    "http.request.request_start": getAbsoluteTime$1(resourceTiming.requestStart),
+    "http.request.response_start": getAbsoluteTime$1(resourceTiming.responseStart),
+    "http.request.response_end": getAbsoluteTime$1(resourceTiming.responseEnd),
     // For TTFB we actually want the relative time from timeOrigin to responseStart
     // This way, TTFB always measures the "first page load" experience.
     // see: https://web.dev/articles/ttfb#measure-resource-requests
@@ -8018,7 +12250,7 @@ function startTrackingWebVitals({
   const performance2 = getBrowserPerformanceAPI();
   if (performance2 && browserPerformanceTimeOrigin()) {
     if (performance2.mark) {
-      WINDOW$1.performance.mark("sentry-tracing-init");
+      WINDOW$3.performance.mark("sentry-tracing-init");
     }
     const lcpCleanupCallback = recordLcpStandaloneSpans ? trackLcpAsStandaloneSpan(client) : _trackLCP();
     const ttfbCleanupCallback = _trackTtfb();
@@ -8354,7 +12586,7 @@ function _addResourceSpans(span, entry, resourceUrl, startTime, duration, timeOr
   if (parsedUrl.host) {
     attributes["server.address"] = parsedUrl.host;
   }
-  attributes["url.same_origin"] = resourceUrl.includes(WINDOW$1.location.origin);
+  attributes["url.same_origin"] = resourceUrl.includes(WINDOW$3.location.origin);
   _setResourceRequestAttributes(entry, attributes, [
     // https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming/responseStatus
     ["responseStatus", "http.response.status_code"],
@@ -8370,17 +12602,17 @@ function _addResourceSpans(span, entry, resourceUrl, startTime, duration, timeOr
   const startTimestamp = timeOrigin + startTime;
   const endTimestamp = startTimestamp + duration;
   startAndEndSpan(span, startTimestamp, endTimestamp, {
-    name: resourceUrl.replace(WINDOW$1.location.origin, ""),
+    name: resourceUrl.replace(WINDOW$3.location.origin, ""),
     op,
     attributes: attributesWithResourceTiming
   });
 }
 function _trackNavigator(span) {
-  const navigator = WINDOW$1.navigator;
-  if (!navigator) {
+  const navigator2 = WINDOW$3.navigator;
+  if (!navigator2) {
     return;
   }
-  const connection = navigator.connection;
+  const connection = navigator2.connection;
   if (connection) {
     if (connection.effectiveType) {
       span.setAttribute("effectiveConnectionType", connection.effectiveType);
@@ -8392,11 +12624,11 @@ function _trackNavigator(span) {
       _measurements["connection.rtt"] = { value: connection.rtt, unit: "millisecond" };
     }
   }
-  if (isMeasurementValue(navigator.deviceMemory)) {
-    span.setAttribute("deviceMemory", `${navigator.deviceMemory} GB`);
+  if (isMeasurementValue(navigator2.deviceMemory)) {
+    span.setAttribute("deviceMemory", `${navigator2.deviceMemory} GB`);
   }
-  if (isMeasurementValue(navigator.hardwareConcurrency)) {
-    span.setAttribute("hardwareConcurrency", String(navigator.hardwareConcurrency));
+  if (isMeasurementValue(navigator2.hardwareConcurrency)) {
+    span.setAttribute("hardwareConcurrency", String(navigator2.hardwareConcurrency));
   }
 }
 function _setWebVitalAttributes(span, options) {
@@ -8515,15 +12747,15 @@ function addClickKeypressInstrumentationHandler(handler) {
   maybeInstrument(type, instrumentDOM);
 }
 function instrumentDOM() {
-  if (!WINDOW$1.document) {
+  if (!WINDOW$3.document) {
     return;
   }
   const triggerDOMHandler = triggerHandlers$1.bind(null, "dom");
   const globalDOMEventHandler = makeDOMEventHandler(triggerDOMHandler, true);
-  WINDOW$1.document.addEventListener("click", globalDOMEventHandler, false);
-  WINDOW$1.document.addEventListener("keypress", globalDOMEventHandler, false);
+  WINDOW$3.document.addEventListener("click", globalDOMEventHandler, false);
+  WINDOW$3.document.addEventListener("keypress", globalDOMEventHandler, false);
   ["EventTarget", "Node"].forEach((target) => {
-    const globalObject = WINDOW$1;
+    const globalObject = WINDOW$3;
     const proto = globalObject[target]?.prototype;
     if (!proto?.hasOwnProperty?.("addEventListener")) {
       return;
@@ -8604,7 +12836,7 @@ function makeDOMEventHandler(handler, globalListener = false) {
     if (!event || event["_sentryCaptured"]) {
       return;
     }
-    const target = getEventTarget(event);
+    const target = getEventTarget$1(event);
     if (shouldSkipDOMEvent(event.type, target)) {
       return;
     }
@@ -8620,13 +12852,13 @@ function makeDOMEventHandler(handler, globalListener = false) {
       lastCapturedEventTargetId = target ? target._sentryId : void 0;
     }
     clearTimeout(debounceTimerID);
-    debounceTimerID = WINDOW$1.setTimeout(() => {
+    debounceTimerID = WINDOW$3.setTimeout(() => {
       lastCapturedEventTargetId = void 0;
       lastCapturedEventType = void 0;
     }, DEBOUNCE_DURATION);
   };
 }
-function getEventTarget(event) {
+function getEventTarget$1(event) {
   try {
     return event.target;
   } catch {
@@ -8640,8 +12872,8 @@ function addHistoryInstrumentationHandler(handler) {
   maybeInstrument(type, instrumentHistory);
 }
 function instrumentHistory() {
-  WINDOW$1.addEventListener("popstate", () => {
-    const to = WINDOW$1.location.href;
+  WINDOW$3.addEventListener("popstate", () => {
+    const to = WINDOW$3.location.href;
     const from = lastHref;
     lastHref = to;
     if (from === to) {
@@ -8669,28 +12901,28 @@ function instrumentHistory() {
       return originalHistoryFunction.apply(this, args);
     };
   }
-  fill(WINDOW$1.history, "pushState", historyReplacementFunction);
-  fill(WINDOW$1.history, "replaceState", historyReplacementFunction);
+  fill(WINDOW$3.history, "pushState", historyReplacementFunction);
+  fill(WINDOW$3.history, "replaceState", historyReplacementFunction);
 }
 function getAbsoluteUrl(urlOrPath) {
   try {
-    const url = new URL(urlOrPath, WINDOW$1.location.origin);
+    const url = new URL(urlOrPath, WINDOW$3.location.origin);
     return url.toString();
   } catch {
     return urlOrPath;
   }
 }
-const cachedImplementations = {};
+const cachedImplementations$3 = {};
 function getNativeImplementation(name) {
-  const cached = cachedImplementations[name];
+  const cached = cachedImplementations$3[name];
   if (cached) {
     return cached;
   }
-  let impl = WINDOW$1[name];
+  let impl = WINDOW$3[name];
   if (isNativeFunction(impl)) {
-    return cachedImplementations[name] = impl.bind(WINDOW$1);
+    return cachedImplementations$3[name] = impl.bind(WINDOW$3);
   }
-  const document2 = WINDOW$1.document;
+  const document2 = WINDOW$3.document;
   if (document2 && typeof document2.createElement === "function") {
     try {
       const sandbox = document2.createElement("iframe");
@@ -8701,17 +12933,20 @@ function getNativeImplementation(name) {
         impl = contentWindow[name];
       }
       document2.head.removeChild(sandbox);
-    } catch (e) {
-      DEBUG_BUILD$1 && debug.warn(`Could not create sandbox iframe for ${name} check, bailing to window.${name}: `, e);
+    } catch (e2) {
+      DEBUG_BUILD$2 && debug$2.warn(`Could not create sandbox iframe for ${name} check, bailing to window.${name}: `, e2);
     }
   }
   if (!impl) {
     return impl;
   }
-  return cachedImplementations[name] = impl.bind(WINDOW$1);
+  return cachedImplementations$3[name] = impl.bind(WINDOW$3);
 }
 function clearCachedImplementation(name) {
-  cachedImplementations[name] = void 0;
+  cachedImplementations$3[name] = void 0;
+}
+function setTimeout$3(...rest) {
+  return getNativeImplementation("setTimeout")(...rest);
 }
 const SENTRY_XHR_DATA_KEY = "__sentry_xhr_v3__";
 function addXhrInstrumentationHandler(handler) {
@@ -8720,7 +12955,7 @@ function addXhrInstrumentationHandler(handler) {
   maybeInstrument(type, instrumentXHR);
 }
 function instrumentXHR() {
-  if (!WINDOW$1.XMLHttpRequest) {
+  if (!WINDOW$3.XMLHttpRequest) {
     return;
   }
   const xhrproto = XMLHttpRequest.prototype;
@@ -8810,6 +13045,36 @@ function parseXhrUrlArg(url) {
   } catch {
   }
   return void 0;
+}
+function serializeFormData(formData) {
+  return new URLSearchParams(formData).toString();
+}
+function getBodyString(body, _debug = debug$2) {
+  try {
+    if (typeof body === "string") {
+      return [body];
+    }
+    if (body instanceof URLSearchParams) {
+      return [body.toString()];
+    }
+    if (body instanceof FormData) {
+      return [serializeFormData(body)];
+    }
+    if (!body) {
+      return [void 0];
+    }
+  } catch (error2) {
+    DEBUG_BUILD$2 && _debug.error(error2, "Failed to serialize body", body);
+    return [void 0, "BODY_PARSE_ERROR"];
+  }
+  DEBUG_BUILD$2 && _debug.log("Skipping network body because of body type", body);
+  return [void 0, "UNPARSEABLE_BODY_TYPE"];
+}
+function getFetchRequestArgBody(fetchArgs = []) {
+  if (fetchArgs.length !== 2 || typeof fetchArgs[1] !== "object") {
+    return void 0;
+  }
+  return fetchArgs[1].body;
 }
 const LAST_INTERACTIONS = [];
 const INTERACTIONS_SPAN_MAP = /* @__PURE__ */ new Map();
@@ -8956,9 +13221,9 @@ function makeFetchTransport(options, nativeFetch = getNativeImplementation("fetc
           "retry-after": response.headers.get("Retry-After")
         }
       };
-    } catch (e) {
+    } catch (e2) {
       clearCachedImplementation("fetch");
-      throw e;
+      throw e2;
     } finally {
       pendingBodySize -= requestSize;
       pendingCount--;
@@ -8966,7 +13231,10 @@ function makeFetchTransport(options, nativeFetch = getNativeImplementation("fetc
   }
   return createTransport(options, makeRequest);
 }
+const OPERA10_PRIORITY = 10;
+const OPERA11_PRIORITY = 20;
 const CHROME_PRIORITY = 30;
+const WINJS_PRIORITY = 40;
 const GECKO_PRIORITY = 50;
 function createFrame(filename, func, lineno, colno) {
   const frame = {
@@ -9040,6 +13308,24 @@ const gecko = (line) => {
   return;
 };
 const geckoStackLineParser = [GECKO_PRIORITY, gecko];
+const winjsRegex = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:[-a-z]+):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
+const winjs = (line) => {
+  const parts = winjsRegex.exec(line);
+  return parts ? createFrame(parts[2], parts[1] || UNKNOWN_FUNCTION, +parts[3], parts[4] ? +parts[4] : void 0) : void 0;
+};
+const winjsStackLineParser = [WINJS_PRIORITY, winjs];
+const opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
+const opera10 = (line) => {
+  const parts = opera10Regex.exec(line);
+  return parts ? createFrame(parts[2], parts[3] || UNKNOWN_FUNCTION, +parts[1]) : void 0;
+};
+const opera10StackLineParser = [OPERA10_PRIORITY, opera10];
+const opera11Regex = / line (\d+), column (\d+)\s*(?:in (?:<anonymous function: ([^>]+)>|([^)]+))\(.*\))? in (.*):\s*$/i;
+const opera11 = (line) => {
+  const parts = opera11Regex.exec(line);
+  return parts ? createFrame(parts[5], parts[3] || parts[4] || UNKNOWN_FUNCTION, +parts[1], +parts[2]) : void 0;
+};
+const opera11StackLineParser = [OPERA11_PRIORITY, opera11];
 const defaultStackLineParsers = [chromeStackLineParser, geckoStackLineParser];
 const defaultStackParser = createStackParser(...defaultStackLineParsers);
 const extractSafariExtensionDetails = (func, filename) => {
@@ -9050,9 +13336,34 @@ const extractSafariExtensionDetails = (func, filename) => {
     isSafariExtension ? `safari-extension:${filename}` : `safari-web-extension:${filename}`
   ] : [func, filename];
 };
-const DEBUG_BUILD = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
+function createUserFeedbackEnvelope(feedback, {
+  metadata,
+  tunnel,
+  dsn
+}) {
+  const headers = {
+    event_id: feedback.event_id,
+    sent_at: (/* @__PURE__ */ new Date()).toISOString(),
+    ...metadata?.sdk && {
+      sdk: {
+        name: metadata.sdk.name,
+        version: metadata.sdk.version
+      }
+    },
+    ...!!tunnel && !!dsn && { dsn: dsnToString(dsn) }
+  };
+  const item = createUserFeedbackEnvelopeItem(feedback);
+  return createEnvelope(headers, [item]);
+}
+function createUserFeedbackEnvelopeItem(feedback) {
+  const feedbackHeaders = {
+    type: "user_report"
+  };
+  return [feedbackHeaders, feedback];
+}
+const DEBUG_BUILD$1 = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
 const MAX_ALLOWED_STRING_LENGTH = 1024;
-const INTEGRATION_NAME$5 = "Breadcrumbs";
+const INTEGRATION_NAME$b = "Breadcrumbs";
 const _breadcrumbsIntegration = (options = {}) => {
   const _options = {
     console: true,
@@ -9064,7 +13375,7 @@ const _breadcrumbsIntegration = (options = {}) => {
     ...options
   };
   return {
-    name: INTEGRATION_NAME$5,
+    name: INTEGRATION_NAME$b,
     setup(client) {
       if (_options.console) {
         addConsoleInstrumentationHandler(_getConsoleBreadcrumbHandler(client));
@@ -9116,7 +13427,7 @@ function _getDomBreadcrumbHandler(client, dom) {
     let keyAttrs = typeof dom === "object" ? dom.serializeAttribute : void 0;
     let maxStringLength = typeof dom === "object" && typeof dom.maxStringLength === "number" ? dom.maxStringLength : void 0;
     if (maxStringLength && maxStringLength > MAX_ALLOWED_STRING_LENGTH) {
-      DEBUG_BUILD && debug.warn(
+      DEBUG_BUILD$1 && debug$2.warn(
         `\`dom.maxStringLength\` cannot exceed ${MAX_ALLOWED_STRING_LENGTH}, but a value of ${maxStringLength} was configured. Sentry will use ${MAX_ALLOWED_STRING_LENGTH} instead.`
       );
       maxStringLength = MAX_ALLOWED_STRING_LENGTH;
@@ -9274,7 +13585,7 @@ function _getHistoryBreadcrumbHandler(client) {
     }
     let from = handlerData.from;
     let to = handlerData.to;
-    const parsedLoc = parseUrl(WINDOW$2.location.href);
+    const parsedLoc = parseUrl(WINDOW$4.location.href);
     let parsedFrom = from ? parseUrl(from) : void 0;
     const parsedTo = parseUrl(to);
     if (!parsedFrom?.path) {
@@ -9331,7 +13642,7 @@ const DEFAULT_EVENT_TARGET = [
   "XMLHttpRequestEventTarget",
   "XMLHttpRequestUpload"
 ];
-const INTEGRATION_NAME$4 = "BrowserApiErrors";
+const INTEGRATION_NAME$a = "BrowserApiErrors";
 const _browserApiErrorsIntegration = (options = {}) => {
   const _options = {
     XMLHttpRequest: true,
@@ -9343,20 +13654,20 @@ const _browserApiErrorsIntegration = (options = {}) => {
     ...options
   };
   return {
-    name: INTEGRATION_NAME$4,
+    name: INTEGRATION_NAME$a,
     // TODO: This currently only works for the first client this is setup
     // We may want to adjust this to check for client etc.
     setupOnce() {
       if (_options.setTimeout) {
-        fill(WINDOW$2, "setTimeout", _wrapTimeFunction);
+        fill(WINDOW$4, "setTimeout", _wrapTimeFunction);
       }
       if (_options.setInterval) {
-        fill(WINDOW$2, "setInterval", _wrapTimeFunction);
+        fill(WINDOW$4, "setInterval", _wrapTimeFunction);
       }
       if (_options.requestAnimationFrame) {
-        fill(WINDOW$2, "requestAnimationFrame", _wrapRAF);
+        fill(WINDOW$4, "requestAnimationFrame", _wrapRAF);
       }
-      if (_options.XMLHttpRequest && "XMLHttpRequest" in WINDOW$2) {
+      if (_options.XMLHttpRequest && "XMLHttpRequest" in WINDOW$4) {
         fill(XMLHttpRequest.prototype, "send", _wrapXHR$1);
       }
       const eventTargetOption = _options.eventTarget;
@@ -9423,7 +13734,7 @@ function _wrapXHR$1(originalSend) {
   };
 }
 function _wrapEventTarget(target, integrationOptions) {
-  const globalObject = WINDOW$2;
+  const globalObject = WINDOW$4;
   const proto = globalObject[target]?.prototype;
   if (!proto?.hasOwnProperty?.("addEventListener")) {
     return;
@@ -9489,8 +13800,8 @@ const browserSessionIntegration = defineIntegration(() => {
   return {
     name: "BrowserSession",
     setupOnce() {
-      if (typeof WINDOW$2.document === "undefined") {
-        DEBUG_BUILD && debug.warn("Using the `browserSessionIntegration` in non-browser environments is not supported.");
+      if (typeof WINDOW$4.document === "undefined") {
+        DEBUG_BUILD$1 && debug$2.warn("Using the `browserSessionIntegration` in non-browser environments is not supported.");
         return;
       }
       startSession({ ignoreDuration: true });
@@ -9504,7 +13815,7 @@ const browserSessionIntegration = defineIntegration(() => {
     }
   };
 });
-const INTEGRATION_NAME$3 = "GlobalHandlers";
+const INTEGRATION_NAME$9 = "GlobalHandlers";
 const _globalHandlersIntegration = (options = {}) => {
   const _options = {
     onerror: true,
@@ -9512,7 +13823,7 @@ const _globalHandlersIntegration = (options = {}) => {
     ...options
   };
   return {
-    name: INTEGRATION_NAME$3,
+    name: INTEGRATION_NAME$9,
     setupOnce() {
       Error.stackTraceLimit = 50;
     },
@@ -9553,12 +13864,12 @@ function _installGlobalOnErrorHandler(client) {
   });
 }
 function _installGlobalOnUnhandledRejectionHandler(client) {
-  addGlobalUnhandledRejectionInstrumentationHandler((e) => {
+  addGlobalUnhandledRejectionInstrumentationHandler((e2) => {
     const { stackParser, attachStacktrace } = getOptions();
     if (getClient() !== client || shouldIgnoreOnError()) {
       return;
     }
-    const error2 = _getUnhandledRejectionError(e);
+    const error2 = _getUnhandledRejectionError(e2);
     const event = isPrimitive(error2) ? _eventFromRejectionWithPrimitive(error2) : eventFromUnknownInput(stackParser, error2, void 0, attachStacktrace, true);
     event.level = "error";
     captureEvent(event, {
@@ -9599,8 +13910,8 @@ function _eventFromRejectionWithPrimitive(reason) {
   };
 }
 function _enhanceEventWithInitialFrame(event, url, line, column) {
-  const e = event.exception = event.exception || {};
-  const ev = e.values = e.values || [];
+  const e2 = event.exception = event.exception || {};
+  const ev = e2.values = e2.values || [];
   const ev0 = ev[0] = ev[0] || {};
   const ev0s = ev0.stacktrace = ev0.stacktrace || {};
   const ev0sf = ev0s.frames = ev0s.frames || [];
@@ -9619,7 +13930,7 @@ function _enhanceEventWithInitialFrame(event, url, line, column) {
   return event;
 }
 function globalHandlerLog(type) {
-  DEBUG_BUILD && debug.log(`Global Handler attached: ${type}`);
+  DEBUG_BUILD$1 && debug$2.log(`Global Handler attached: ${type}`);
 }
 function getOptions() {
   const client = getClient();
@@ -9645,7 +13956,7 @@ const httpContextIntegration = defineIntegration(() => {
   return {
     name: "HttpContext",
     preprocessEvent(event) {
-      if (!WINDOW$2.navigator && !WINDOW$2.location && !WINDOW$2.document) {
+      if (!WINDOW$4.navigator && !WINDOW$4.location && !WINDOW$4.document) {
         return;
       }
       const reqData = getHttpRequestData();
@@ -9663,12 +13974,12 @@ const httpContextIntegration = defineIntegration(() => {
 });
 const DEFAULT_KEY = "cause";
 const DEFAULT_LIMIT = 5;
-const INTEGRATION_NAME$2 = "LinkedErrors";
+const INTEGRATION_NAME$8 = "LinkedErrors";
 const _linkedErrorsIntegration = (options = {}) => {
   const limit = options.limit || DEFAULT_LIMIT;
   const key = options.key || DEFAULT_KEY;
   return {
-    name: INTEGRATION_NAME$2,
+    name: INTEGRATION_NAME$8,
     preprocessEvent(event, hint, client) {
       const options2 = client.getOptions();
       applyAggregateErrorsToEvent(
@@ -9686,7 +13997,7 @@ const _linkedErrorsIntegration = (options = {}) => {
 const linkedErrorsIntegration = defineIntegration(_linkedErrorsIntegration);
 function checkAndWarnIfIsEmbeddedBrowserExtension() {
   if (_isEmbeddedBrowserExtension()) {
-    if (DEBUG_BUILD) {
+    if (DEBUG_BUILD$1) {
       consoleSandbox(() => {
         console.error(
           "[Sentry] You cannot use Sentry.init() in a browser extension, see: https://docs.sentry.io/platforms/javascript/best-practices/browser-extensions/"
@@ -9698,10 +14009,10 @@ function checkAndWarnIfIsEmbeddedBrowserExtension() {
   return false;
 }
 function _isEmbeddedBrowserExtension() {
-  if (typeof WINDOW$2.window === "undefined") {
+  if (typeof WINDOW$4.window === "undefined") {
     return false;
   }
-  const _window = WINDOW$2;
+  const _window = WINDOW$4;
   if (_window.nw) {
     return false;
   }
@@ -9711,7 +14022,7 @@ function _isEmbeddedBrowserExtension() {
   }
   const href = getLocationHref();
   const extensionProtocols = ["chrome-extension", "moz-extension", "ms-browser-extension", "safari-web-extension"];
-  const isDedicatedExtensionPage = WINDOW$2 === WINDOW$2.top && extensionProtocols.some((protocol) => href.startsWith(`${protocol}://`));
+  const isDedicatedExtensionPage = WINDOW$4 === WINDOW$4.top && extensionProtocols.some((protocol) => href.startsWith(`${protocol}://`));
   return !isDedicatedExtensionPage;
 }
 function getDefaultIntegrations(_options) {
@@ -9743,7 +14054,109 @@ function init$1(options = {}) {
   };
   return initAndBind(BrowserClient, clientOptions);
 }
-const INTEGRATION_NAME$1 = "HttpClient";
+function forceLoad() {
+}
+function onLoad(callback) {
+  callback();
+}
+function showReportDialog(options = {}) {
+  const optionalDocument = WINDOW$4.document;
+  const injectionPoint = optionalDocument?.head || optionalDocument?.body;
+  if (!injectionPoint) {
+    DEBUG_BUILD$1 && debug$2.error("[showReportDialog] Global document not defined");
+    return;
+  }
+  const scope = getCurrentScope();
+  const client = getClient();
+  const dsn = client?.getDsn();
+  if (!dsn) {
+    DEBUG_BUILD$1 && debug$2.error("[showReportDialog] DSN not configured");
+    return;
+  }
+  const mergedOptions = {
+    ...options,
+    user: {
+      ...scope.getUser(),
+      ...options.user
+    },
+    eventId: options.eventId || lastEventId()
+  };
+  const script = WINDOW$4.document.createElement("script");
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.src = getReportDialogEndpoint(dsn, mergedOptions);
+  const { onLoad: onLoad2, onClose } = mergedOptions;
+  if (onLoad2) {
+    script.onload = onLoad2;
+  }
+  if (onClose) {
+    const reportDialogClosedMessageHandler = (event) => {
+      if (event.data === "__sentry_reportdialog_closed__") {
+        try {
+          onClose();
+        } finally {
+          WINDOW$4.removeEventListener("message", reportDialogClosedMessageHandler);
+        }
+      }
+    };
+    WINDOW$4.addEventListener("message", reportDialogClosedMessageHandler);
+  }
+  injectionPoint.appendChild(script);
+}
+const WINDOW$2 = GLOBAL_OBJ;
+const INTEGRATION_NAME$7 = "ReportingObserver";
+const SETUP_CLIENTS = /* @__PURE__ */ new WeakMap();
+const _reportingObserverIntegration = (options = {}) => {
+  const types = options.types || ["crash", "deprecation", "intervention"];
+  function handler(reports) {
+    if (!SETUP_CLIENTS.has(getClient())) {
+      return;
+    }
+    for (const report of reports) {
+      withScope((scope) => {
+        scope.setExtra("url", report.url);
+        const label = `ReportingObserver [${report.type}]`;
+        let details = "No details available";
+        if (report.body) {
+          const plainBody = {};
+          for (const prop in report.body) {
+            plainBody[prop] = report.body[prop];
+          }
+          scope.setExtra("body", plainBody);
+          if (report.type === "crash") {
+            const body = report.body;
+            details = [body.crashId || "", body.reason || ""].join(" ").trim() || details;
+          } else {
+            const body = report.body;
+            details = body.message || details;
+          }
+        }
+        captureMessage(`${label}: ${details}`);
+      });
+    }
+  }
+  return {
+    name: INTEGRATION_NAME$7,
+    setupOnce() {
+      if (!supportsReportingObserver()) {
+        return;
+      }
+      const observer = new WINDOW$2.ReportingObserver(
+        handler,
+        {
+          buffered: true,
+          types
+        }
+      );
+      observer.observe();
+    },
+    setup(client) {
+      SETUP_CLIENTS.set(client, true);
+    }
+  };
+};
+const reportingObserverIntegration = defineIntegration(_reportingObserverIntegration);
+const INTEGRATION_NAME$6 = "HttpClient";
 const _httpClientIntegration = (options = {}) => {
   const _options = {
     failedRequestStatusCodes: [[500, 599]],
@@ -9751,7 +14164,7 @@ const _httpClientIntegration = (options = {}) => {
     ...options
   };
   return {
-    name: INTEGRATION_NAME$1,
+    name: INTEGRATION_NAME$6,
     setup(client) {
       _wrapFetch(client, _options);
       _wrapXHR(client, _options);
@@ -9911,8 +14324,8 @@ function _wrapXHR(client, options) {
     const { method, request_headers: headers } = sentryXhrData;
     try {
       _xhrResponseHandler(options, xhr, method, headers, error2 || virtualError);
-    } catch (e) {
-      DEBUG_BUILD && debug.warn("Error while extracting response event form XHR response", e);
+    } catch (e2) {
+      DEBUG_BUILD$1 && debug$2.warn("Error while extracting response event form XHR response", e2);
     }
   });
 }
@@ -9969,13 +14382,13 @@ function _shouldSendDefaultPii() {
   const client = getClient();
   return client ? Boolean(client.getOptions().sendDefaultPii) : false;
 }
-const WINDOW = GLOBAL_OBJ;
+const WINDOW$1 = GLOBAL_OBJ;
 const DEFAULT_LINES_OF_CONTEXT = 7;
-const INTEGRATION_NAME = "ContextLines";
+const INTEGRATION_NAME$5 = "ContextLines";
 const _contextLinesIntegration = (options = {}) => {
   const contextLines = options.frameContextLines != null ? options.frameContextLines : DEFAULT_LINES_OF_CONTEXT;
   return {
-    name: INTEGRATION_NAME,
+    name: INTEGRATION_NAME$5,
     processEvent(event) {
       return addSourceContext(event, contextLines);
     }
@@ -9983,8 +14396,8 @@ const _contextLinesIntegration = (options = {}) => {
 };
 const contextLinesIntegration = defineIntegration(_contextLinesIntegration);
 function addSourceContext(event, contextLines) {
-  const doc = WINDOW.document;
-  const htmlFilename = WINDOW.location && stripUrlQueryAndFragment(WINDOW.location.href);
+  const doc = WINDOW$1.document;
+  const htmlFilename = WINDOW$1.location && stripUrlQueryAndFragment(WINDOW$1.location.href);
   if (!doc || !htmlFilename) {
     return event;
   }
@@ -10014,6 +14427,9328 @@ function applySourceContextToFrame(frame, htmlLines, htmlFilename, linesOfContex
   addContextToFrame(htmlLines, frame, linesOfContext);
   return frame;
 }
+const INTEGRATION_NAME$4 = "GraphQLClient";
+const _graphqlClientIntegration = (options) => {
+  return {
+    name: INTEGRATION_NAME$4,
+    setup(client) {
+      _updateSpanWithGraphQLData(client, options);
+      _updateBreadcrumbWithGraphQLData(client, options);
+    }
+  };
+};
+function _updateSpanWithGraphQLData(client, options) {
+  client.on("beforeOutgoingRequestSpan", (span, hint) => {
+    const spanJSON = spanToJSON(span);
+    const spanAttributes = spanJSON.data || {};
+    const spanOp = spanAttributes[SEMANTIC_ATTRIBUTE_SENTRY_OP];
+    const isHttpClientSpan = spanOp === "http.client";
+    if (!isHttpClientSpan) {
+      return;
+    }
+    const httpUrl = spanAttributes[SEMANTIC_ATTRIBUTE_URL_FULL] || spanAttributes["http.url"];
+    const httpMethod = spanAttributes[SEMANTIC_ATTRIBUTE_HTTP_REQUEST_METHOD] || spanAttributes["http.method"];
+    if (!isString(httpUrl) || !isString(httpMethod)) {
+      return;
+    }
+    const { endpoints } = options;
+    const isTracedGraphqlEndpoint = stringMatchesSomePattern(httpUrl, endpoints);
+    const payload = getRequestPayloadXhrOrFetch(hint);
+    if (isTracedGraphqlEndpoint && payload) {
+      const graphqlBody = getGraphQLRequestPayload(payload);
+      if (graphqlBody) {
+        const operationInfo = _getGraphQLOperation(graphqlBody);
+        span.updateName(`${httpMethod} ${httpUrl} (${operationInfo})`);
+        span.setAttribute("graphql.document", payload);
+      }
+    }
+  });
+}
+function _updateBreadcrumbWithGraphQLData(client, options) {
+  client.on("beforeOutgoingRequestBreadcrumb", (breadcrumb, handlerData) => {
+    const { category, type, data } = breadcrumb;
+    const isFetch = category === "fetch";
+    const isXhr = category === "xhr";
+    const isHttpBreadcrumb = type === "http";
+    if (isHttpBreadcrumb && (isFetch || isXhr)) {
+      const httpUrl = data?.url;
+      const { endpoints } = options;
+      const isTracedGraphqlEndpoint = stringMatchesSomePattern(httpUrl, endpoints);
+      const payload = getRequestPayloadXhrOrFetch(handlerData);
+      if (isTracedGraphqlEndpoint && data && payload) {
+        const graphqlBody = getGraphQLRequestPayload(payload);
+        if (!data.graphql && graphqlBody) {
+          const operationInfo = _getGraphQLOperation(graphqlBody);
+          data["graphql.document"] = graphqlBody.query;
+          data["graphql.operation"] = operationInfo;
+        }
+      }
+    }
+  });
+}
+function _getGraphQLOperation(requestBody) {
+  const { query: graphqlQuery, operationName: graphqlOperationName } = requestBody;
+  const { operationName = graphqlOperationName, operationType } = parseGraphQLQuery(graphqlQuery);
+  const operationInfo = operationName ? `${operationType} ${operationName}` : `${operationType}`;
+  return operationInfo;
+}
+function getRequestPayloadXhrOrFetch(hint) {
+  const isXhr = "xhr" in hint;
+  let body;
+  if (isXhr) {
+    const sentryXhrData = hint.xhr[SENTRY_XHR_DATA_KEY];
+    body = sentryXhrData && getBodyString(sentryXhrData.body)[0];
+  } else {
+    const sentryFetchData = getFetchRequestArgBody(hint.input);
+    body = getBodyString(sentryFetchData)[0];
+  }
+  return body;
+}
+function parseGraphQLQuery(query) {
+  const namedQueryRe = /^(?:\s*)(query|mutation|subscription)(?:\s*)(\w+)(?:\s*)[{(]/;
+  const unnamedQueryRe = /^(?:\s*)(query|mutation|subscription)(?:\s*)[{(]/;
+  const namedMatch = query.match(namedQueryRe);
+  if (namedMatch) {
+    return {
+      operationType: namedMatch[1],
+      operationName: namedMatch[2]
+    };
+  }
+  const unnamedMatch = query.match(unnamedQueryRe);
+  if (unnamedMatch) {
+    return {
+      operationType: unnamedMatch[1],
+      operationName: void 0
+    };
+  }
+  return {
+    operationType: void 0,
+    operationName: void 0
+  };
+}
+function getGraphQLRequestPayload(payload) {
+  let graphqlBody = void 0;
+  try {
+    const requestBody = JSON.parse(payload);
+    const isGraphQLRequest = !!requestBody["query"];
+    if (isGraphQLRequest) {
+      graphqlBody = requestBody;
+    }
+  } finally {
+    return graphqlBody;
+  }
+}
+const graphqlClientIntegration = defineIntegration(_graphqlClientIntegration);
+const WINDOW = GLOBAL_OBJ;
+const REPLAY_SESSION_KEY = "sentryReplaySession";
+const REPLAY_EVENT_NAME = "replay_event";
+const UNABLE_TO_SEND_REPLAY = "Unable to send Replay";
+const SESSION_IDLE_PAUSE_DURATION = 3e5;
+const SESSION_IDLE_EXPIRE_DURATION = 9e5;
+const DEFAULT_FLUSH_MIN_DELAY = 5e3;
+const DEFAULT_FLUSH_MAX_DELAY = 5500;
+const BUFFER_CHECKOUT_TIME = 6e4;
+const RETRY_BASE_INTERVAL = 5e3;
+const RETRY_MAX_COUNT = 3;
+const NETWORK_BODY_MAX_SIZE = 15e4;
+const CONSOLE_ARG_MAX_SIZE = 5e3;
+const SLOW_CLICK_THRESHOLD = 3e3;
+const SLOW_CLICK_SCROLL_TIMEOUT = 300;
+const REPLAY_MAX_EVENT_BUFFER_SIZE = 2e7;
+const MIN_REPLAY_DURATION = 4999;
+const MIN_REPLAY_DURATION_LIMIT = 15e3;
+const MAX_REPLAY_DURATION = 36e5;
+var __defProp$1$1 = Object.defineProperty;
+var __defNormalProp$1$1 = (obj, key, value) => key in obj ? __defProp$1$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField$1$1 = (obj, key, value) => __defNormalProp$1$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+var NodeType$2 = /* @__PURE__ */ ((NodeType2) => {
+  NodeType2[NodeType2["Document"] = 0] = "Document";
+  NodeType2[NodeType2["DocumentType"] = 1] = "DocumentType";
+  NodeType2[NodeType2["Element"] = 2] = "Element";
+  NodeType2[NodeType2["Text"] = 3] = "Text";
+  NodeType2[NodeType2["CDATA"] = 4] = "CDATA";
+  NodeType2[NodeType2["Comment"] = 5] = "Comment";
+  return NodeType2;
+})(NodeType$2 || {});
+function isElement$1(n2) {
+  return n2.nodeType === n2.ELEMENT_NODE;
+}
+function isShadowRoot(n2) {
+  const host = n2?.host;
+  return Boolean(host?.shadowRoot === n2);
+}
+function isNativeShadowDom(shadowRoot) {
+  return Object.prototype.toString.call(shadowRoot) === "[object ShadowRoot]";
+}
+function fixBrowserCompatibilityIssuesInCSS(cssText) {
+  if (cssText.includes(" background-clip: text;") && !cssText.includes(" -webkit-background-clip: text;")) {
+    cssText = cssText.replace(
+      /\sbackground-clip:\s*text;/g,
+      " -webkit-background-clip: text; background-clip: text;"
+    );
+  }
+  return cssText;
+}
+function escapeImportStatement(rule) {
+  const { cssText } = rule;
+  if (cssText.split('"').length < 3) return cssText;
+  const statement = ["@import", `url(${JSON.stringify(rule.href)})`];
+  if (rule.layerName === "") {
+    statement.push(`layer`);
+  } else if (rule.layerName) {
+    statement.push(`layer(${rule.layerName})`);
+  }
+  if (rule.supportsText) {
+    statement.push(`supports(${rule.supportsText})`);
+  }
+  if (rule.media.length) {
+    statement.push(rule.media.mediaText);
+  }
+  return statement.join(" ") + ";";
+}
+function stringifyStylesheet(s2) {
+  try {
+    const rules2 = s2.rules || s2.cssRules;
+    return rules2 ? fixBrowserCompatibilityIssuesInCSS(
+      Array.from(rules2, stringifyRule).join("")
+    ) : null;
+  } catch (error2) {
+    return null;
+  }
+}
+function fixAllCssProperty(rule) {
+  let styles = "";
+  for (let i2 = 0; i2 < rule.style.length; i2++) {
+    const styleDeclaration = rule.style;
+    const attribute = styleDeclaration[i2];
+    const isImportant = styleDeclaration.getPropertyPriority(attribute);
+    styles += `${attribute}:${styleDeclaration.getPropertyValue(attribute)}${isImportant ? ` !important` : ""};`;
+  }
+  return `${rule.selectorText} { ${styles} }`;
+}
+function stringifyRule(rule) {
+  let importStringified;
+  if (isCSSImportRule(rule)) {
+    try {
+      importStringified = // for same-origin stylesheets,
+      // we can access the imported stylesheet rules directly
+      stringifyStylesheet(rule.styleSheet) || // work around browser issues with the raw string `@import url(...)` statement
+      escapeImportStatement(rule);
+    } catch (error2) {
+    }
+  } else if (isCSSStyleRule(rule)) {
+    let cssText = rule.cssText;
+    const needsSafariColonFix = rule.selectorText.includes(":");
+    const needsAllFix = typeof rule.style["all"] === "string" && rule.style["all"];
+    if (needsAllFix) {
+      cssText = fixAllCssProperty(rule);
+    }
+    if (needsSafariColonFix) {
+      cssText = fixSafariColons(cssText);
+    }
+    if (needsSafariColonFix || needsAllFix) {
+      return cssText;
+    }
+  }
+  return importStringified || rule.cssText;
+}
+function fixSafariColons(cssStringified) {
+  const regex = /(\[(?:[\w-]+)[^\\])(:(?:[\w-]+)\])/gm;
+  return cssStringified.replace(regex, "$1\\$2");
+}
+function isCSSImportRule(rule) {
+  return "styleSheet" in rule;
+}
+function isCSSStyleRule(rule) {
+  return "selectorText" in rule;
+}
+let Mirror$1 = class Mirror {
+  constructor() {
+    __publicField$1$1(this, "idNodeMap", /* @__PURE__ */ new Map());
+    __publicField$1$1(this, "nodeMetaMap", /* @__PURE__ */ new WeakMap());
+  }
+  getId(n2) {
+    if (!n2) return -1;
+    const id = this.getMeta(n2)?.id;
+    return id ?? -1;
+  }
+  getNode(id) {
+    return this.idNodeMap.get(id) || null;
+  }
+  getIds() {
+    return Array.from(this.idNodeMap.keys());
+  }
+  getMeta(n2) {
+    return this.nodeMetaMap.get(n2) || null;
+  }
+  // removes the node from idNodeMap
+  // doesn't remove the node from nodeMetaMap
+  removeNodeFromMap(n2) {
+    const id = this.getId(n2);
+    this.idNodeMap.delete(id);
+    if (n2.childNodes) {
+      n2.childNodes.forEach(
+        (childNode) => this.removeNodeFromMap(childNode)
+      );
+    }
+  }
+  has(id) {
+    return this.idNodeMap.has(id);
+  }
+  hasNode(node) {
+    return this.nodeMetaMap.has(node);
+  }
+  add(n2, meta) {
+    const id = meta.id;
+    this.idNodeMap.set(id, n2);
+    this.nodeMetaMap.set(n2, meta);
+  }
+  replace(id, n2) {
+    const oldNode = this.getNode(id);
+    if (oldNode) {
+      const meta = this.nodeMetaMap.get(oldNode);
+      if (meta) this.nodeMetaMap.set(n2, meta);
+    }
+    this.idNodeMap.set(id, n2);
+  }
+  reset() {
+    this.idNodeMap = /* @__PURE__ */ new Map();
+    this.nodeMetaMap = /* @__PURE__ */ new WeakMap();
+  }
+};
+function createMirror$2$1() {
+  return new Mirror$1();
+}
+function shouldMaskInput({
+  maskInputOptions,
+  tagName,
+  type
+}) {
+  if (tagName === "OPTION") {
+    tagName = "SELECT";
+  }
+  return Boolean(
+    maskInputOptions[tagName.toLowerCase()] || type && maskInputOptions[type] || type === "password" || // Default to "text" option for inputs without a "type" attribute defined
+    tagName === "INPUT" && !type && maskInputOptions["text"]
+  );
+}
+function maskInputValue({
+  isMasked,
+  element,
+  value,
+  maskInputFn
+}) {
+  let text = value || "";
+  if (!isMasked) {
+    return text;
+  }
+  if (maskInputFn) {
+    text = maskInputFn(text, element);
+  }
+  return "*".repeat(text.length);
+}
+function toLowerCase(str) {
+  return str.toLowerCase();
+}
+function toUpperCase(str) {
+  return str.toUpperCase();
+}
+const ORIGINAL_ATTRIBUTE_NAME = "__rrweb_original__";
+function is2DCanvasBlank(canvas) {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return true;
+  const chunkSize = 50;
+  for (let x2 = 0; x2 < canvas.width; x2 += chunkSize) {
+    for (let y2 = 0; y2 < canvas.height; y2 += chunkSize) {
+      const getImageData = ctx.getImageData;
+      const originalGetImageData = ORIGINAL_ATTRIBUTE_NAME in getImageData ? getImageData[ORIGINAL_ATTRIBUTE_NAME] : getImageData;
+      const pixelBuffer = new Uint32Array(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        originalGetImageData.call(
+          ctx,
+          x2,
+          y2,
+          Math.min(chunkSize, canvas.width - x2),
+          Math.min(chunkSize, canvas.height - y2)
+        ).data.buffer
+      );
+      if (pixelBuffer.some((pixel) => pixel !== 0)) return false;
+    }
+  }
+  return true;
+}
+function getInputType(element) {
+  const type = element.type;
+  return element.hasAttribute("data-rr-is-password") ? "password" : type ? (
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    toLowerCase(type)
+  ) : null;
+}
+function getInputValue(el, tagName, type) {
+  if (tagName === "INPUT" && (type === "radio" || type === "checkbox")) {
+    return el.getAttribute("value") || "";
+  }
+  return el.value;
+}
+function extractFileExtension(path, baseURL) {
+  let url;
+  try {
+    url = new URL(path, baseURL ?? window.location.href);
+  } catch (err) {
+    return null;
+  }
+  const regex = /\.([0-9a-z]+)(?:$)/i;
+  const match = url.pathname.match(regex);
+  return match?.[1] ?? null;
+}
+const cachedImplementations$1 = {};
+function getImplementation$1(name) {
+  const cached = cachedImplementations$1[name];
+  if (cached) {
+    return cached;
+  }
+  const document2 = window.document;
+  let impl = window[name];
+  if (document2 && typeof document2.createElement === "function") {
+    try {
+      const sandbox = document2.createElement("iframe");
+      sandbox.hidden = true;
+      document2.head.appendChild(sandbox);
+      const contentWindow = sandbox.contentWindow;
+      if (contentWindow && contentWindow[name]) {
+        impl = // eslint-disable-next-line @typescript-eslint/unbound-method
+        contentWindow[name];
+      }
+      document2.head.removeChild(sandbox);
+    } catch (e2) {
+    }
+  }
+  return cachedImplementations$1[name] = impl.bind(
+    window
+  );
+}
+function setTimeout$2(...rest) {
+  return getImplementation$1("setTimeout")(...rest);
+}
+function clearTimeout$1(...rest) {
+  return getImplementation$1("clearTimeout")(...rest);
+}
+function getIframeContentDocument(iframe) {
+  try {
+    return iframe.contentDocument;
+  } catch (e2) {
+  }
+}
+let _id = 1;
+const tagNameRegex = new RegExp("[^a-z0-9-_:]");
+const IGNORED_NODE = -2;
+function genId() {
+  return _id++;
+}
+function getValidTagName$1(element) {
+  if (element instanceof HTMLFormElement) {
+    return "form";
+  }
+  const processedTagName = toLowerCase(element.tagName);
+  if (tagNameRegex.test(processedTagName)) {
+    return "div";
+  }
+  return processedTagName;
+}
+function extractOrigin(url) {
+  let origin = "";
+  if (url.indexOf("//") > -1) {
+    origin = url.split("/").slice(0, 3).join("/");
+  } else {
+    origin = url.split("/")[0];
+  }
+  origin = origin.split("?")[0];
+  return origin;
+}
+let canvasService;
+let canvasCtx;
+const URL_IN_CSS_REF = /url\((?:(')([^']*)'|(")(.*?)"|([^)]*))\)/gm;
+const URL_PROTOCOL_MATCH = /^(?:[a-z+]+:)?\/\//i;
+const URL_WWW_MATCH = /^www\..*/i;
+const DATA_URI = /^(data:)([^,]*),(.*)/i;
+function absoluteToStylesheet(cssText, href) {
+  return (cssText || "").replace(
+    URL_IN_CSS_REF,
+    (origin, quote1, path1, quote2, path2, path3) => {
+      const filePath = path1 || path2 || path3;
+      const maybeQuote = quote1 || quote2 || "";
+      if (!filePath) {
+        return origin;
+      }
+      if (URL_PROTOCOL_MATCH.test(filePath) || URL_WWW_MATCH.test(filePath)) {
+        return `url(${maybeQuote}${filePath}${maybeQuote})`;
+      }
+      if (DATA_URI.test(filePath)) {
+        return `url(${maybeQuote}${filePath}${maybeQuote})`;
+      }
+      if (filePath[0] === "/") {
+        return `url(${maybeQuote}${extractOrigin(href) + filePath}${maybeQuote})`;
+      }
+      const stack = href.split("/");
+      const parts = filePath.split("/");
+      stack.pop();
+      for (const part of parts) {
+        if (part === ".") {
+          continue;
+        } else if (part === "..") {
+          stack.pop();
+        } else {
+          stack.push(part);
+        }
+      }
+      return `url(${maybeQuote}${stack.join("/")}${maybeQuote})`;
+    }
+  );
+}
+const SRCSET_NOT_SPACES = /^[^ \t\n\r\u000c]+/;
+const SRCSET_COMMAS_OR_SPACES = /^[, \t\n\r\u000c]+/;
+function getAbsoluteSrcsetString(doc, attributeValue) {
+  if (attributeValue.trim() === "") {
+    return attributeValue;
+  }
+  let pos = 0;
+  function collectCharacters(regEx) {
+    let chars2;
+    const match = regEx.exec(attributeValue.substring(pos));
+    if (match) {
+      chars2 = match[0];
+      pos += chars2.length;
+      return chars2;
+    }
+    return "";
+  }
+  const output = [];
+  while (true) {
+    collectCharacters(SRCSET_COMMAS_OR_SPACES);
+    if (pos >= attributeValue.length) {
+      break;
+    }
+    let url = collectCharacters(SRCSET_NOT_SPACES);
+    if (url.slice(-1) === ",") {
+      url = absoluteToDoc(doc, url.substring(0, url.length - 1));
+      output.push(url);
+    } else {
+      let descriptorsStr = "";
+      url = absoluteToDoc(doc, url);
+      let inParens = false;
+      while (true) {
+        const c2 = attributeValue.charAt(pos);
+        if (c2 === "") {
+          output.push((url + descriptorsStr).trim());
+          break;
+        } else if (!inParens) {
+          if (c2 === ",") {
+            pos += 1;
+            output.push((url + descriptorsStr).trim());
+            break;
+          } else if (c2 === "(") {
+            inParens = true;
+          }
+        } else {
+          if (c2 === ")") {
+            inParens = false;
+          }
+        }
+        descriptorsStr += c2;
+        pos += 1;
+      }
+    }
+  }
+  return output.join(", ");
+}
+const cachedDocument = /* @__PURE__ */ new WeakMap();
+function absoluteToDoc(doc, attributeValue) {
+  if (!attributeValue || attributeValue.trim() === "") {
+    return attributeValue;
+  }
+  return getHref(doc, attributeValue);
+}
+function isSVGElement(el) {
+  return Boolean(el.tagName === "svg" || el.ownerSVGElement);
+}
+function getHref(doc, customHref) {
+  let a2 = cachedDocument.get(doc);
+  if (!a2) {
+    a2 = doc.createElement("a");
+    cachedDocument.set(doc, a2);
+  }
+  if (!customHref) {
+    customHref = "";
+  } else if (customHref.startsWith("blob:") || customHref.startsWith("data:")) {
+    return customHref;
+  }
+  a2.setAttribute("href", customHref);
+  return a2.href;
+}
+function transformAttribute(doc, tagName, name, value, element, maskAttributeFn) {
+  if (!value) {
+    return value;
+  }
+  if (name === "src" || name === "href" && !(tagName === "use" && value[0] === "#")) {
+    return absoluteToDoc(doc, value);
+  } else if (name === "xlink:href" && value[0] !== "#") {
+    return absoluteToDoc(doc, value);
+  } else if (name === "background" && (tagName === "table" || tagName === "td" || tagName === "th")) {
+    return absoluteToDoc(doc, value);
+  } else if (name === "srcset") {
+    return getAbsoluteSrcsetString(doc, value);
+  } else if (name === "style") {
+    return absoluteToStylesheet(value, getHref(doc));
+  } else if (tagName === "object" && name === "data") {
+    return absoluteToDoc(doc, value);
+  }
+  if (typeof maskAttributeFn === "function") {
+    return maskAttributeFn(name, value, element);
+  }
+  return value;
+}
+function ignoreAttribute(tagName, name, _value) {
+  return (tagName === "video" || tagName === "audio") && name === "autoplay";
+}
+function _isBlockedElement(element, blockClass, blockSelector, unblockSelector) {
+  try {
+    if (unblockSelector && element.matches(unblockSelector)) {
+      return false;
+    }
+    if (typeof blockClass === "string") {
+      if (element.classList.contains(blockClass)) {
+        return true;
+      }
+    } else {
+      for (let eIndex = element.classList.length; eIndex--; ) {
+        const className = element.classList[eIndex];
+        if (blockClass.test(className)) {
+          return true;
+        }
+      }
+    }
+    if (blockSelector) {
+      return element.matches(blockSelector);
+    }
+  } catch (e2) {
+  }
+  return false;
+}
+function elementClassMatchesRegex$1(el, regex) {
+  for (let eIndex = el.classList.length; eIndex--; ) {
+    const className = el.classList[eIndex];
+    if (regex.test(className)) {
+      return true;
+    }
+  }
+  return false;
+}
+function distanceToMatch$1(node, matchPredicate, limit = Infinity, distance = 0) {
+  if (!node) return -1;
+  if (node.nodeType !== node.ELEMENT_NODE) return -1;
+  if (distance > limit) return -1;
+  if (matchPredicate(node)) return distance;
+  return distanceToMatch$1(node.parentNode, matchPredicate, limit, distance + 1);
+}
+function createMatchPredicate$1(className, selector) {
+  return (node) => {
+    const el = node;
+    if (el === null) return false;
+    try {
+      if (className) {
+        if (typeof className === "string") {
+          if (el.matches(`.${className}`)) return true;
+        } else if (elementClassMatchesRegex$1(el, className)) {
+          return true;
+        }
+      }
+      if (selector && el.matches(selector)) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  };
+}
+function needMaskingText(node, maskTextClass, maskTextSelector, unmaskTextClass, unmaskTextSelector, maskAllText) {
+  try {
+    const el = node.nodeType === node.ELEMENT_NODE ? node : node.parentElement;
+    if (el === null) return false;
+    if (el.tagName === "INPUT") {
+      const autocomplete = el.getAttribute("autocomplete");
+      const disallowedAutocompleteValues = [
+        "current-password",
+        "new-password",
+        "cc-number",
+        "cc-exp",
+        "cc-exp-month",
+        "cc-exp-year",
+        "cc-csc"
+      ];
+      if (disallowedAutocompleteValues.includes(autocomplete)) {
+        return true;
+      }
+    }
+    let maskDistance = -1;
+    let unmaskDistance = -1;
+    if (maskAllText) {
+      unmaskDistance = distanceToMatch$1(
+        el,
+        createMatchPredicate$1(unmaskTextClass, unmaskTextSelector)
+      );
+      if (unmaskDistance < 0) {
+        return true;
+      }
+      maskDistance = distanceToMatch$1(
+        el,
+        createMatchPredicate$1(maskTextClass, maskTextSelector),
+        unmaskDistance >= 0 ? unmaskDistance : Infinity
+      );
+    } else {
+      maskDistance = distanceToMatch$1(
+        el,
+        createMatchPredicate$1(maskTextClass, maskTextSelector)
+      );
+      if (maskDistance < 0) {
+        return false;
+      }
+      unmaskDistance = distanceToMatch$1(
+        el,
+        createMatchPredicate$1(unmaskTextClass, unmaskTextSelector),
+        maskDistance >= 0 ? maskDistance : Infinity
+      );
+    }
+    return maskDistance >= 0 ? unmaskDistance >= 0 ? maskDistance <= unmaskDistance : true : unmaskDistance >= 0 ? false : !!maskAllText;
+  } catch (e2) {
+  }
+  return !!maskAllText;
+}
+function onceIframeLoaded(iframeEl, listener, iframeLoadTimeout) {
+  const win = iframeEl.contentWindow;
+  if (!win) {
+    return;
+  }
+  let fired = false;
+  let readyState;
+  try {
+    readyState = win.document.readyState;
+  } catch (error2) {
+    return;
+  }
+  if (readyState !== "complete") {
+    const timer = setTimeout$2(() => {
+      if (!fired) {
+        listener();
+        fired = true;
+      }
+    }, iframeLoadTimeout);
+    iframeEl.addEventListener("load", () => {
+      clearTimeout$1(timer);
+      fired = true;
+      listener();
+    });
+    return;
+  }
+  const blankUrl = "about:blank";
+  if (win.location.href !== blankUrl || iframeEl.src === blankUrl || iframeEl.src === "") {
+    setTimeout$2(listener, 0);
+    return iframeEl.addEventListener("load", listener);
+  }
+  iframeEl.addEventListener("load", listener);
+}
+function onceStylesheetLoaded(link, listener, styleSheetLoadTimeout) {
+  let fired = false;
+  let styleSheetLoaded;
+  try {
+    styleSheetLoaded = link.sheet;
+  } catch (error2) {
+    return;
+  }
+  if (styleSheetLoaded) return;
+  const timer = setTimeout$2(() => {
+    if (!fired) {
+      listener();
+      fired = true;
+    }
+  }, styleSheetLoadTimeout);
+  link.addEventListener("load", () => {
+    clearTimeout$1(timer);
+    fired = true;
+    listener();
+  });
+}
+function serializeNode(n2, options) {
+  const {
+    doc,
+    mirror: mirror2,
+    blockClass,
+    blockSelector,
+    unblockSelector,
+    maskAllText,
+    maskAttributeFn,
+    maskTextClass,
+    unmaskTextClass,
+    maskTextSelector,
+    unmaskTextSelector,
+    inlineStylesheet,
+    maskInputOptions = {},
+    maskTextFn,
+    maskInputFn,
+    dataURLOptions = {},
+    inlineImages,
+    recordCanvas,
+    keepIframeSrcFn,
+    newlyAddedElement = false
+  } = options;
+  const rootId = getRootId(doc, mirror2);
+  switch (n2.nodeType) {
+    case n2.DOCUMENT_NODE:
+      if (n2.compatMode !== "CSS1Compat") {
+        return {
+          type: NodeType$2.Document,
+          childNodes: [],
+          compatMode: n2.compatMode
+          // probably "BackCompat"
+        };
+      } else {
+        return {
+          type: NodeType$2.Document,
+          childNodes: []
+        };
+      }
+    case n2.DOCUMENT_TYPE_NODE:
+      return {
+        type: NodeType$2.DocumentType,
+        name: n2.name,
+        publicId: n2.publicId,
+        systemId: n2.systemId,
+        rootId
+      };
+    case n2.ELEMENT_NODE:
+      return serializeElementNode(n2, {
+        doc,
+        blockClass,
+        blockSelector,
+        unblockSelector,
+        inlineStylesheet,
+        maskAttributeFn,
+        maskInputOptions,
+        maskInputFn,
+        dataURLOptions,
+        inlineImages,
+        recordCanvas,
+        keepIframeSrcFn,
+        newlyAddedElement,
+        rootId,
+        maskTextClass,
+        unmaskTextClass,
+        maskTextSelector,
+        unmaskTextSelector
+      });
+    case n2.TEXT_NODE:
+      return serializeTextNode(n2, {
+        doc,
+        maskAllText,
+        maskTextClass,
+        unmaskTextClass,
+        maskTextSelector,
+        unmaskTextSelector,
+        maskTextFn,
+        maskInputOptions,
+        maskInputFn,
+        rootId
+      });
+    case n2.CDATA_SECTION_NODE:
+      return {
+        type: NodeType$2.CDATA,
+        textContent: "",
+        rootId
+      };
+    case n2.COMMENT_NODE:
+      return {
+        type: NodeType$2.Comment,
+        textContent: n2.textContent || "",
+        rootId
+      };
+    default:
+      return false;
+  }
+}
+function getRootId(doc, mirror2) {
+  if (!mirror2.hasNode(doc)) return void 0;
+  const docId = mirror2.getId(doc);
+  return docId === 1 ? void 0 : docId;
+}
+function serializeTextNode(n2, options) {
+  const {
+    maskAllText,
+    maskTextClass,
+    unmaskTextClass,
+    maskTextSelector,
+    unmaskTextSelector,
+    maskTextFn,
+    maskInputOptions,
+    maskInputFn,
+    rootId
+  } = options;
+  const parentTagName = n2.parentNode && n2.parentNode.tagName;
+  let textContent = n2.textContent;
+  const isStyle = parentTagName === "STYLE" ? true : void 0;
+  const isScript = parentTagName === "SCRIPT" ? true : void 0;
+  const isTextarea = parentTagName === "TEXTAREA" ? true : void 0;
+  if (isStyle && textContent) {
+    try {
+      if (n2.nextSibling || n2.previousSibling) {
+      } else if (n2.parentNode.sheet?.cssRules) {
+        textContent = stringifyStylesheet(
+          n2.parentNode.sheet
+        );
+      }
+    } catch (err) {
+      console.warn(
+        `Cannot get CSS styles from text's parentNode. Error: ${err}`,
+        n2
+      );
+    }
+    textContent = absoluteToStylesheet(textContent, getHref(options.doc));
+  }
+  if (isScript) {
+    textContent = "SCRIPT_PLACEHOLDER";
+  }
+  const forceMask = needMaskingText(
+    n2,
+    maskTextClass,
+    maskTextSelector,
+    unmaskTextClass,
+    unmaskTextSelector,
+    maskAllText
+  );
+  if (!isStyle && !isScript && !isTextarea && textContent && forceMask) {
+    textContent = maskTextFn ? maskTextFn(textContent, n2.parentElement) : textContent.replace(/[\S]/g, "*");
+  }
+  if (isTextarea && textContent && (maskInputOptions.textarea || forceMask)) {
+    textContent = maskInputFn ? maskInputFn(textContent, n2.parentNode) : textContent.replace(/[\S]/g, "*");
+  }
+  if (parentTagName === "OPTION" && textContent) {
+    const isInputMasked = shouldMaskInput({
+      type: null,
+      tagName: parentTagName,
+      maskInputOptions
+    });
+    textContent = maskInputValue({
+      isMasked: needMaskingText(
+        n2,
+        maskTextClass,
+        maskTextSelector,
+        unmaskTextClass,
+        unmaskTextSelector,
+        isInputMasked
+      ),
+      element: n2,
+      value: textContent,
+      maskInputFn
+    });
+  }
+  return {
+    type: NodeType$2.Text,
+    textContent: textContent || "",
+    isStyle,
+    rootId
+  };
+}
+function serializeElementNode(n2, options) {
+  const {
+    doc,
+    blockClass,
+    blockSelector,
+    unblockSelector,
+    inlineStylesheet,
+    maskInputOptions = {},
+    maskAttributeFn,
+    maskInputFn,
+    dataURLOptions = {},
+    inlineImages,
+    recordCanvas,
+    keepIframeSrcFn,
+    newlyAddedElement = false,
+    rootId,
+    maskTextClass,
+    unmaskTextClass,
+    maskTextSelector,
+    unmaskTextSelector
+  } = options;
+  const needBlock = _isBlockedElement(
+    n2,
+    blockClass,
+    blockSelector,
+    unblockSelector
+  );
+  const tagName = getValidTagName$1(n2);
+  let attributes2 = {};
+  const len = n2.attributes.length;
+  for (let i2 = 0; i2 < len; i2++) {
+    const attr = n2.attributes[i2];
+    if (attr.name && !ignoreAttribute(tagName, attr.name, attr.value)) {
+      attributes2[attr.name] = transformAttribute(
+        doc,
+        tagName,
+        toLowerCase(attr.name),
+        attr.value,
+        n2,
+        maskAttributeFn
+      );
+    }
+  }
+  if (tagName === "link" && inlineStylesheet) {
+    const stylesheet = Array.from(doc.styleSheets).find((s2) => {
+      return s2.href === n2.href;
+    });
+    let cssText = null;
+    if (stylesheet) {
+      cssText = stringifyStylesheet(stylesheet);
+    }
+    if (cssText) {
+      attributes2.rel = null;
+      attributes2.href = null;
+      attributes2.crossorigin = null;
+      attributes2._cssText = absoluteToStylesheet(cssText, stylesheet.href);
+    }
+  }
+  if (tagName === "style" && n2.sheet && // TODO: Currently we only try to get dynamic stylesheet when it is an empty style element
+  !(n2.innerText || n2.textContent || "").trim().length) {
+    const cssText = stringifyStylesheet(
+      n2.sheet
+    );
+    if (cssText) {
+      attributes2._cssText = absoluteToStylesheet(cssText, getHref(doc));
+    }
+  }
+  if (tagName === "input" || tagName === "textarea" || tagName === "select" || tagName === "option") {
+    const el = n2;
+    const type = getInputType(el);
+    const value = getInputValue(el, toUpperCase(tagName), type);
+    const checked = el.checked;
+    if (type !== "submit" && type !== "button" && value) {
+      const forceMask = needMaskingText(
+        el,
+        maskTextClass,
+        maskTextSelector,
+        unmaskTextClass,
+        unmaskTextSelector,
+        shouldMaskInput({
+          type,
+          tagName: toUpperCase(tagName),
+          maskInputOptions
+        })
+      );
+      attributes2.value = maskInputValue({
+        isMasked: forceMask,
+        element: el,
+        value,
+        maskInputFn
+      });
+    }
+    if (checked) {
+      attributes2.checked = checked;
+    }
+  }
+  if (tagName === "option") {
+    if (n2.selected && !maskInputOptions["select"]) {
+      attributes2.selected = true;
+    } else {
+      delete attributes2.selected;
+    }
+  }
+  if (tagName === "canvas" && recordCanvas) {
+    if (n2.__context === "2d") {
+      if (!is2DCanvasBlank(n2)) {
+        attributes2.rr_dataURL = n2.toDataURL(
+          dataURLOptions.type,
+          dataURLOptions.quality
+        );
+      }
+    } else if (!("__context" in n2)) {
+      const canvasDataURL = n2.toDataURL(
+        dataURLOptions.type,
+        dataURLOptions.quality
+      );
+      const blankCanvas = doc.createElement("canvas");
+      blankCanvas.width = n2.width;
+      blankCanvas.height = n2.height;
+      const blankCanvasDataURL = blankCanvas.toDataURL(
+        dataURLOptions.type,
+        dataURLOptions.quality
+      );
+      if (canvasDataURL !== blankCanvasDataURL) {
+        attributes2.rr_dataURL = canvasDataURL;
+      }
+    }
+  }
+  if (tagName === "img" && inlineImages) {
+    if (!canvasService) {
+      canvasService = doc.createElement("canvas");
+      canvasCtx = canvasService.getContext("2d");
+    }
+    const image = n2;
+    const imageSrc = image.currentSrc || image.getAttribute("src") || "<unknown-src>";
+    const priorCrossOrigin = image.crossOrigin;
+    const recordInlineImage = () => {
+      image.removeEventListener("load", recordInlineImage);
+      try {
+        canvasService.width = image.naturalWidth;
+        canvasService.height = image.naturalHeight;
+        canvasCtx.drawImage(image, 0, 0);
+        attributes2.rr_dataURL = canvasService.toDataURL(
+          dataURLOptions.type,
+          dataURLOptions.quality
+        );
+      } catch (err) {
+        if (image.crossOrigin !== "anonymous") {
+          image.crossOrigin = "anonymous";
+          if (image.complete && image.naturalWidth !== 0)
+            recordInlineImage();
+          else image.addEventListener("load", recordInlineImage);
+          return;
+        } else {
+          console.warn(
+            `Cannot inline img src=${imageSrc}! Error: ${err}`
+          );
+        }
+      }
+      if (image.crossOrigin === "anonymous") {
+        priorCrossOrigin ? attributes2.crossOrigin = priorCrossOrigin : image.removeAttribute("crossorigin");
+      }
+    };
+    if (image.complete && image.naturalWidth !== 0) recordInlineImage();
+    else image.addEventListener("load", recordInlineImage);
+  }
+  if (tagName === "audio" || tagName === "video") {
+    attributes2.rr_mediaState = n2.paused ? "paused" : "played";
+    attributes2.rr_mediaCurrentTime = n2.currentTime;
+  }
+  if (!newlyAddedElement) {
+    if (n2.scrollLeft) {
+      attributes2.rr_scrollLeft = n2.scrollLeft;
+    }
+    if (n2.scrollTop) {
+      attributes2.rr_scrollTop = n2.scrollTop;
+    }
+  }
+  if (needBlock) {
+    const { width, height } = n2.getBoundingClientRect();
+    attributes2 = {
+      class: attributes2.class,
+      rr_width: `${width}px`,
+      rr_height: `${height}px`
+    };
+  }
+  if (tagName === "iframe" && !keepIframeSrcFn(attributes2.src)) {
+    if (!needBlock && !getIframeContentDocument(n2)) {
+      attributes2.rr_src = attributes2.src;
+    }
+    delete attributes2.src;
+  }
+  let isCustomElement;
+  try {
+    if (customElements.get(tagName)) isCustomElement = true;
+  } catch (e2) {
+  }
+  return {
+    type: NodeType$2.Element,
+    tagName,
+    attributes: attributes2,
+    childNodes: [],
+    isSVG: isSVGElement(n2) || void 0,
+    needBlock,
+    rootId,
+    isCustom: isCustomElement
+  };
+}
+function lowerIfExists(maybeAttr) {
+  if (maybeAttr === void 0 || maybeAttr === null) {
+    return "";
+  } else {
+    return maybeAttr.toLowerCase();
+  }
+}
+function slimDOMExcluded(sn, slimDOMOptions) {
+  if (slimDOMOptions.comment && sn.type === NodeType$2.Comment) {
+    return true;
+  } else if (sn.type === NodeType$2.Element) {
+    if (slimDOMOptions.script && // script tag
+    (sn.tagName === "script" || // (module)preload link
+    sn.tagName === "link" && (sn.attributes.rel === "preload" || sn.attributes.rel === "modulepreload") || // prefetch link
+    sn.tagName === "link" && sn.attributes.rel === "prefetch" && typeof sn.attributes.href === "string" && extractFileExtension(sn.attributes.href) === "js")) {
+      return true;
+    } else if (slimDOMOptions.headFavicon && (sn.tagName === "link" && sn.attributes.rel === "shortcut icon" || sn.tagName === "meta" && (lowerIfExists(sn.attributes.name).match(
+      /^msapplication-tile(image|color)$/
+    ) || lowerIfExists(sn.attributes.name) === "application-name" || lowerIfExists(sn.attributes.rel) === "icon" || lowerIfExists(sn.attributes.rel) === "apple-touch-icon" || lowerIfExists(sn.attributes.rel) === "shortcut icon"))) {
+      return true;
+    } else if (sn.tagName === "meta") {
+      if (slimDOMOptions.headMetaDescKeywords && lowerIfExists(sn.attributes.name).match(/^description|keywords$/)) {
+        return true;
+      } else if (slimDOMOptions.headMetaSocial && (lowerIfExists(sn.attributes.property).match(/^(og|twitter|fb):/) || // og = opengraph (facebook)
+      lowerIfExists(sn.attributes.name).match(/^(og|twitter):/) || lowerIfExists(sn.attributes.name) === "pinterest")) {
+        return true;
+      } else if (slimDOMOptions.headMetaRobots && (lowerIfExists(sn.attributes.name) === "robots" || lowerIfExists(sn.attributes.name) === "googlebot" || lowerIfExists(sn.attributes.name) === "bingbot")) {
+        return true;
+      } else if (slimDOMOptions.headMetaHttpEquiv && sn.attributes["http-equiv"] !== void 0) {
+        return true;
+      } else if (slimDOMOptions.headMetaAuthorship && (lowerIfExists(sn.attributes.name) === "author" || lowerIfExists(sn.attributes.name) === "generator" || lowerIfExists(sn.attributes.name) === "framework" || lowerIfExists(sn.attributes.name) === "publisher" || lowerIfExists(sn.attributes.name) === "progid" || lowerIfExists(sn.attributes.property).match(/^article:/) || lowerIfExists(sn.attributes.property).match(/^product:/))) {
+        return true;
+      } else if (slimDOMOptions.headMetaVerification && (lowerIfExists(sn.attributes.name) === "google-site-verification" || lowerIfExists(sn.attributes.name) === "yandex-verification" || lowerIfExists(sn.attributes.name) === "csrf-token" || lowerIfExists(sn.attributes.name) === "p:domain_verify" || lowerIfExists(sn.attributes.name) === "verify-v1" || lowerIfExists(sn.attributes.name) === "verification" || lowerIfExists(sn.attributes.name) === "shopify-checkout-api-token")) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+function serializeNodeWithId(n2, options) {
+  const {
+    doc,
+    mirror: mirror2,
+    blockClass,
+    blockSelector,
+    unblockSelector,
+    maskAllText,
+    maskTextClass,
+    unmaskTextClass,
+    maskTextSelector,
+    unmaskTextSelector,
+    skipChild = false,
+    inlineStylesheet = true,
+    maskInputOptions = {},
+    maskAttributeFn,
+    maskTextFn,
+    maskInputFn,
+    slimDOMOptions,
+    dataURLOptions = {},
+    inlineImages = false,
+    recordCanvas = false,
+    onSerialize,
+    onIframeLoad,
+    iframeLoadTimeout = 5e3,
+    onBlockedImageLoad,
+    onStylesheetLoad,
+    stylesheetLoadTimeout = 5e3,
+    keepIframeSrcFn = () => false,
+    newlyAddedElement = false
+  } = options;
+  let { preserveWhiteSpace = true } = options;
+  const _serializedNode = serializeNode(n2, {
+    doc,
+    mirror: mirror2,
+    blockClass,
+    blockSelector,
+    maskAllText,
+    unblockSelector,
+    maskTextClass,
+    unmaskTextClass,
+    maskTextSelector,
+    unmaskTextSelector,
+    inlineStylesheet,
+    maskInputOptions,
+    maskAttributeFn,
+    maskTextFn,
+    maskInputFn,
+    dataURLOptions,
+    inlineImages,
+    recordCanvas,
+    keepIframeSrcFn,
+    newlyAddedElement
+  });
+  if (!_serializedNode) {
+    console.warn(n2, "not serialized");
+    return null;
+  }
+  let id;
+  if (mirror2.hasNode(n2)) {
+    id = mirror2.getId(n2);
+  } else if (slimDOMExcluded(_serializedNode, slimDOMOptions) || !preserveWhiteSpace && _serializedNode.type === NodeType$2.Text && !_serializedNode.isStyle && !_serializedNode.textContent.replace(/^\s+|\s+$/gm, "").length) {
+    id = IGNORED_NODE;
+  } else {
+    id = genId();
+  }
+  const serializedNode2 = Object.assign(_serializedNode, { id });
+  mirror2.add(n2, serializedNode2);
+  if (id === IGNORED_NODE) {
+    return null;
+  }
+  if (onSerialize) {
+    onSerialize(n2);
+  }
+  let recordChild = !skipChild;
+  if (serializedNode2.type === NodeType$2.Element) {
+    recordChild = recordChild && !serializedNode2.needBlock;
+    const shadowRoot = n2.shadowRoot;
+    if (shadowRoot && isNativeShadowDom(shadowRoot))
+      serializedNode2.isShadowHost = true;
+  }
+  if ((serializedNode2.type === NodeType$2.Document || serializedNode2.type === NodeType$2.Element) && recordChild) {
+    if (slimDOMOptions.headWhitespace && serializedNode2.type === NodeType$2.Element && serializedNode2.tagName === "head") {
+      preserveWhiteSpace = false;
+    }
+    const bypassOptions = {
+      doc,
+      mirror: mirror2,
+      blockClass,
+      blockSelector,
+      maskAllText,
+      unblockSelector,
+      maskTextClass,
+      unmaskTextClass,
+      maskTextSelector,
+      unmaskTextSelector,
+      skipChild,
+      inlineStylesheet,
+      maskInputOptions,
+      maskAttributeFn,
+      maskTextFn,
+      maskInputFn,
+      slimDOMOptions,
+      dataURLOptions,
+      inlineImages,
+      recordCanvas,
+      preserveWhiteSpace,
+      onSerialize,
+      onIframeLoad,
+      iframeLoadTimeout,
+      onBlockedImageLoad,
+      onStylesheetLoad,
+      stylesheetLoadTimeout,
+      keepIframeSrcFn
+    };
+    const childNodes = n2.childNodes ? Array.from(n2.childNodes) : [];
+    for (const childN of childNodes) {
+      const serializedChildNode = serializeNodeWithId(childN, bypassOptions);
+      if (serializedChildNode) {
+        serializedNode2.childNodes.push(serializedChildNode);
+      }
+    }
+    if (isElement$1(n2) && n2.shadowRoot) {
+      for (const childN of Array.from(n2.shadowRoot.childNodes)) {
+        const serializedChildNode = serializeNodeWithId(childN, bypassOptions);
+        if (serializedChildNode) {
+          isNativeShadowDom(n2.shadowRoot) && (serializedChildNode.isShadow = true);
+          serializedNode2.childNodes.push(serializedChildNode);
+        }
+      }
+    }
+  }
+  if (n2.parentNode && isShadowRoot(n2.parentNode) && isNativeShadowDom(n2.parentNode)) {
+    serializedNode2.isShadow = true;
+  }
+  if (serializedNode2.type === NodeType$2.Element && serializedNode2.tagName === "iframe" && !serializedNode2.needBlock) {
+    onceIframeLoaded(
+      n2,
+      () => {
+        const iframeDoc = getIframeContentDocument(n2);
+        if (iframeDoc && onIframeLoad) {
+          const serializedIframeNode = serializeNodeWithId(iframeDoc, {
+            doc: iframeDoc,
+            mirror: mirror2,
+            blockClass,
+            blockSelector,
+            unblockSelector,
+            maskAllText,
+            maskTextClass,
+            unmaskTextClass,
+            maskTextSelector,
+            unmaskTextSelector,
+            skipChild: false,
+            inlineStylesheet,
+            maskInputOptions,
+            maskAttributeFn,
+            maskTextFn,
+            maskInputFn,
+            slimDOMOptions,
+            dataURLOptions,
+            inlineImages,
+            recordCanvas,
+            preserveWhiteSpace,
+            onSerialize,
+            onIframeLoad,
+            iframeLoadTimeout,
+            onStylesheetLoad,
+            stylesheetLoadTimeout,
+            keepIframeSrcFn
+          });
+          if (serializedIframeNode) {
+            onIframeLoad(
+              n2,
+              serializedIframeNode
+            );
+          }
+        }
+      },
+      iframeLoadTimeout
+    );
+  }
+  if (serializedNode2.type === NodeType$2.Element && serializedNode2.tagName === "img" && !n2.complete && serializedNode2.needBlock) {
+    const image = n2;
+    const updateImageDimensions = () => {
+      if (image.isConnected && !image.complete && onBlockedImageLoad) {
+        try {
+          const rect = image.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            onBlockedImageLoad(image, serializedNode2, rect);
+          }
+        } catch (error2) {
+        }
+      }
+      image.removeEventListener("load", updateImageDimensions);
+    };
+    if (image.isConnected) {
+      image.addEventListener("load", updateImageDimensions);
+    }
+  }
+  if (serializedNode2.type === NodeType$2.Element && serializedNode2.tagName === "link" && typeof serializedNode2.attributes.rel === "string" && (serializedNode2.attributes.rel === "stylesheet" || serializedNode2.attributes.rel === "preload" && typeof serializedNode2.attributes.href === "string" && extractFileExtension(serializedNode2.attributes.href) === "css")) {
+    onceStylesheetLoaded(
+      n2,
+      () => {
+        if (onStylesheetLoad) {
+          const serializedLinkNode = serializeNodeWithId(n2, {
+            doc,
+            mirror: mirror2,
+            blockClass,
+            blockSelector,
+            unblockSelector,
+            maskAllText,
+            maskTextClass,
+            unmaskTextClass,
+            maskTextSelector,
+            unmaskTextSelector,
+            skipChild: false,
+            inlineStylesheet,
+            maskInputOptions,
+            maskAttributeFn,
+            maskTextFn,
+            maskInputFn,
+            slimDOMOptions,
+            dataURLOptions,
+            inlineImages,
+            recordCanvas,
+            preserveWhiteSpace,
+            onSerialize,
+            onIframeLoad,
+            iframeLoadTimeout,
+            onStylesheetLoad,
+            stylesheetLoadTimeout,
+            keepIframeSrcFn
+          });
+          if (serializedLinkNode) {
+            onStylesheetLoad(
+              n2,
+              serializedLinkNode
+            );
+          }
+        }
+      },
+      stylesheetLoadTimeout
+    );
+  }
+  if (serializedNode2.type === NodeType$2.Element) {
+    delete serializedNode2.needBlock;
+  }
+  return serializedNode2;
+}
+function snapshot(n2, options) {
+  const {
+    mirror: mirror2 = new Mirror$1(),
+    blockClass = "rr-block",
+    blockSelector = null,
+    unblockSelector = null,
+    maskAllText = false,
+    maskTextClass = "rr-mask",
+    unmaskTextClass = null,
+    maskTextSelector = null,
+    unmaskTextSelector = null,
+    inlineStylesheet = true,
+    inlineImages = false,
+    recordCanvas = false,
+    maskAllInputs = false,
+    maskAttributeFn,
+    maskTextFn,
+    maskInputFn,
+    slimDOM = false,
+    dataURLOptions,
+    preserveWhiteSpace,
+    onSerialize,
+    onIframeLoad,
+    iframeLoadTimeout,
+    onBlockedImageLoad,
+    onStylesheetLoad,
+    stylesheetLoadTimeout,
+    keepIframeSrcFn = () => false
+  } = options || {};
+  const maskInputOptions = maskAllInputs === true ? {
+    color: true,
+    date: true,
+    "datetime-local": true,
+    email: true,
+    month: true,
+    number: true,
+    range: true,
+    search: true,
+    tel: true,
+    text: true,
+    time: true,
+    url: true,
+    week: true,
+    textarea: true,
+    select: true
+  } : maskAllInputs === false ? {} : maskAllInputs;
+  const slimDOMOptions = slimDOM === true || slimDOM === "all" ? (
+    // if true: set of sensible options that should not throw away any information
+    {
+      script: true,
+      comment: true,
+      headFavicon: true,
+      headWhitespace: true,
+      headMetaDescKeywords: slimDOM === "all",
+      // destructive
+      headMetaSocial: true,
+      headMetaRobots: true,
+      headMetaHttpEquiv: true,
+      headMetaAuthorship: true,
+      headMetaVerification: true
+    }
+  ) : slimDOM === false ? {} : slimDOM;
+  return serializeNodeWithId(n2, {
+    doc: n2,
+    mirror: mirror2,
+    blockClass,
+    blockSelector,
+    unblockSelector,
+    maskAllText,
+    maskTextClass,
+    unmaskTextClass,
+    maskTextSelector,
+    unmaskTextSelector,
+    skipChild: false,
+    inlineStylesheet,
+    maskInputOptions,
+    maskAttributeFn,
+    maskTextFn,
+    maskInputFn,
+    slimDOMOptions,
+    dataURLOptions,
+    inlineImages,
+    recordCanvas,
+    preserveWhiteSpace,
+    onSerialize,
+    onIframeLoad,
+    iframeLoadTimeout,
+    onBlockedImageLoad,
+    onStylesheetLoad,
+    stylesheetLoadTimeout,
+    keepIframeSrcFn,
+    newlyAddedElement: false
+  });
+}
+function on(type, fn, target = document) {
+  const options = { capture: true, passive: true };
+  target.addEventListener(type, fn, options);
+  return () => target.removeEventListener(type, fn, options);
+}
+const DEPARTED_MIRROR_ACCESS_WARNING$1 = "Please stop import mirror directly. Instead of that,\r\nnow you can use replayer.getMirror() to access the mirror instance of a replayer,\r\nor you can use record.mirror to access the mirror instance during recording.";
+let _mirror$1 = {
+  map: {},
+  getId() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING$1);
+    return -1;
+  },
+  getNode() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING$1);
+    return null;
+  },
+  removeNodeFromMap() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING$1);
+  },
+  has() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING$1);
+    return false;
+  },
+  reset() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING$1);
+  }
+};
+if (typeof window !== "undefined" && window.Proxy && window.Reflect) {
+  _mirror$1 = new Proxy(_mirror$1, {
+    get(target, prop, receiver) {
+      if (prop === "map") {
+        console.error(DEPARTED_MIRROR_ACCESS_WARNING$1);
+      }
+      return Reflect.get(target, prop, receiver);
+    }
+  });
+}
+function throttle$1(func, wait, options = {}) {
+  let timeout = null;
+  let previous = 0;
+  return function(...args) {
+    const now = Date.now();
+    if (!previous && options.leading === false) {
+      previous = now;
+    }
+    const remaining = wait - (now - previous);
+    const context = this;
+    if (remaining <= 0 || remaining > wait) {
+      if (timeout) {
+        clearTimeout$2(timeout);
+        timeout = null;
+      }
+      previous = now;
+      func.apply(context, args);
+    } else if (!timeout && options.trailing !== false) {
+      timeout = setTimeout$1$1(() => {
+        previous = options.leading === false ? 0 : Date.now();
+        timeout = null;
+        func.apply(context, args);
+      }, remaining);
+    }
+  };
+}
+function hookSetter$1(target, key, d2, isRevoked, win = window) {
+  const original = win.Object.getOwnPropertyDescriptor(target, key);
+  win.Object.defineProperty(
+    target,
+    key,
+    isRevoked ? d2 : {
+      set(value) {
+        setTimeout$1$1(() => {
+          d2.set.call(this, value);
+        }, 0);
+        if (original && original.set) {
+          original.set.call(this, value);
+        }
+      }
+    }
+  );
+  return () => hookSetter$1(target, key, original || {}, true);
+}
+function patch$1(source, name, replacement) {
+  try {
+    if (!(name in source)) {
+      return () => {
+      };
+    }
+    const original = source[name];
+    const wrapped = replacement(original);
+    if (typeof wrapped === "function") {
+      wrapped.prototype = wrapped.prototype || {};
+      Object.defineProperties(wrapped, {
+        __rrweb_original__: {
+          enumerable: false,
+          value: original
+        }
+      });
+    }
+    source[name] = wrapped;
+    return () => {
+      source[name] = original;
+    };
+  } catch {
+    return () => {
+    };
+  }
+}
+let nowTimestamp = Date.now;
+if (!/* @__PURE__ */ /[1-9][0-9]{12}/.test(Date.now().toString())) {
+  nowTimestamp = () => (/* @__PURE__ */ new Date()).getTime();
+}
+function getWindowScroll(win) {
+  const doc = win.document;
+  return {
+    left: doc.scrollingElement ? doc.scrollingElement.scrollLeft : win.pageXOffset !== void 0 ? win.pageXOffset : doc?.documentElement.scrollLeft || doc?.body?.parentElement?.scrollLeft || doc?.body?.scrollLeft || 0,
+    top: doc.scrollingElement ? doc.scrollingElement.scrollTop : win.pageYOffset !== void 0 ? win.pageYOffset : doc?.documentElement.scrollTop || doc?.body?.parentElement?.scrollTop || doc?.body?.scrollTop || 0
+  };
+}
+function getWindowHeight() {
+  return window.innerHeight || document.documentElement && document.documentElement.clientHeight || document.body && document.body.clientHeight;
+}
+function getWindowWidth() {
+  return window.innerWidth || document.documentElement && document.documentElement.clientWidth || document.body && document.body.clientWidth;
+}
+function closestElementOfNode$1(node) {
+  if (!node) {
+    return null;
+  }
+  try {
+    const el = node.nodeType === node.ELEMENT_NODE ? node : node.parentElement;
+    return el;
+  } catch (error2) {
+    return null;
+  }
+}
+function isBlocked$1(node, blockClass, blockSelector, unblockSelector, checkAncestors) {
+  if (!node) {
+    return false;
+  }
+  const el = closestElementOfNode$1(node);
+  if (!el) {
+    return false;
+  }
+  const blockedPredicate = createMatchPredicate$1(blockClass, blockSelector);
+  if (!checkAncestors) {
+    const isUnblocked = unblockSelector && el.matches(unblockSelector);
+    return blockedPredicate(el) && !isUnblocked;
+  }
+  const blockDistance = distanceToMatch$1(el, blockedPredicate);
+  let unblockDistance = -1;
+  if (blockDistance < 0) {
+    return false;
+  }
+  if (unblockSelector) {
+    unblockDistance = distanceToMatch$1(
+      el,
+      createMatchPredicate$1(null, unblockSelector)
+    );
+  }
+  if (blockDistance > -1 && unblockDistance < 0) {
+    return true;
+  }
+  return blockDistance < unblockDistance;
+}
+function isSerialized(n2, mirror2) {
+  return mirror2.getId(n2) !== -1;
+}
+function isIgnored(n2, mirror2) {
+  return mirror2.getId(n2) === IGNORED_NODE;
+}
+function isAncestorRemoved(target, mirror2) {
+  if (isShadowRoot(target)) {
+    return false;
+  }
+  const id = mirror2.getId(target);
+  if (!mirror2.has(id)) {
+    return true;
+  }
+  if (target.parentNode && target.parentNode.nodeType === target.DOCUMENT_NODE) {
+    return false;
+  }
+  if (!target.parentNode) {
+    return true;
+  }
+  return isAncestorRemoved(target.parentNode, mirror2);
+}
+function legacy_isTouchEvent(event) {
+  return Boolean(event.changedTouches);
+}
+function polyfill$1(win = window) {
+  if ("NodeList" in win && !win.NodeList.prototype.forEach) {
+    win.NodeList.prototype.forEach = Array.prototype.forEach;
+  }
+  if ("DOMTokenList" in win && !win.DOMTokenList.prototype.forEach) {
+    win.DOMTokenList.prototype.forEach = Array.prototype.forEach;
+  }
+  if (!Node.prototype.contains) {
+    Node.prototype.contains = (...args) => {
+      let node = args[0];
+      if (!(0 in args)) {
+        throw new TypeError("1 argument is required");
+      }
+      do {
+        if (this === node) {
+          return true;
+        }
+      } while (node = node && node.parentNode);
+      return false;
+    };
+  }
+}
+function isSerializedIframe(n2, mirror2) {
+  return Boolean(n2.nodeName === "IFRAME" && mirror2.getMeta(n2));
+}
+function isSerializedStylesheet(n2, mirror2) {
+  return Boolean(
+    n2.nodeName === "LINK" && n2.nodeType === n2.ELEMENT_NODE && n2.getAttribute && n2.getAttribute("rel") === "stylesheet" && mirror2.getMeta(n2)
+  );
+}
+function hasShadowRoot(n2) {
+  return Boolean(n2?.shadowRoot);
+}
+class StyleSheetMirror {
+  constructor() {
+    this.id = 1;
+    this.styleIDMap = /* @__PURE__ */ new WeakMap();
+    this.idStyleMap = /* @__PURE__ */ new Map();
+  }
+  getId(stylesheet) {
+    return this.styleIDMap.get(stylesheet) ?? -1;
+  }
+  has(stylesheet) {
+    return this.styleIDMap.has(stylesheet);
+  }
+  /**
+   * @returns If the stylesheet is in the mirror, returns the id of the stylesheet. If not, return the new assigned id.
+   */
+  add(stylesheet, id) {
+    if (this.has(stylesheet)) return this.getId(stylesheet);
+    let newId;
+    if (id === void 0) {
+      newId = this.id++;
+    } else newId = id;
+    this.styleIDMap.set(stylesheet, newId);
+    this.idStyleMap.set(newId, stylesheet);
+    return newId;
+  }
+  getStyle(id) {
+    return this.idStyleMap.get(id) || null;
+  }
+  reset() {
+    this.styleIDMap = /* @__PURE__ */ new WeakMap();
+    this.idStyleMap = /* @__PURE__ */ new Map();
+    this.id = 1;
+  }
+  generateId() {
+    return this.id++;
+  }
+}
+function getShadowHost(n2) {
+  let shadowHost = null;
+  if (n2.getRootNode?.()?.nodeType === Node.DOCUMENT_FRAGMENT_NODE && n2.getRootNode().host)
+    shadowHost = n2.getRootNode().host;
+  return shadowHost;
+}
+function getRootShadowHost(n2) {
+  let rootShadowHost = n2;
+  let shadowHost;
+  while (shadowHost = getShadowHost(rootShadowHost))
+    rootShadowHost = shadowHost;
+  return rootShadowHost;
+}
+function shadowHostInDom(n2) {
+  const doc = n2.ownerDocument;
+  if (!doc) return false;
+  const shadowHost = getRootShadowHost(n2);
+  return doc.contains(shadowHost);
+}
+function inDom(n2) {
+  const doc = n2.ownerDocument;
+  if (!doc) return false;
+  return doc.contains(n2) || shadowHostInDom(n2);
+}
+const cachedImplementations$2 = {};
+function getImplementation$2(name) {
+  const cached = cachedImplementations$2[name];
+  if (cached) {
+    return cached;
+  }
+  const document2 = window.document;
+  let impl = window[name];
+  if (document2 && typeof document2.createElement === "function") {
+    try {
+      const sandbox = document2.createElement("iframe");
+      sandbox.hidden = true;
+      document2.head.appendChild(sandbox);
+      const contentWindow = sandbox.contentWindow;
+      if (contentWindow && contentWindow[name]) {
+        impl = // eslint-disable-next-line @typescript-eslint/unbound-method
+        contentWindow[name];
+      }
+      document2.head.removeChild(sandbox);
+    } catch (e2) {
+    }
+  }
+  return cachedImplementations$2[name] = impl.bind(
+    window
+  );
+}
+function onRequestAnimationFrame$1(...rest) {
+  return getImplementation$2("requestAnimationFrame")(...rest);
+}
+function setTimeout$1$1(...rest) {
+  return getImplementation$2("setTimeout")(...rest);
+}
+function clearTimeout$2(...rest) {
+  return getImplementation$2("clearTimeout")(...rest);
+}
+var EventType = /* @__PURE__ */ ((EventType2) => {
+  EventType2[EventType2["DomContentLoaded"] = 0] = "DomContentLoaded";
+  EventType2[EventType2["Load"] = 1] = "Load";
+  EventType2[EventType2["FullSnapshot"] = 2] = "FullSnapshot";
+  EventType2[EventType2["IncrementalSnapshot"] = 3] = "IncrementalSnapshot";
+  EventType2[EventType2["Meta"] = 4] = "Meta";
+  EventType2[EventType2["Custom"] = 5] = "Custom";
+  EventType2[EventType2["Plugin"] = 6] = "Plugin";
+  return EventType2;
+})(EventType || {});
+var IncrementalSource = /* @__PURE__ */ ((IncrementalSource2) => {
+  IncrementalSource2[IncrementalSource2["Mutation"] = 0] = "Mutation";
+  IncrementalSource2[IncrementalSource2["MouseMove"] = 1] = "MouseMove";
+  IncrementalSource2[IncrementalSource2["MouseInteraction"] = 2] = "MouseInteraction";
+  IncrementalSource2[IncrementalSource2["Scroll"] = 3] = "Scroll";
+  IncrementalSource2[IncrementalSource2["ViewportResize"] = 4] = "ViewportResize";
+  IncrementalSource2[IncrementalSource2["Input"] = 5] = "Input";
+  IncrementalSource2[IncrementalSource2["TouchMove"] = 6] = "TouchMove";
+  IncrementalSource2[IncrementalSource2["MediaInteraction"] = 7] = "MediaInteraction";
+  IncrementalSource2[IncrementalSource2["StyleSheetRule"] = 8] = "StyleSheetRule";
+  IncrementalSource2[IncrementalSource2["CanvasMutation"] = 9] = "CanvasMutation";
+  IncrementalSource2[IncrementalSource2["Font"] = 10] = "Font";
+  IncrementalSource2[IncrementalSource2["Log"] = 11] = "Log";
+  IncrementalSource2[IncrementalSource2["Drag"] = 12] = "Drag";
+  IncrementalSource2[IncrementalSource2["StyleDeclaration"] = 13] = "StyleDeclaration";
+  IncrementalSource2[IncrementalSource2["Selection"] = 14] = "Selection";
+  IncrementalSource2[IncrementalSource2["AdoptedStyleSheet"] = 15] = "AdoptedStyleSheet";
+  IncrementalSource2[IncrementalSource2["CustomElement"] = 16] = "CustomElement";
+  return IncrementalSource2;
+})(IncrementalSource || {});
+var MouseInteractions = /* @__PURE__ */ ((MouseInteractions2) => {
+  MouseInteractions2[MouseInteractions2["MouseUp"] = 0] = "MouseUp";
+  MouseInteractions2[MouseInteractions2["MouseDown"] = 1] = "MouseDown";
+  MouseInteractions2[MouseInteractions2["Click"] = 2] = "Click";
+  MouseInteractions2[MouseInteractions2["ContextMenu"] = 3] = "ContextMenu";
+  MouseInteractions2[MouseInteractions2["DblClick"] = 4] = "DblClick";
+  MouseInteractions2[MouseInteractions2["Focus"] = 5] = "Focus";
+  MouseInteractions2[MouseInteractions2["Blur"] = 6] = "Blur";
+  MouseInteractions2[MouseInteractions2["TouchStart"] = 7] = "TouchStart";
+  MouseInteractions2[MouseInteractions2["TouchMove_Departed"] = 8] = "TouchMove_Departed";
+  MouseInteractions2[MouseInteractions2["TouchEnd"] = 9] = "TouchEnd";
+  MouseInteractions2[MouseInteractions2["TouchCancel"] = 10] = "TouchCancel";
+  return MouseInteractions2;
+})(MouseInteractions || {});
+var PointerTypes = /* @__PURE__ */ ((PointerTypes2) => {
+  PointerTypes2[PointerTypes2["Mouse"] = 0] = "Mouse";
+  PointerTypes2[PointerTypes2["Pen"] = 1] = "Pen";
+  PointerTypes2[PointerTypes2["Touch"] = 2] = "Touch";
+  return PointerTypes2;
+})(PointerTypes || {});
+var MediaInteractions = /* @__PURE__ */ ((MediaInteractions2) => {
+  MediaInteractions2[MediaInteractions2["Play"] = 0] = "Play";
+  MediaInteractions2[MediaInteractions2["Pause"] = 1] = "Pause";
+  MediaInteractions2[MediaInteractions2["Seeked"] = 2] = "Seeked";
+  MediaInteractions2[MediaInteractions2["VolumeChange"] = 3] = "VolumeChange";
+  MediaInteractions2[MediaInteractions2["RateChange"] = 4] = "RateChange";
+  return MediaInteractions2;
+})(MediaInteractions || {});
+function getIFrameContentDocument(iframe) {
+  try {
+    return iframe.contentDocument;
+  } catch (e2) {
+  }
+}
+function getIFrameContentWindow(iframe) {
+  try {
+    return iframe.contentWindow;
+  } catch (e2) {
+  }
+}
+function isNodeInLinkedList(n2) {
+  return "__ln" in n2;
+}
+class DoubleLinkedList {
+  constructor() {
+    this.length = 0;
+    this.head = null;
+    this.tail = null;
+  }
+  get(position) {
+    if (position >= this.length) {
+      throw new Error("Position outside of list range");
+    }
+    let current = this.head;
+    for (let index = 0; index < position; index++) {
+      current = current?.next || null;
+    }
+    return current;
+  }
+  addNode(n2) {
+    const node = {
+      value: n2,
+      previous: null,
+      next: null
+    };
+    n2.__ln = node;
+    if (n2.previousSibling && isNodeInLinkedList(n2.previousSibling)) {
+      const current = n2.previousSibling.__ln.next;
+      node.next = current;
+      node.previous = n2.previousSibling.__ln;
+      n2.previousSibling.__ln.next = node;
+      if (current) {
+        current.previous = node;
+      }
+    } else if (n2.nextSibling && isNodeInLinkedList(n2.nextSibling) && n2.nextSibling.__ln.previous) {
+      const current = n2.nextSibling.__ln.previous;
+      node.previous = current;
+      node.next = n2.nextSibling.__ln;
+      n2.nextSibling.__ln.previous = node;
+      if (current) {
+        current.next = node;
+      }
+    } else {
+      if (this.head) {
+        this.head.previous = node;
+      }
+      node.next = this.head;
+      this.head = node;
+    }
+    if (node.next === null) {
+      this.tail = node;
+    }
+    this.length++;
+  }
+  removeNode(n2) {
+    const current = n2.__ln;
+    if (!this.head) {
+      return;
+    }
+    if (!current.previous) {
+      this.head = current.next;
+      if (this.head) {
+        this.head.previous = null;
+      } else {
+        this.tail = null;
+      }
+    } else {
+      current.previous.next = current.next;
+      if (current.next) {
+        current.next.previous = current.previous;
+      } else {
+        this.tail = current.previous;
+      }
+    }
+    if (n2.__ln) {
+      delete n2.__ln;
+    }
+    this.length--;
+  }
+}
+const moveKey = (id, parentId) => `${id}@${parentId}`;
+class MutationBuffer {
+  constructor() {
+    this.frozen = false;
+    this.locked = false;
+    this.texts = [];
+    this.attributes = [];
+    this.attributeMap = /* @__PURE__ */ new WeakMap();
+    this.removes = [];
+    this.mapRemoves = [];
+    this.movedMap = {};
+    this.addedSet = /* @__PURE__ */ new Set();
+    this.movedSet = /* @__PURE__ */ new Set();
+    this.droppedSet = /* @__PURE__ */ new Set();
+    this.processMutations = (mutations) => {
+      mutations.forEach(this.processMutation);
+      this.emit();
+    };
+    this.emit = () => {
+      if (this.frozen || this.locked) {
+        return;
+      }
+      const adds = [];
+      const addedIds = /* @__PURE__ */ new Set();
+      const addList = new DoubleLinkedList();
+      const getNextId = (n2) => {
+        let ns = n2;
+        let nextId = IGNORED_NODE;
+        while (nextId === IGNORED_NODE) {
+          ns = ns && ns.nextSibling;
+          nextId = ns && this.mirror.getId(ns);
+        }
+        return nextId;
+      };
+      const pushAdd = (n2) => {
+        if (!n2.parentNode || !inDom(n2)) {
+          return;
+        }
+        const parentId = isShadowRoot(n2.parentNode) ? this.mirror.getId(getShadowHost(n2)) : this.mirror.getId(n2.parentNode);
+        const nextId = getNextId(n2);
+        if (parentId === -1 || nextId === -1) {
+          return addList.addNode(n2);
+        }
+        const sn = serializeNodeWithId(n2, {
+          doc: this.doc,
+          mirror: this.mirror,
+          blockClass: this.blockClass,
+          blockSelector: this.blockSelector,
+          maskAllText: this.maskAllText,
+          unblockSelector: this.unblockSelector,
+          maskTextClass: this.maskTextClass,
+          unmaskTextClass: this.unmaskTextClass,
+          maskTextSelector: this.maskTextSelector,
+          unmaskTextSelector: this.unmaskTextSelector,
+          skipChild: true,
+          newlyAddedElement: true,
+          inlineStylesheet: this.inlineStylesheet,
+          maskInputOptions: this.maskInputOptions,
+          maskAttributeFn: this.maskAttributeFn,
+          maskTextFn: this.maskTextFn,
+          maskInputFn: this.maskInputFn,
+          slimDOMOptions: this.slimDOMOptions,
+          dataURLOptions: this.dataURLOptions,
+          recordCanvas: this.recordCanvas,
+          inlineImages: this.inlineImages,
+          onSerialize: (currentN) => {
+            if (isSerializedIframe(currentN, this.mirror) && !isBlocked$1(
+              currentN,
+              this.blockClass,
+              this.blockSelector,
+              this.unblockSelector,
+              false
+            )) {
+              this.iframeManager.addIframe(currentN);
+            }
+            if (isSerializedStylesheet(currentN, this.mirror)) {
+              this.stylesheetManager.trackLinkElement(
+                currentN
+              );
+            }
+            if (hasShadowRoot(n2)) {
+              this.shadowDomManager.addShadowRoot(n2.shadowRoot, this.doc);
+            }
+          },
+          onIframeLoad: (iframe, childSn) => {
+            if (isBlocked$1(
+              iframe,
+              this.blockClass,
+              this.blockSelector,
+              this.unblockSelector,
+              false
+            )) {
+              return;
+            }
+            this.iframeManager.attachIframe(iframe, childSn);
+            if (iframe.contentWindow) {
+              this.canvasManager.addWindow(iframe.contentWindow);
+            }
+            this.shadowDomManager.observeAttachShadow(iframe);
+          },
+          onStylesheetLoad: (link, childSn) => {
+            this.stylesheetManager.attachLinkElement(link, childSn);
+          },
+          onBlockedImageLoad: (_imageEl, serializedNode, { width, height }) => {
+            this.mutationCb({
+              adds: [],
+              removes: [],
+              texts: [],
+              attributes: [
+                {
+                  id: serializedNode.id,
+                  attributes: {
+                    style: {
+                      width: `${width}px`,
+                      height: `${height}px`
+                    }
+                  }
+                }
+              ]
+            });
+          }
+        });
+        if (sn) {
+          adds.push({
+            parentId,
+            nextId,
+            node: sn
+          });
+          addedIds.add(sn.id);
+        }
+      };
+      while (this.mapRemoves.length) {
+        this.mirror.removeNodeFromMap(this.mapRemoves.shift());
+      }
+      for (const n2 of this.movedSet) {
+        if (isParentRemoved(this.removes, n2, this.mirror) && !this.movedSet.has(n2.parentNode)) {
+          continue;
+        }
+        pushAdd(n2);
+      }
+      for (const n2 of this.addedSet) {
+        if (!isAncestorInSet(this.droppedSet, n2) && !isParentRemoved(this.removes, n2, this.mirror)) {
+          pushAdd(n2);
+        } else if (isAncestorInSet(this.movedSet, n2)) {
+          pushAdd(n2);
+        } else {
+          this.droppedSet.add(n2);
+        }
+      }
+      let candidate = null;
+      while (addList.length) {
+        let node = null;
+        if (candidate) {
+          const parentId = this.mirror.getId(candidate.value.parentNode);
+          const nextId = getNextId(candidate.value);
+          if (parentId !== -1 && nextId !== -1) {
+            node = candidate;
+          }
+        }
+        if (!node) {
+          let tailNode = addList.tail;
+          while (tailNode) {
+            const _node = tailNode;
+            tailNode = tailNode.previous;
+            if (_node) {
+              const parentId = this.mirror.getId(_node.value.parentNode);
+              const nextId = getNextId(_node.value);
+              if (nextId === -1) continue;
+              else if (parentId !== -1) {
+                node = _node;
+                break;
+              } else {
+                const unhandledNode = _node.value;
+                if (unhandledNode.parentNode && unhandledNode.parentNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+                  const shadowHost = unhandledNode.parentNode.host;
+                  const parentId2 = this.mirror.getId(shadowHost);
+                  if (parentId2 !== -1) {
+                    node = _node;
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (!node) {
+          while (addList.head) {
+            addList.removeNode(addList.head.value);
+          }
+          break;
+        }
+        candidate = node.previous;
+        addList.removeNode(node.value);
+        pushAdd(node.value);
+      }
+      const payload = {
+        texts: this.texts.map((text) => ({
+          id: this.mirror.getId(text.node),
+          value: text.value
+        })).filter((text) => !addedIds.has(text.id)).filter((text) => this.mirror.has(text.id)),
+        attributes: this.attributes.map((attribute) => {
+          const { attributes } = attribute;
+          if (typeof attributes.style === "string") {
+            const diffAsStr = JSON.stringify(attribute.styleDiff);
+            const unchangedAsStr = JSON.stringify(attribute._unchangedStyles);
+            if (diffAsStr.length < attributes.style.length) {
+              if ((diffAsStr + unchangedAsStr).split("var(").length === attributes.style.split("var(").length) {
+                attributes.style = attribute.styleDiff;
+              }
+            }
+          }
+          return {
+            id: this.mirror.getId(attribute.node),
+            attributes
+          };
+        }).filter((attribute) => !addedIds.has(attribute.id)).filter((attribute) => this.mirror.has(attribute.id)),
+        removes: this.removes,
+        adds
+      };
+      if (!payload.texts.length && !payload.attributes.length && !payload.removes.length && !payload.adds.length) {
+        return;
+      }
+      this.texts = [];
+      this.attributes = [];
+      this.attributeMap = /* @__PURE__ */ new WeakMap();
+      this.removes = [];
+      this.addedSet = /* @__PURE__ */ new Set();
+      this.movedSet = /* @__PURE__ */ new Set();
+      this.droppedSet = /* @__PURE__ */ new Set();
+      this.movedMap = {};
+      this.mutationCb(payload);
+    };
+    this.processMutation = (m2) => {
+      if (isIgnored(m2.target, this.mirror)) {
+        return;
+      }
+      switch (m2.type) {
+        case "characterData": {
+          const value = m2.target.textContent;
+          if (!isBlocked$1(
+            m2.target,
+            this.blockClass,
+            this.blockSelector,
+            this.unblockSelector,
+            false
+          ) && value !== m2.oldValue) {
+            this.texts.push({
+              value: needMaskingText(
+                m2.target,
+                this.maskTextClass,
+                this.maskTextSelector,
+                this.unmaskTextClass,
+                this.unmaskTextSelector,
+                this.maskAllText
+              ) && value ? this.maskTextFn ? this.maskTextFn(value, closestElementOfNode$1(m2.target)) : value.replace(/[\S]/g, "*") : value,
+              node: m2.target
+            });
+          }
+          break;
+        }
+        case "attributes": {
+          const target = m2.target;
+          let attributeName = m2.attributeName;
+          let value = m2.target.getAttribute(attributeName);
+          if (attributeName === "value") {
+            const type = getInputType(target);
+            const tagName = target.tagName;
+            value = getInputValue(target, tagName, type);
+            const isInputMasked = shouldMaskInput({
+              maskInputOptions: this.maskInputOptions,
+              tagName,
+              type
+            });
+            const forceMask = needMaskingText(
+              m2.target,
+              this.maskTextClass,
+              this.maskTextSelector,
+              this.unmaskTextClass,
+              this.unmaskTextSelector,
+              isInputMasked
+            );
+            value = maskInputValue({
+              isMasked: forceMask,
+              element: target,
+              value,
+              maskInputFn: this.maskInputFn
+            });
+          }
+          if (isBlocked$1(
+            m2.target,
+            this.blockClass,
+            this.blockSelector,
+            this.unblockSelector,
+            false
+          ) || value === m2.oldValue) {
+            return;
+          }
+          let item = this.attributeMap.get(m2.target);
+          if (target.tagName === "IFRAME" && attributeName === "src" && !this.keepIframeSrcFn(value)) {
+            const iframeDoc = getIFrameContentDocument(
+              target
+            );
+            if (!iframeDoc) {
+              attributeName = "rr_src";
+            } else {
+              return;
+            }
+          }
+          if (!item) {
+            item = {
+              node: m2.target,
+              attributes: {},
+              styleDiff: {},
+              _unchangedStyles: {}
+            };
+            this.attributes.push(item);
+            this.attributeMap.set(m2.target, item);
+          }
+          if (attributeName === "type" && target.tagName === "INPUT" && (m2.oldValue || "").toLowerCase() === "password") {
+            target.setAttribute("data-rr-is-password", "true");
+          }
+          if (!ignoreAttribute(target.tagName, attributeName)) {
+            item.attributes[attributeName] = transformAttribute(
+              this.doc,
+              toLowerCase(target.tagName),
+              toLowerCase(attributeName),
+              value,
+              target,
+              this.maskAttributeFn
+            );
+            if (attributeName === "style") {
+              if (!this.unattachedDoc) {
+                try {
+                  this.unattachedDoc = document.implementation.createHTMLDocument();
+                } catch (e2) {
+                  this.unattachedDoc = this.doc;
+                }
+              }
+              const old = this.unattachedDoc.createElement("span");
+              if (m2.oldValue) {
+                old.setAttribute("style", m2.oldValue);
+              }
+              for (const pname of Array.from(target.style)) {
+                const newValue = target.style.getPropertyValue(pname);
+                const newPriority = target.style.getPropertyPriority(pname);
+                if (newValue !== old.style.getPropertyValue(pname) || newPriority !== old.style.getPropertyPriority(pname)) {
+                  if (newPriority === "") {
+                    item.styleDiff[pname] = newValue;
+                  } else {
+                    item.styleDiff[pname] = [newValue, newPriority];
+                  }
+                } else {
+                  item._unchangedStyles[pname] = [newValue, newPriority];
+                }
+              }
+              for (const pname of Array.from(old.style)) {
+                if (target.style.getPropertyValue(pname) === "") {
+                  item.styleDiff[pname] = false;
+                }
+              }
+            }
+          }
+          break;
+        }
+        case "childList": {
+          if (isBlocked$1(
+            m2.target,
+            this.blockClass,
+            this.blockSelector,
+            this.unblockSelector,
+            true
+          )) {
+            return;
+          }
+          m2.addedNodes.forEach((n2) => this.genAdds(n2, m2.target));
+          m2.removedNodes.forEach((n2) => {
+            const nodeId = this.mirror.getId(n2);
+            const parentId = isShadowRoot(m2.target) ? this.mirror.getId(m2.target.host) : this.mirror.getId(m2.target);
+            if (isBlocked$1(
+              m2.target,
+              this.blockClass,
+              this.blockSelector,
+              this.unblockSelector,
+              false
+            ) || isIgnored(n2, this.mirror) || !isSerialized(n2, this.mirror)) {
+              return;
+            }
+            if (this.addedSet.has(n2)) {
+              deepDelete(this.addedSet, n2);
+              this.droppedSet.add(n2);
+            } else if (this.addedSet.has(m2.target) && nodeId === -1) ;
+            else if (isAncestorRemoved(m2.target, this.mirror)) ;
+            else if (this.movedSet.has(n2) && this.movedMap[moveKey(nodeId, parentId)]) {
+              deepDelete(this.movedSet, n2);
+            } else {
+              this.removes.push({
+                parentId,
+                id: nodeId,
+                isShadow: isShadowRoot(m2.target) && isNativeShadowDom(m2.target) ? true : void 0
+              });
+            }
+            this.mapRemoves.push(n2);
+          });
+          break;
+        }
+      }
+    };
+    this.genAdds = (n2, target) => {
+      if (this.processedNodeManager.inOtherBuffer(n2, this)) return;
+      if (this.addedSet.has(n2) || this.movedSet.has(n2)) return;
+      if (this.mirror.hasNode(n2)) {
+        if (isIgnored(n2, this.mirror)) {
+          return;
+        }
+        this.movedSet.add(n2);
+        let targetId = null;
+        if (target && this.mirror.hasNode(target)) {
+          targetId = this.mirror.getId(target);
+        }
+        if (targetId && targetId !== -1) {
+          this.movedMap[moveKey(this.mirror.getId(n2), targetId)] = true;
+        }
+      } else {
+        this.addedSet.add(n2);
+        this.droppedSet.delete(n2);
+      }
+      if (!isBlocked$1(
+        n2,
+        this.blockClass,
+        this.blockSelector,
+        this.unblockSelector,
+        false
+      )) {
+        if (n2.childNodes) {
+          n2.childNodes.forEach((childN) => this.genAdds(childN));
+        }
+        if (hasShadowRoot(n2)) {
+          n2.shadowRoot.childNodes.forEach((childN) => {
+            this.processedNodeManager.add(childN, this);
+            this.genAdds(childN, n2);
+          });
+        }
+      }
+    };
+  }
+  init(options) {
+    [
+      "mutationCb",
+      "blockClass",
+      "blockSelector",
+      "unblockSelector",
+      "maskAllText",
+      "maskTextClass",
+      "unmaskTextClass",
+      "maskTextSelector",
+      "unmaskTextSelector",
+      "inlineStylesheet",
+      "maskInputOptions",
+      "maskAttributeFn",
+      "maskTextFn",
+      "maskInputFn",
+      "keepIframeSrcFn",
+      "recordCanvas",
+      "inlineImages",
+      "slimDOMOptions",
+      "dataURLOptions",
+      "doc",
+      "mirror",
+      "iframeManager",
+      "stylesheetManager",
+      "shadowDomManager",
+      "canvasManager",
+      "processedNodeManager"
+    ].forEach((key) => {
+      this[key] = options[key];
+    });
+  }
+  freeze() {
+    this.frozen = true;
+    this.canvasManager.freeze();
+  }
+  unfreeze() {
+    this.frozen = false;
+    this.canvasManager.unfreeze();
+    this.emit();
+  }
+  isFrozen() {
+    return this.frozen;
+  }
+  lock() {
+    this.locked = true;
+    this.canvasManager.lock();
+  }
+  unlock() {
+    this.locked = false;
+    this.canvasManager.unlock();
+    this.emit();
+  }
+  reset() {
+    this.shadowDomManager.reset();
+    this.canvasManager.reset();
+  }
+}
+function deepDelete(addsSet, n2) {
+  addsSet.delete(n2);
+  n2.childNodes?.forEach((childN) => deepDelete(addsSet, childN));
+}
+function isParentRemoved(removes, n2, mirror2) {
+  if (removes.length === 0) return false;
+  return _isParentRemoved(removes, n2, mirror2);
+}
+function _isParentRemoved(removes, n2, mirror2) {
+  let node = n2.parentNode;
+  while (node) {
+    const parentId = mirror2.getId(node);
+    if (removes.some((r2) => r2.id === parentId)) {
+      return true;
+    }
+    node = node.parentNode;
+  }
+  return false;
+}
+function isAncestorInSet(set, n2) {
+  if (set.size === 0) return false;
+  return _isAncestorInSet(set, n2);
+}
+function _isAncestorInSet(set, n2) {
+  const { parentNode } = n2;
+  if (!parentNode) {
+    return false;
+  }
+  if (set.has(parentNode)) {
+    return true;
+  }
+  return _isAncestorInSet(set, parentNode);
+}
+let errorHandler$1;
+function registerErrorHandler$1(handler) {
+  errorHandler$1 = handler;
+}
+function unregisterErrorHandler() {
+  errorHandler$1 = void 0;
+}
+const callbackWrapper$1 = (cb) => {
+  if (!errorHandler$1) {
+    return cb;
+  }
+  const rrwebWrapped = (...rest) => {
+    try {
+      return cb(...rest);
+    } catch (error2) {
+      if (errorHandler$1 && errorHandler$1(error2) === true) {
+        return () => {
+        };
+      }
+      throw error2;
+    }
+  };
+  return rrwebWrapped;
+};
+const mutationBuffers = [];
+function getEventTarget(event) {
+  try {
+    if ("composedPath" in event) {
+      const path = event.composedPath();
+      if (path.length) {
+        return path[0];
+      }
+    } else if ("path" in event && event.path.length) {
+      return event.path[0];
+    }
+  } catch {
+  }
+  return event && event.target;
+}
+function initMutationObserver(options, rootEl) {
+  const mutationBuffer = new MutationBuffer();
+  mutationBuffers.push(mutationBuffer);
+  mutationBuffer.init(options);
+  let mutationObserverCtor = window.MutationObserver || /**
+  * Some websites may disable MutationObserver by removing it from the window object.
+  * If someone is using rrweb to build a browser extention or things like it, they
+  * could not change the website's code but can have an opportunity to inject some
+  * code before the website executing its JS logic.
+  * Then they can do this to store the native MutationObserver:
+  * window.__rrMutationObserver = MutationObserver
+  */
+  window.__rrMutationObserver;
+  const angularZoneSymbol = window?.Zone?.__symbol__?.("MutationObserver");
+  if (angularZoneSymbol && window[angularZoneSymbol]) {
+    mutationObserverCtor = window[angularZoneSymbol];
+  }
+  const observer = new mutationObserverCtor(
+    callbackWrapper$1((mutations) => {
+      if (options.onMutation && options.onMutation(mutations) === false) {
+        return;
+      }
+      mutationBuffer.processMutations.bind(mutationBuffer)(mutations);
+    })
+  );
+  observer.observe(rootEl, {
+    attributes: true,
+    attributeOldValue: true,
+    characterData: true,
+    characterDataOldValue: true,
+    childList: true,
+    subtree: true
+  });
+  return observer;
+}
+function initMoveObserver({
+  mousemoveCb,
+  sampling,
+  doc,
+  mirror: mirror2
+}) {
+  if (sampling.mousemove === false) {
+    return () => {
+    };
+  }
+  const threshold = typeof sampling.mousemove === "number" ? sampling.mousemove : 50;
+  const callbackThreshold = typeof sampling.mousemoveCallback === "number" ? sampling.mousemoveCallback : 500;
+  let positions = [];
+  let timeBaseline;
+  const wrappedCb = throttle$1(
+    callbackWrapper$1(
+      (source) => {
+        const totalOffset = Date.now() - timeBaseline;
+        mousemoveCb(
+          positions.map((p2) => {
+            p2.timeOffset -= totalOffset;
+            return p2;
+          }),
+          source
+        );
+        positions = [];
+        timeBaseline = null;
+      }
+    ),
+    callbackThreshold
+  );
+  const updatePosition = callbackWrapper$1(
+    throttle$1(
+      callbackWrapper$1((evt) => {
+        const target = getEventTarget(evt);
+        const { clientX, clientY } = legacy_isTouchEvent(evt) ? evt.changedTouches[0] : evt;
+        if (!timeBaseline) {
+          timeBaseline = nowTimestamp();
+        }
+        positions.push({
+          x: clientX,
+          y: clientY,
+          id: mirror2.getId(target),
+          timeOffset: nowTimestamp() - timeBaseline
+        });
+        wrappedCb(
+          typeof DragEvent !== "undefined" && evt instanceof DragEvent ? IncrementalSource.Drag : evt instanceof MouseEvent ? IncrementalSource.MouseMove : IncrementalSource.TouchMove
+        );
+      }),
+      threshold,
+      {
+        trailing: false
+      }
+    )
+  );
+  const handlers2 = [
+    on("mousemove", updatePosition, doc),
+    on("touchmove", updatePosition, doc),
+    on("drag", updatePosition, doc)
+  ];
+  return callbackWrapper$1(() => {
+    handlers2.forEach((h2) => h2());
+  });
+}
+function initMouseInteractionObserver({
+  mouseInteractionCb,
+  doc,
+  mirror: mirror2,
+  blockClass,
+  blockSelector,
+  unblockSelector,
+  sampling
+}) {
+  if (sampling.mouseInteraction === false) {
+    return () => {
+    };
+  }
+  const disableMap = sampling.mouseInteraction === true || sampling.mouseInteraction === void 0 ? {} : sampling.mouseInteraction;
+  const handlers2 = [];
+  let currentPointerType = null;
+  const getHandler = (eventKey) => {
+    return (event) => {
+      const target = getEventTarget(event);
+      if (isBlocked$1(target, blockClass, blockSelector, unblockSelector, true)) {
+        return;
+      }
+      let pointerType = null;
+      let thisEventKey = eventKey;
+      if ("pointerType" in event) {
+        switch (event.pointerType) {
+          case "mouse":
+            pointerType = PointerTypes.Mouse;
+            break;
+          case "touch":
+            pointerType = PointerTypes.Touch;
+            break;
+          case "pen":
+            pointerType = PointerTypes.Pen;
+            break;
+        }
+        if (pointerType === PointerTypes.Touch) {
+          if (MouseInteractions[eventKey] === MouseInteractions.MouseDown) {
+            thisEventKey = "TouchStart";
+          } else if (MouseInteractions[eventKey] === MouseInteractions.MouseUp) {
+            thisEventKey = "TouchEnd";
+          }
+        } else if (pointerType === PointerTypes.Pen) ;
+      } else if (legacy_isTouchEvent(event)) {
+        pointerType = PointerTypes.Touch;
+      }
+      if (pointerType !== null) {
+        currentPointerType = pointerType;
+        if (thisEventKey.startsWith("Touch") && pointerType === PointerTypes.Touch || thisEventKey.startsWith("Mouse") && pointerType === PointerTypes.Mouse) {
+          pointerType = null;
+        }
+      } else if (MouseInteractions[eventKey] === MouseInteractions.Click) {
+        pointerType = currentPointerType;
+        currentPointerType = null;
+      }
+      const e2 = legacy_isTouchEvent(event) ? event.changedTouches[0] : event;
+      if (!e2) {
+        return;
+      }
+      const id = mirror2.getId(target);
+      const { clientX, clientY } = e2;
+      callbackWrapper$1(mouseInteractionCb)({
+        type: MouseInteractions[thisEventKey],
+        id,
+        x: clientX,
+        y: clientY,
+        ...pointerType !== null && { pointerType }
+      });
+    };
+  };
+  Object.keys(MouseInteractions).filter(
+    (key) => Number.isNaN(Number(key)) && !key.endsWith("_Departed") && disableMap[key] !== false
+  ).forEach((eventKey) => {
+    let eventName = toLowerCase(eventKey);
+    const handler = getHandler(eventKey);
+    if (window.PointerEvent) {
+      switch (MouseInteractions[eventKey]) {
+        case MouseInteractions.MouseDown:
+        case MouseInteractions.MouseUp:
+          eventName = eventName.replace(
+            "mouse",
+            "pointer"
+          );
+          break;
+        case MouseInteractions.TouchStart:
+        case MouseInteractions.TouchEnd:
+          return;
+      }
+    }
+    handlers2.push(on(eventName, handler, doc));
+  });
+  return callbackWrapper$1(() => {
+    handlers2.forEach((h2) => h2());
+  });
+}
+function initScrollObserver({
+  scrollCb,
+  doc,
+  mirror: mirror2,
+  blockClass,
+  blockSelector,
+  unblockSelector,
+  sampling
+}) {
+  const updatePosition = callbackWrapper$1(
+    throttle$1(
+      callbackWrapper$1((evt) => {
+        const target = getEventTarget(evt);
+        if (!target || isBlocked$1(
+          target,
+          blockClass,
+          blockSelector,
+          unblockSelector,
+          true
+        )) {
+          return;
+        }
+        const id = mirror2.getId(target);
+        if (target === doc && doc.defaultView) {
+          const scrollLeftTop = getWindowScroll(doc.defaultView);
+          scrollCb({
+            id,
+            x: scrollLeftTop.left,
+            y: scrollLeftTop.top
+          });
+        } else {
+          scrollCb({
+            id,
+            x: target.scrollLeft,
+            y: target.scrollTop
+          });
+        }
+      }),
+      sampling.scroll || 100
+    )
+  );
+  return on("scroll", updatePosition, doc);
+}
+function initViewportResizeObserver({ viewportResizeCb }, { win }) {
+  let lastH = -1;
+  let lastW = -1;
+  const updateDimension = callbackWrapper$1(
+    throttle$1(
+      callbackWrapper$1(() => {
+        const height = getWindowHeight();
+        const width = getWindowWidth();
+        if (lastH !== height || lastW !== width) {
+          viewportResizeCb({
+            width: Number(width),
+            height: Number(height)
+          });
+          lastH = height;
+          lastW = width;
+        }
+      }),
+      200
+    )
+  );
+  return on("resize", updateDimension, win);
+}
+const INPUT_TAGS = ["INPUT", "TEXTAREA", "SELECT"];
+const lastInputValueMap = /* @__PURE__ */ new WeakMap();
+function initInputObserver({
+  inputCb,
+  doc,
+  mirror: mirror2,
+  blockClass,
+  blockSelector,
+  unblockSelector,
+  ignoreClass,
+  ignoreSelector,
+  maskInputOptions,
+  maskInputFn,
+  sampling,
+  userTriggeredOnInput,
+  maskTextClass,
+  unmaskTextClass,
+  maskTextSelector,
+  unmaskTextSelector
+}) {
+  function eventHandler(event) {
+    let target = getEventTarget(event);
+    const userTriggered = event.isTrusted;
+    const tagName = target && toUpperCase(target.tagName);
+    if (tagName === "OPTION") target = target.parentElement;
+    if (!target || !tagName || INPUT_TAGS.indexOf(tagName) < 0 || isBlocked$1(
+      target,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      true
+    )) {
+      return;
+    }
+    const el = target;
+    if (el.classList.contains(ignoreClass) || ignoreSelector && el.matches(ignoreSelector)) {
+      return;
+    }
+    const type = getInputType(target);
+    let text = getInputValue(el, tagName, type);
+    let isChecked = false;
+    const isInputMasked = shouldMaskInput({
+      maskInputOptions,
+      tagName,
+      type
+    });
+    const forceMask = needMaskingText(
+      target,
+      maskTextClass,
+      maskTextSelector,
+      unmaskTextClass,
+      unmaskTextSelector,
+      isInputMasked
+    );
+    if (type === "radio" || type === "checkbox") {
+      isChecked = target.checked;
+    }
+    text = maskInputValue({
+      isMasked: forceMask,
+      element: target,
+      value: text,
+      maskInputFn
+    });
+    cbWithDedup(
+      target,
+      userTriggeredOnInput ? { text, isChecked, userTriggered } : { text, isChecked }
+    );
+    const name = target.name;
+    if (type === "radio" && name && isChecked) {
+      doc.querySelectorAll(`input[type="radio"][name="${name}"]`).forEach((el2) => {
+        if (el2 !== target) {
+          const text2 = maskInputValue({
+            // share mask behavior of `target`
+            isMasked: forceMask,
+            element: el2,
+            value: getInputValue(el2, tagName, type),
+            maskInputFn
+          });
+          cbWithDedup(
+            el2,
+            userTriggeredOnInput ? { text: text2, isChecked: !isChecked, userTriggered: false } : { text: text2, isChecked: !isChecked }
+          );
+        }
+      });
+    }
+  }
+  function cbWithDedup(target, v2) {
+    const lastInputValue = lastInputValueMap.get(target);
+    if (!lastInputValue || lastInputValue.text !== v2.text || lastInputValue.isChecked !== v2.isChecked) {
+      lastInputValueMap.set(target, v2);
+      const id = mirror2.getId(target);
+      callbackWrapper$1(inputCb)({
+        ...v2,
+        id
+      });
+    }
+  }
+  const events = sampling.input === "last" ? ["change"] : ["input", "change"];
+  const handlers2 = events.map(
+    (eventName) => on(eventName, callbackWrapper$1(eventHandler), doc)
+  );
+  const currentWindow = doc.defaultView;
+  if (!currentWindow) {
+    return () => {
+      handlers2.forEach((h2) => h2());
+    };
+  }
+  const propertyDescriptor = currentWindow.Object.getOwnPropertyDescriptor(
+    currentWindow.HTMLInputElement.prototype,
+    "value"
+  );
+  const hookProperties = [
+    [currentWindow.HTMLInputElement.prototype, "value"],
+    [currentWindow.HTMLInputElement.prototype, "checked"],
+    [currentWindow.HTMLSelectElement.prototype, "value"],
+    [currentWindow.HTMLTextAreaElement.prototype, "value"],
+    // Some UI library use selectedIndex to set select value
+    [currentWindow.HTMLSelectElement.prototype, "selectedIndex"],
+    [currentWindow.HTMLOptionElement.prototype, "selected"]
+  ];
+  if (propertyDescriptor && propertyDescriptor.set) {
+    handlers2.push(
+      ...hookProperties.map(
+        (p2) => hookSetter$1(
+          p2[0],
+          p2[1],
+          {
+            set() {
+              callbackWrapper$1(eventHandler)({
+                target: this,
+                isTrusted: false
+                // userTriggered to false as this could well be programmatic
+              });
+            }
+          },
+          false,
+          currentWindow
+        )
+      )
+    );
+  }
+  return callbackWrapper$1(() => {
+    handlers2.forEach((h2) => h2());
+  });
+}
+function getNestedCSSRulePositions(rule) {
+  const positions = [];
+  function recurse(childRule, pos) {
+    if (hasNestedCSSRule("CSSGroupingRule") && childRule.parentRule instanceof CSSGroupingRule || hasNestedCSSRule("CSSMediaRule") && childRule.parentRule instanceof CSSMediaRule || hasNestedCSSRule("CSSSupportsRule") && childRule.parentRule instanceof CSSSupportsRule || hasNestedCSSRule("CSSConditionRule") && childRule.parentRule instanceof CSSConditionRule) {
+      const rules2 = Array.from(
+        childRule.parentRule.cssRules
+      );
+      const index = rules2.indexOf(childRule);
+      pos.unshift(index);
+    } else if (childRule.parentStyleSheet) {
+      const rules2 = Array.from(childRule.parentStyleSheet.cssRules);
+      const index = rules2.indexOf(childRule);
+      pos.unshift(index);
+    }
+    return pos;
+  }
+  return recurse(rule, positions);
+}
+function getIdAndStyleId(sheet, mirror2, styleMirror) {
+  let id, styleId;
+  if (!sheet) return {};
+  if (sheet.ownerNode) id = mirror2.getId(sheet.ownerNode);
+  else styleId = styleMirror.getId(sheet);
+  return {
+    styleId,
+    id
+  };
+}
+function initStyleSheetObserver({ styleSheetRuleCb, mirror: mirror2, stylesheetManager }, { win }) {
+  if (!win.CSSStyleSheet || !win.CSSStyleSheet.prototype) {
+    return () => {
+    };
+  }
+  const insertRule = win.CSSStyleSheet.prototype.insertRule;
+  win.CSSStyleSheet.prototype.insertRule = new Proxy(insertRule, {
+    apply: callbackWrapper$1(
+      (target, thisArg, argumentsList) => {
+        const [rule, index] = argumentsList;
+        const { id, styleId } = getIdAndStyleId(
+          thisArg,
+          mirror2,
+          stylesheetManager.styleMirror
+        );
+        if (id && id !== -1 || styleId && styleId !== -1) {
+          styleSheetRuleCb({
+            id,
+            styleId,
+            adds: [{ rule, index }]
+          });
+        }
+        return target.apply(thisArg, argumentsList);
+      }
+    )
+  });
+  const deleteRule = win.CSSStyleSheet.prototype.deleteRule;
+  win.CSSStyleSheet.prototype.deleteRule = new Proxy(deleteRule, {
+    apply: callbackWrapper$1(
+      (target, thisArg, argumentsList) => {
+        const [index] = argumentsList;
+        const { id, styleId } = getIdAndStyleId(
+          thisArg,
+          mirror2,
+          stylesheetManager.styleMirror
+        );
+        if (id && id !== -1 || styleId && styleId !== -1) {
+          styleSheetRuleCb({
+            id,
+            styleId,
+            removes: [{ index }]
+          });
+        }
+        return target.apply(thisArg, argumentsList);
+      }
+    )
+  });
+  let replace;
+  if (win.CSSStyleSheet.prototype.replace) {
+    replace = win.CSSStyleSheet.prototype.replace;
+    win.CSSStyleSheet.prototype.replace = new Proxy(replace, {
+      apply: callbackWrapper$1(
+        (target, thisArg, argumentsList) => {
+          const [text] = argumentsList;
+          const { id, styleId } = getIdAndStyleId(
+            thisArg,
+            mirror2,
+            stylesheetManager.styleMirror
+          );
+          if (id && id !== -1 || styleId && styleId !== -1) {
+            styleSheetRuleCb({
+              id,
+              styleId,
+              replace: text
+            });
+          }
+          return target.apply(thisArg, argumentsList);
+        }
+      )
+    });
+  }
+  let replaceSync;
+  if (win.CSSStyleSheet.prototype.replaceSync) {
+    replaceSync = win.CSSStyleSheet.prototype.replaceSync;
+    win.CSSStyleSheet.prototype.replaceSync = new Proxy(replaceSync, {
+      apply: callbackWrapper$1(
+        (target, thisArg, argumentsList) => {
+          const [text] = argumentsList;
+          const { id, styleId } = getIdAndStyleId(
+            thisArg,
+            mirror2,
+            stylesheetManager.styleMirror
+          );
+          if (id && id !== -1 || styleId && styleId !== -1) {
+            styleSheetRuleCb({
+              id,
+              styleId,
+              replaceSync: text
+            });
+          }
+          return target.apply(thisArg, argumentsList);
+        }
+      )
+    });
+  }
+  const supportedNestedCSSRuleTypes = {};
+  if (canMonkeyPatchNestedCSSRule("CSSGroupingRule")) {
+    supportedNestedCSSRuleTypes.CSSGroupingRule = win.CSSGroupingRule;
+  } else {
+    if (canMonkeyPatchNestedCSSRule("CSSMediaRule")) {
+      supportedNestedCSSRuleTypes.CSSMediaRule = win.CSSMediaRule;
+    }
+    if (canMonkeyPatchNestedCSSRule("CSSConditionRule")) {
+      supportedNestedCSSRuleTypes.CSSConditionRule = win.CSSConditionRule;
+    }
+    if (canMonkeyPatchNestedCSSRule("CSSSupportsRule")) {
+      supportedNestedCSSRuleTypes.CSSSupportsRule = win.CSSSupportsRule;
+    }
+  }
+  const unmodifiedFunctions = {};
+  Object.entries(supportedNestedCSSRuleTypes).forEach(([typeKey, type]) => {
+    unmodifiedFunctions[typeKey] = {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      insertRule: type.prototype.insertRule,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      deleteRule: type.prototype.deleteRule
+    };
+    type.prototype.insertRule = new Proxy(
+      unmodifiedFunctions[typeKey].insertRule,
+      {
+        apply: callbackWrapper$1(
+          (target, thisArg, argumentsList) => {
+            const [rule, index] = argumentsList;
+            const { id, styleId } = getIdAndStyleId(
+              thisArg.parentStyleSheet,
+              mirror2,
+              stylesheetManager.styleMirror
+            );
+            if (id && id !== -1 || styleId && styleId !== -1) {
+              styleSheetRuleCb({
+                id,
+                styleId,
+                adds: [
+                  {
+                    rule,
+                    index: [
+                      ...getNestedCSSRulePositions(thisArg),
+                      index || 0
+                      // defaults to 0
+                    ]
+                  }
+                ]
+              });
+            }
+            return target.apply(thisArg, argumentsList);
+          }
+        )
+      }
+    );
+    type.prototype.deleteRule = new Proxy(
+      unmodifiedFunctions[typeKey].deleteRule,
+      {
+        apply: callbackWrapper$1(
+          (target, thisArg, argumentsList) => {
+            const [index] = argumentsList;
+            const { id, styleId } = getIdAndStyleId(
+              thisArg.parentStyleSheet,
+              mirror2,
+              stylesheetManager.styleMirror
+            );
+            if (id && id !== -1 || styleId && styleId !== -1) {
+              styleSheetRuleCb({
+                id,
+                styleId,
+                removes: [
+                  { index: [...getNestedCSSRulePositions(thisArg), index] }
+                ]
+              });
+            }
+            return target.apply(thisArg, argumentsList);
+          }
+        )
+      }
+    );
+  });
+  return callbackWrapper$1(() => {
+    win.CSSStyleSheet.prototype.insertRule = insertRule;
+    win.CSSStyleSheet.prototype.deleteRule = deleteRule;
+    replace && (win.CSSStyleSheet.prototype.replace = replace);
+    replaceSync && (win.CSSStyleSheet.prototype.replaceSync = replaceSync);
+    Object.entries(supportedNestedCSSRuleTypes).forEach(([typeKey, type]) => {
+      type.prototype.insertRule = unmodifiedFunctions[typeKey].insertRule;
+      type.prototype.deleteRule = unmodifiedFunctions[typeKey].deleteRule;
+    });
+  });
+}
+function initAdoptedStyleSheetObserver({
+  mirror: mirror2,
+  stylesheetManager
+}, host) {
+  let hostId = null;
+  if (host.nodeName === "#document") hostId = mirror2.getId(host);
+  else hostId = mirror2.getId(host.host);
+  const patchTarget = host.nodeName === "#document" ? host.defaultView?.Document : host.ownerDocument?.defaultView?.ShadowRoot;
+  const originalPropertyDescriptor = patchTarget?.prototype ? Object.getOwnPropertyDescriptor(
+    patchTarget?.prototype,
+    "adoptedStyleSheets"
+  ) : void 0;
+  if (hostId === null || hostId === -1 || !patchTarget || !originalPropertyDescriptor)
+    return () => {
+    };
+  Object.defineProperty(host, "adoptedStyleSheets", {
+    configurable: originalPropertyDescriptor.configurable,
+    enumerable: originalPropertyDescriptor.enumerable,
+    get() {
+      return originalPropertyDescriptor.get?.call(this);
+    },
+    set(sheets) {
+      const result = originalPropertyDescriptor.set?.call(this, sheets);
+      if (hostId !== null && hostId !== -1) {
+        try {
+          stylesheetManager.adoptStyleSheets(sheets, hostId);
+        } catch (e2) {
+        }
+      }
+      return result;
+    }
+  });
+  return callbackWrapper$1(() => {
+    Object.defineProperty(host, "adoptedStyleSheets", {
+      configurable: originalPropertyDescriptor.configurable,
+      enumerable: originalPropertyDescriptor.enumerable,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      get: originalPropertyDescriptor.get,
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      set: originalPropertyDescriptor.set
+    });
+  });
+}
+function initStyleDeclarationObserver({
+  styleDeclarationCb,
+  mirror: mirror2,
+  ignoreCSSAttributes,
+  stylesheetManager
+}, { win }) {
+  const setProperty = win.CSSStyleDeclaration.prototype.setProperty;
+  win.CSSStyleDeclaration.prototype.setProperty = new Proxy(setProperty, {
+    apply: callbackWrapper$1(
+      (target, thisArg, argumentsList) => {
+        const [property, value, priority] = argumentsList;
+        if (ignoreCSSAttributes.has(property)) {
+          return setProperty.apply(thisArg, [property, value, priority]);
+        }
+        const { id, styleId } = getIdAndStyleId(
+          thisArg.parentRule?.parentStyleSheet,
+          mirror2,
+          stylesheetManager.styleMirror
+        );
+        if (id && id !== -1 || styleId && styleId !== -1) {
+          styleDeclarationCb({
+            id,
+            styleId,
+            set: {
+              property,
+              value,
+              priority
+            },
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            index: getNestedCSSRulePositions(thisArg.parentRule)
+          });
+        }
+        return target.apply(thisArg, argumentsList);
+      }
+    )
+  });
+  const removeProperty = win.CSSStyleDeclaration.prototype.removeProperty;
+  win.CSSStyleDeclaration.prototype.removeProperty = new Proxy(removeProperty, {
+    apply: callbackWrapper$1(
+      (target, thisArg, argumentsList) => {
+        const [property] = argumentsList;
+        if (ignoreCSSAttributes.has(property)) {
+          return removeProperty.apply(thisArg, [property]);
+        }
+        const { id, styleId } = getIdAndStyleId(
+          thisArg.parentRule?.parentStyleSheet,
+          mirror2,
+          stylesheetManager.styleMirror
+        );
+        if (id && id !== -1 || styleId && styleId !== -1) {
+          styleDeclarationCb({
+            id,
+            styleId,
+            remove: {
+              property
+            },
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            index: getNestedCSSRulePositions(thisArg.parentRule)
+          });
+        }
+        return target.apply(thisArg, argumentsList);
+      }
+    )
+  });
+  return callbackWrapper$1(() => {
+    win.CSSStyleDeclaration.prototype.setProperty = setProperty;
+    win.CSSStyleDeclaration.prototype.removeProperty = removeProperty;
+  });
+}
+function initMediaInteractionObserver({
+  mediaInteractionCb,
+  blockClass,
+  blockSelector,
+  unblockSelector,
+  mirror: mirror2,
+  sampling,
+  doc
+}) {
+  const handler = callbackWrapper$1(
+    (type) => throttle$1(
+      callbackWrapper$1((event) => {
+        const target = getEventTarget(event);
+        if (!target || isBlocked$1(
+          target,
+          blockClass,
+          blockSelector,
+          unblockSelector,
+          true
+        )) {
+          return;
+        }
+        const { currentTime, volume, muted, playbackRate } = target;
+        mediaInteractionCb({
+          type,
+          id: mirror2.getId(target),
+          currentTime,
+          volume,
+          muted,
+          playbackRate
+        });
+      }),
+      sampling.media || 500
+    )
+  );
+  const handlers2 = [
+    on("play", handler(MediaInteractions.Play), doc),
+    on("pause", handler(MediaInteractions.Pause), doc),
+    on("seeked", handler(MediaInteractions.Seeked), doc),
+    on("volumechange", handler(MediaInteractions.VolumeChange), doc),
+    on("ratechange", handler(MediaInteractions.RateChange), doc)
+  ];
+  return callbackWrapper$1(() => {
+    handlers2.forEach((h2) => h2());
+  });
+}
+function initFontObserver({ fontCb, doc }) {
+  const win = doc.defaultView;
+  if (!win) {
+    return () => {
+    };
+  }
+  const handlers2 = [];
+  const fontMap = /* @__PURE__ */ new WeakMap();
+  const originalFontFace = win.FontFace;
+  win.FontFace = function FontFace2(family, source, descriptors) {
+    const fontFace = new originalFontFace(family, source, descriptors);
+    fontMap.set(fontFace, {
+      family,
+      buffer: typeof source !== "string",
+      descriptors,
+      fontSource: typeof source === "string" ? source : JSON.stringify(Array.from(new Uint8Array(source)))
+    });
+    return fontFace;
+  };
+  const restoreHandler = patch$1(
+    doc.fonts,
+    "add",
+    function(original) {
+      return function(fontFace) {
+        setTimeout$1$1(
+          callbackWrapper$1(() => {
+            const p2 = fontMap.get(fontFace);
+            if (p2) {
+              fontCb(p2);
+              fontMap.delete(fontFace);
+            }
+          }),
+          0
+        );
+        return original.apply(this, [fontFace]);
+      };
+    }
+  );
+  handlers2.push(() => {
+    win.FontFace = originalFontFace;
+  });
+  handlers2.push(restoreHandler);
+  return callbackWrapper$1(() => {
+    handlers2.forEach((h2) => h2());
+  });
+}
+function initSelectionObserver(param) {
+  const {
+    doc,
+    mirror: mirror2,
+    blockClass,
+    blockSelector,
+    unblockSelector,
+    selectionCb
+  } = param;
+  let collapsed = true;
+  const updateSelection = callbackWrapper$1(() => {
+    const selection = doc.getSelection();
+    if (!selection || collapsed && selection?.isCollapsed) return;
+    collapsed = selection.isCollapsed || false;
+    const ranges = [];
+    const count2 = selection.rangeCount || 0;
+    for (let i2 = 0; i2 < count2; i2++) {
+      const range = selection.getRangeAt(i2);
+      const { startContainer, startOffset, endContainer, endOffset } = range;
+      const blocked = isBlocked$1(
+        startContainer,
+        blockClass,
+        blockSelector,
+        unblockSelector,
+        true
+      ) || isBlocked$1(
+        endContainer,
+        blockClass,
+        blockSelector,
+        unblockSelector,
+        true
+      );
+      if (blocked) continue;
+      ranges.push({
+        start: mirror2.getId(startContainer),
+        startOffset,
+        end: mirror2.getId(endContainer),
+        endOffset
+      });
+    }
+    selectionCb({ ranges });
+  });
+  updateSelection();
+  return on("selectionchange", updateSelection);
+}
+function initCustomElementObserver({
+  doc,
+  customElementCb
+}) {
+  const win = doc.defaultView;
+  if (!win || !win.customElements) return () => {
+  };
+  const restoreHandler = patch$1(
+    win.customElements,
+    "define",
+    function(original) {
+      return function(name, constructor, options) {
+        try {
+          customElementCb({
+            define: {
+              name
+            }
+          });
+        } catch (e2) {
+        }
+        return original.apply(this, [name, constructor, options]);
+      };
+    }
+  );
+  return restoreHandler;
+}
+function initObservers(o2, _hooks = {}) {
+  const currentWindow = o2.doc.defaultView;
+  if (!currentWindow) {
+    return () => {
+    };
+  }
+  let mutationObserver;
+  if (o2.recordDOM) {
+    mutationObserver = initMutationObserver(o2, o2.doc);
+  }
+  const mousemoveHandler = initMoveObserver(o2);
+  const mouseInteractionHandler = initMouseInteractionObserver(o2);
+  const scrollHandler = initScrollObserver(o2);
+  const viewportResizeHandler = initViewportResizeObserver(o2, {
+    win: currentWindow
+  });
+  const inputHandler = initInputObserver(o2);
+  const mediaInteractionHandler = initMediaInteractionObserver(o2);
+  let styleSheetObserver = () => {
+  };
+  let adoptedStyleSheetObserver = () => {
+  };
+  let styleDeclarationObserver = () => {
+  };
+  let fontObserver = () => {
+  };
+  if (o2.recordDOM) {
+    styleSheetObserver = initStyleSheetObserver(o2, { win: currentWindow });
+    adoptedStyleSheetObserver = initAdoptedStyleSheetObserver(o2, o2.doc);
+    styleDeclarationObserver = initStyleDeclarationObserver(o2, {
+      win: currentWindow
+    });
+    if (o2.collectFonts) {
+      fontObserver = initFontObserver(o2);
+    }
+  }
+  const selectionObserver = initSelectionObserver(o2);
+  const customElementObserver = initCustomElementObserver(o2);
+  const pluginHandlers = [];
+  for (const plugin of o2.plugins) {
+    pluginHandlers.push(
+      plugin.observer(plugin.callback, currentWindow, plugin.options)
+    );
+  }
+  return callbackWrapper$1(() => {
+    mutationBuffers.forEach((b2) => b2.reset());
+    mutationObserver?.disconnect();
+    mousemoveHandler();
+    mouseInteractionHandler();
+    scrollHandler();
+    viewportResizeHandler();
+    inputHandler();
+    mediaInteractionHandler();
+    styleSheetObserver();
+    adoptedStyleSheetObserver();
+    styleDeclarationObserver();
+    fontObserver();
+    selectionObserver();
+    customElementObserver();
+    pluginHandlers.forEach((h2) => h2());
+  });
+}
+function hasNestedCSSRule(prop) {
+  return typeof window[prop] !== "undefined";
+}
+function canMonkeyPatchNestedCSSRule(prop) {
+  return Boolean(
+    typeof window[prop] !== "undefined" && // Note: Generally, this check _shouldn't_ be necessary
+    // However, in some scenarios (e.g. jsdom) this can sometimes fail, so we check for it here
+    window[prop].prototype && "insertRule" in window[prop].prototype && "deleteRule" in window[prop].prototype
+  );
+}
+class CrossOriginIframeMirror {
+  constructor(generateIdFn) {
+    this.generateIdFn = generateIdFn;
+    this.iframeIdToRemoteIdMap = /* @__PURE__ */ new WeakMap();
+    this.iframeRemoteIdToIdMap = /* @__PURE__ */ new WeakMap();
+  }
+  getId(iframe, remoteId, idToRemoteMap, remoteToIdMap) {
+    const idToRemoteIdMap = idToRemoteMap || this.getIdToRemoteIdMap(iframe);
+    const remoteIdToIdMap = remoteToIdMap || this.getRemoteIdToIdMap(iframe);
+    let id = idToRemoteIdMap.get(remoteId);
+    if (!id) {
+      id = this.generateIdFn();
+      idToRemoteIdMap.set(remoteId, id);
+      remoteIdToIdMap.set(id, remoteId);
+    }
+    return id;
+  }
+  getIds(iframe, remoteId) {
+    const idToRemoteIdMap = this.getIdToRemoteIdMap(iframe);
+    const remoteIdToIdMap = this.getRemoteIdToIdMap(iframe);
+    return remoteId.map(
+      (id) => this.getId(iframe, id, idToRemoteIdMap, remoteIdToIdMap)
+    );
+  }
+  getRemoteId(iframe, id, map) {
+    const remoteIdToIdMap = map || this.getRemoteIdToIdMap(iframe);
+    if (typeof id !== "number") return id;
+    const remoteId = remoteIdToIdMap.get(id);
+    if (!remoteId) return -1;
+    return remoteId;
+  }
+  getRemoteIds(iframe, ids) {
+    const remoteIdToIdMap = this.getRemoteIdToIdMap(iframe);
+    return ids.map((id) => this.getRemoteId(iframe, id, remoteIdToIdMap));
+  }
+  reset(iframe) {
+    if (!iframe) {
+      this.iframeIdToRemoteIdMap = /* @__PURE__ */ new WeakMap();
+      this.iframeRemoteIdToIdMap = /* @__PURE__ */ new WeakMap();
+      return;
+    }
+    this.iframeIdToRemoteIdMap.delete(iframe);
+    this.iframeRemoteIdToIdMap.delete(iframe);
+  }
+  getIdToRemoteIdMap(iframe) {
+    let idToRemoteIdMap = this.iframeIdToRemoteIdMap.get(iframe);
+    if (!idToRemoteIdMap) {
+      idToRemoteIdMap = /* @__PURE__ */ new Map();
+      this.iframeIdToRemoteIdMap.set(iframe, idToRemoteIdMap);
+    }
+    return idToRemoteIdMap;
+  }
+  getRemoteIdToIdMap(iframe) {
+    let remoteIdToIdMap = this.iframeRemoteIdToIdMap.get(iframe);
+    if (!remoteIdToIdMap) {
+      remoteIdToIdMap = /* @__PURE__ */ new Map();
+      this.iframeRemoteIdToIdMap.set(iframe, remoteIdToIdMap);
+    }
+    return remoteIdToIdMap;
+  }
+}
+class IframeManagerNoop {
+  constructor() {
+    this.crossOriginIframeMirror = new CrossOriginIframeMirror(genId);
+    this.crossOriginIframeRootIdMap = /* @__PURE__ */ new WeakMap();
+  }
+  addIframe() {
+  }
+  addLoadListener() {
+  }
+  attachIframe() {
+  }
+}
+class IframeManager {
+  constructor(options) {
+    this.iframes = /* @__PURE__ */ new WeakMap();
+    this.crossOriginIframeMap = /* @__PURE__ */ new WeakMap();
+    this.crossOriginIframeMirror = new CrossOriginIframeMirror(genId);
+    this.crossOriginIframeRootIdMap = /* @__PURE__ */ new WeakMap();
+    this.mutationCb = options.mutationCb;
+    this.wrappedEmit = options.wrappedEmit;
+    this.stylesheetManager = options.stylesheetManager;
+    this.recordCrossOriginIframes = options.recordCrossOriginIframes;
+    this.crossOriginIframeStyleMirror = new CrossOriginIframeMirror(
+      this.stylesheetManager.styleMirror.generateId.bind(
+        this.stylesheetManager.styleMirror
+      )
+    );
+    this.mirror = options.mirror;
+    if (this.recordCrossOriginIframes) {
+      window.addEventListener("message", this.handleMessage.bind(this));
+    }
+  }
+  addIframe(iframeEl) {
+    this.iframes.set(iframeEl, true);
+    if (iframeEl.contentWindow)
+      this.crossOriginIframeMap.set(iframeEl.contentWindow, iframeEl);
+  }
+  addLoadListener(cb) {
+    this.loadListener = cb;
+  }
+  attachIframe(iframeEl, childSn) {
+    this.mutationCb({
+      adds: [
+        {
+          parentId: this.mirror.getId(iframeEl),
+          nextId: null,
+          node: childSn
+        }
+      ],
+      removes: [],
+      texts: [],
+      attributes: [],
+      isAttachIframe: true
+    });
+    if (this.recordCrossOriginIframes)
+      iframeEl.contentWindow?.addEventListener(
+        "message",
+        this.handleMessage.bind(this)
+      );
+    this.loadListener?.(iframeEl);
+    const iframeDoc = getIFrameContentDocument(iframeEl);
+    if (iframeDoc && iframeDoc.adoptedStyleSheets && iframeDoc.adoptedStyleSheets.length > 0)
+      this.stylesheetManager.adoptStyleSheets(
+        iframeDoc.adoptedStyleSheets,
+        this.mirror.getId(iframeDoc)
+      );
+  }
+  handleMessage(message) {
+    const crossOriginMessageEvent = message;
+    if (crossOriginMessageEvent.data.type !== "rrweb" || // To filter out the rrweb messages which are forwarded by some sites.
+    crossOriginMessageEvent.origin !== crossOriginMessageEvent.data.origin)
+      return;
+    const iframeSourceWindow = message.source;
+    if (!iframeSourceWindow) return;
+    const iframeEl = this.crossOriginIframeMap.get(message.source);
+    if (!iframeEl) return;
+    const transformedEvent = this.transformCrossOriginEvent(
+      iframeEl,
+      crossOriginMessageEvent.data.event
+    );
+    if (transformedEvent)
+      this.wrappedEmit(
+        transformedEvent,
+        crossOriginMessageEvent.data.isCheckout
+      );
+  }
+  transformCrossOriginEvent(iframeEl, e2) {
+    switch (e2.type) {
+      case EventType.FullSnapshot: {
+        this.crossOriginIframeMirror.reset(iframeEl);
+        this.crossOriginIframeStyleMirror.reset(iframeEl);
+        this.replaceIdOnNode(e2.data.node, iframeEl);
+        const rootId = e2.data.node.id;
+        this.crossOriginIframeRootIdMap.set(iframeEl, rootId);
+        this.patchRootIdOnNode(e2.data.node, rootId);
+        return {
+          timestamp: e2.timestamp,
+          type: EventType.IncrementalSnapshot,
+          data: {
+            source: IncrementalSource.Mutation,
+            adds: [
+              {
+                parentId: this.mirror.getId(iframeEl),
+                nextId: null,
+                node: e2.data.node
+              }
+            ],
+            removes: [],
+            texts: [],
+            attributes: [],
+            isAttachIframe: true
+          }
+        };
+      }
+      case EventType.Meta:
+      case EventType.Load:
+      case EventType.DomContentLoaded: {
+        return false;
+      }
+      case EventType.Plugin: {
+        return e2;
+      }
+      case EventType.Custom: {
+        this.replaceIds(
+          e2.data.payload,
+          iframeEl,
+          ["id", "parentId", "previousId", "nextId"]
+        );
+        return e2;
+      }
+      case EventType.IncrementalSnapshot: {
+        switch (e2.data.source) {
+          case IncrementalSource.Mutation: {
+            e2.data.adds.forEach((n2) => {
+              this.replaceIds(n2, iframeEl, [
+                "parentId",
+                "nextId",
+                "previousId"
+              ]);
+              this.replaceIdOnNode(n2.node, iframeEl);
+              const rootId = this.crossOriginIframeRootIdMap.get(iframeEl);
+              rootId && this.patchRootIdOnNode(n2.node, rootId);
+            });
+            e2.data.removes.forEach((n2) => {
+              this.replaceIds(n2, iframeEl, ["parentId", "id"]);
+            });
+            e2.data.attributes.forEach((n2) => {
+              this.replaceIds(n2, iframeEl, ["id"]);
+            });
+            e2.data.texts.forEach((n2) => {
+              this.replaceIds(n2, iframeEl, ["id"]);
+            });
+            return e2;
+          }
+          case IncrementalSource.Drag:
+          case IncrementalSource.TouchMove:
+          case IncrementalSource.MouseMove: {
+            e2.data.positions.forEach((p2) => {
+              this.replaceIds(p2, iframeEl, ["id"]);
+            });
+            return e2;
+          }
+          case IncrementalSource.ViewportResize: {
+            return false;
+          }
+          case IncrementalSource.MediaInteraction:
+          case IncrementalSource.MouseInteraction:
+          case IncrementalSource.Scroll:
+          case IncrementalSource.CanvasMutation:
+          case IncrementalSource.Input: {
+            this.replaceIds(e2.data, iframeEl, ["id"]);
+            return e2;
+          }
+          case IncrementalSource.StyleSheetRule:
+          case IncrementalSource.StyleDeclaration: {
+            this.replaceIds(e2.data, iframeEl, ["id"]);
+            this.replaceStyleIds(e2.data, iframeEl, ["styleId"]);
+            return e2;
+          }
+          case IncrementalSource.Font: {
+            return e2;
+          }
+          case IncrementalSource.Selection: {
+            e2.data.ranges.forEach((range) => {
+              this.replaceIds(range, iframeEl, ["start", "end"]);
+            });
+            return e2;
+          }
+          case IncrementalSource.AdoptedStyleSheet: {
+            this.replaceIds(e2.data, iframeEl, ["id"]);
+            this.replaceStyleIds(e2.data, iframeEl, ["styleIds"]);
+            e2.data.styles?.forEach((style) => {
+              this.replaceStyleIds(style, iframeEl, ["styleId"]);
+            });
+            return e2;
+          }
+        }
+      }
+    }
+    return false;
+  }
+  replace(iframeMirror, obj, iframeEl, keys2) {
+    for (const key of keys2) {
+      if (!Array.isArray(obj[key]) && typeof obj[key] !== "number") continue;
+      if (Array.isArray(obj[key])) {
+        obj[key] = iframeMirror.getIds(
+          iframeEl,
+          obj[key]
+        );
+      } else {
+        obj[key] = iframeMirror.getId(iframeEl, obj[key]);
+      }
+    }
+    return obj;
+  }
+  replaceIds(obj, iframeEl, keys2) {
+    return this.replace(this.crossOriginIframeMirror, obj, iframeEl, keys2);
+  }
+  replaceStyleIds(obj, iframeEl, keys2) {
+    return this.replace(this.crossOriginIframeStyleMirror, obj, iframeEl, keys2);
+  }
+  replaceIdOnNode(node, iframeEl) {
+    this.replaceIds(node, iframeEl, ["id", "rootId"]);
+    if ("childNodes" in node) {
+      node.childNodes.forEach((child) => {
+        this.replaceIdOnNode(child, iframeEl);
+      });
+    }
+  }
+  patchRootIdOnNode(node, rootId) {
+    if (node.type !== NodeType$2.Document && !node.rootId) node.rootId = rootId;
+    if ("childNodes" in node) {
+      node.childNodes.forEach((child) => {
+        this.patchRootIdOnNode(child, rootId);
+      });
+    }
+  }
+}
+class ShadowDomManagerNoop {
+  init() {
+  }
+  addShadowRoot() {
+  }
+  observeAttachShadow() {
+  }
+  reset() {
+  }
+}
+class ShadowDomManager {
+  constructor(options) {
+    this.shadowDoms = /* @__PURE__ */ new WeakSet();
+    this.restoreHandlers = [];
+    this.mutationCb = options.mutationCb;
+    this.scrollCb = options.scrollCb;
+    this.bypassOptions = options.bypassOptions;
+    this.mirror = options.mirror;
+    this.init();
+  }
+  init() {
+    this.reset();
+    this.patchAttachShadow(Element, document);
+  }
+  addShadowRoot(shadowRoot, doc) {
+    if (!isNativeShadowDom(shadowRoot)) return;
+    if (this.shadowDoms.has(shadowRoot)) return;
+    this.shadowDoms.add(shadowRoot);
+    this.bypassOptions.canvasManager.addShadowRoot(shadowRoot);
+    const observer = initMutationObserver(
+      {
+        ...this.bypassOptions,
+        doc,
+        mutationCb: this.mutationCb,
+        mirror: this.mirror,
+        shadowDomManager: this
+      },
+      shadowRoot
+    );
+    this.restoreHandlers.push(() => observer.disconnect());
+    this.restoreHandlers.push(
+      initScrollObserver({
+        ...this.bypassOptions,
+        scrollCb: this.scrollCb,
+        // https://gist.github.com/praveenpuglia/0832da687ed5a5d7a0907046c9ef1813
+        // scroll is not allowed to pass the boundary, so we need to listen the shadow document
+        doc: shadowRoot,
+        mirror: this.mirror
+      })
+    );
+    setTimeout$1$1(() => {
+      if (shadowRoot.adoptedStyleSheets && shadowRoot.adoptedStyleSheets.length > 0)
+        this.bypassOptions.stylesheetManager.adoptStyleSheets(
+          shadowRoot.adoptedStyleSheets,
+          this.mirror.getId(shadowRoot.host)
+        );
+      this.restoreHandlers.push(
+        initAdoptedStyleSheetObserver(
+          {
+            mirror: this.mirror,
+            stylesheetManager: this.bypassOptions.stylesheetManager
+          },
+          shadowRoot
+        )
+      );
+    }, 0);
+  }
+  /**
+   * Monkey patch 'attachShadow' of an IFrameElement to observe newly added shadow doms.
+   */
+  observeAttachShadow(iframeElement) {
+    const iframeDoc = getIFrameContentDocument(iframeElement);
+    const iframeWindow = getIFrameContentWindow(iframeElement);
+    if (!iframeDoc || !iframeWindow) return;
+    this.patchAttachShadow(
+      iframeWindow.Element,
+      iframeDoc
+    );
+  }
+  /**
+   * Patch 'attachShadow' to observe newly added shadow doms.
+   */
+  patchAttachShadow(element, doc) {
+    const manager = this;
+    this.restoreHandlers.push(
+      patch$1(
+        element.prototype,
+        "attachShadow",
+        function(original) {
+          return function(option) {
+            const shadowRoot = original.call(this, option);
+            if (this.shadowRoot && inDom(this))
+              manager.addShadowRoot(this.shadowRoot, doc);
+            return shadowRoot;
+          };
+        }
+      )
+    );
+  }
+  reset() {
+    this.restoreHandlers.forEach((handler) => {
+      try {
+        handler();
+      } catch (e2) {
+      }
+    });
+    this.restoreHandlers = [];
+    this.shadowDoms = /* @__PURE__ */ new WeakSet();
+    this.bypassOptions.canvasManager.resetShadowRoots();
+  }
+}
+var chars$1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var lookup$1 = typeof Uint8Array === "undefined" ? [] : new Uint8Array(256);
+for (var i$1$1 = 0; i$1$1 < chars$1.length; i$1$1++) {
+  lookup$1[chars$1.charCodeAt(i$1$1)] = i$1$1;
+}
+class CanvasManagerNoop {
+  reset() {
+  }
+  freeze() {
+  }
+  unfreeze() {
+  }
+  lock() {
+  }
+  unlock() {
+  }
+  snapshot() {
+  }
+  addWindow() {
+  }
+  addShadowRoot() {
+  }
+  resetShadowRoots() {
+  }
+}
+class StylesheetManager {
+  constructor(options) {
+    this.trackedLinkElements = /* @__PURE__ */ new WeakSet();
+    this.styleMirror = new StyleSheetMirror();
+    this.mutationCb = options.mutationCb;
+    this.adoptedStyleSheetCb = options.adoptedStyleSheetCb;
+  }
+  attachLinkElement(linkEl, childSn) {
+    if ("_cssText" in childSn.attributes)
+      this.mutationCb({
+        adds: [],
+        removes: [],
+        texts: [],
+        attributes: [
+          {
+            id: childSn.id,
+            attributes: childSn.attributes
+          }
+        ]
+      });
+    this.trackLinkElement(linkEl);
+  }
+  trackLinkElement(linkEl) {
+    if (this.trackedLinkElements.has(linkEl)) return;
+    this.trackedLinkElements.add(linkEl);
+    this.trackStylesheetInLinkElement(linkEl);
+  }
+  adoptStyleSheets(sheets, hostId) {
+    if (sheets.length === 0) return;
+    const adoptedStyleSheetData = {
+      id: hostId,
+      styleIds: []
+    };
+    const styles = [];
+    for (const sheet of sheets) {
+      let styleId;
+      if (!this.styleMirror.has(sheet)) {
+        styleId = this.styleMirror.add(sheet);
+        styles.push({
+          styleId,
+          rules: Array.from(sheet.rules || CSSRule, (r2, index) => ({
+            rule: stringifyRule(r2),
+            index
+          }))
+        });
+      } else styleId = this.styleMirror.getId(sheet);
+      adoptedStyleSheetData.styleIds.push(styleId);
+    }
+    if (styles.length > 0) adoptedStyleSheetData.styles = styles;
+    this.adoptedStyleSheetCb(adoptedStyleSheetData);
+  }
+  reset() {
+    this.styleMirror.reset();
+    this.trackedLinkElements = /* @__PURE__ */ new WeakSet();
+  }
+  // TODO: take snapshot on stylesheet reload by applying event listener
+  trackStylesheetInLinkElement(_linkEl) {
+  }
+}
+class ProcessedNodeManager {
+  constructor() {
+    this.nodeMap = /* @__PURE__ */ new WeakMap();
+    this.active = false;
+  }
+  inOtherBuffer(node, thisBuffer) {
+    const buffers = this.nodeMap.get(node);
+    return buffers && Array.from(buffers).some((buffer) => buffer !== thisBuffer);
+  }
+  add(node, buffer) {
+    if (!this.active) {
+      this.active = true;
+      onRequestAnimationFrame$1(() => {
+        this.nodeMap = /* @__PURE__ */ new WeakMap();
+        this.active = false;
+      });
+    }
+    this.nodeMap.set(node, (this.nodeMap.get(node) || /* @__PURE__ */ new Set()).add(buffer));
+  }
+  destroy() {
+  }
+}
+let wrappedEmit;
+let _takeFullSnapshot;
+try {
+  if (Array.from([1], (x2) => x2 * 2)[0] !== 2) {
+    const cleanFrame = document.createElement("iframe");
+    document.body.appendChild(cleanFrame);
+    Array.from = cleanFrame.contentWindow?.Array.from || Array.from;
+    document.body.removeChild(cleanFrame);
+  }
+} catch (err) {
+  console.debug("Unable to override Array.from", err);
+}
+const mirror = createMirror$2$1();
+function record(options = {}) {
+  const {
+    emit,
+    checkoutEveryNms,
+    checkoutEveryNth,
+    blockClass = "rr-block",
+    blockSelector = null,
+    unblockSelector = null,
+    ignoreClass = "rr-ignore",
+    ignoreSelector = null,
+    maskAllText = false,
+    maskTextClass = "rr-mask",
+    unmaskTextClass = null,
+    maskTextSelector = null,
+    unmaskTextSelector = null,
+    inlineStylesheet = true,
+    maskAllInputs,
+    maskInputOptions: _maskInputOptions,
+    slimDOMOptions: _slimDOMOptions,
+    maskAttributeFn,
+    maskInputFn,
+    maskTextFn,
+    maxCanvasSize = null,
+    packFn,
+    sampling = {},
+    dataURLOptions = {},
+    mousemoveWait,
+    recordDOM = true,
+    recordCanvas = false,
+    recordCrossOriginIframes = false,
+    recordAfter = options.recordAfter === "DOMContentLoaded" ? options.recordAfter : "load",
+    userTriggeredOnInput = false,
+    collectFonts = false,
+    inlineImages = false,
+    plugins,
+    keepIframeSrcFn = () => false,
+    ignoreCSSAttributes = /* @__PURE__ */ new Set([]),
+    errorHandler: errorHandler2,
+    onMutation,
+    getCanvasManager
+  } = options;
+  registerErrorHandler$1(errorHandler2);
+  const inEmittingFrame = recordCrossOriginIframes ? window.parent === window : true;
+  let passEmitsToParent = false;
+  if (!inEmittingFrame) {
+    try {
+      if (window.parent.document) {
+        passEmitsToParent = false;
+      }
+    } catch (e2) {
+      passEmitsToParent = true;
+    }
+  }
+  if (inEmittingFrame && !emit) {
+    throw new Error("emit function is required");
+  }
+  if (!inEmittingFrame && !passEmitsToParent) {
+    return () => {
+    };
+  }
+  if (mousemoveWait !== void 0 && sampling.mousemove === void 0) {
+    sampling.mousemove = mousemoveWait;
+  }
+  mirror.reset();
+  const maskInputOptions = maskAllInputs === true ? {
+    color: true,
+    date: true,
+    "datetime-local": true,
+    email: true,
+    month: true,
+    number: true,
+    range: true,
+    search: true,
+    tel: true,
+    text: true,
+    time: true,
+    url: true,
+    week: true,
+    textarea: true,
+    select: true,
+    radio: true,
+    checkbox: true
+  } : _maskInputOptions !== void 0 ? _maskInputOptions : {};
+  const slimDOMOptions = _slimDOMOptions === true || _slimDOMOptions === "all" ? {
+    script: true,
+    comment: true,
+    headFavicon: true,
+    headWhitespace: true,
+    headMetaSocial: true,
+    headMetaRobots: true,
+    headMetaHttpEquiv: true,
+    headMetaVerification: true,
+    // the following are off for slimDOMOptions === true,
+    // as they destroy some (hidden) info:
+    headMetaAuthorship: _slimDOMOptions === "all",
+    headMetaDescKeywords: _slimDOMOptions === "all"
+  } : _slimDOMOptions ? _slimDOMOptions : {};
+  polyfill$1();
+  let lastFullSnapshotEvent;
+  let incrementalSnapshotCount = 0;
+  const eventProcessor = (e2) => {
+    for (const plugin of plugins || []) {
+      if (plugin.eventProcessor) {
+        e2 = plugin.eventProcessor(e2);
+      }
+    }
+    if (packFn && // Disable packing events which will be emitted to parent frames.
+    !passEmitsToParent) {
+      e2 = packFn(e2);
+    }
+    return e2;
+  };
+  wrappedEmit = (r2, isCheckout) => {
+    const e2 = r2;
+    e2.timestamp = nowTimestamp();
+    if (mutationBuffers[0]?.isFrozen() && e2.type !== EventType.FullSnapshot && !(e2.type === EventType.IncrementalSnapshot && e2.data.source === IncrementalSource.Mutation)) {
+      mutationBuffers.forEach((buf) => buf.unfreeze());
+    }
+    if (inEmittingFrame) {
+      emit?.(eventProcessor(e2), isCheckout);
+    } else if (passEmitsToParent) {
+      const message = {
+        type: "rrweb",
+        event: eventProcessor(e2),
+        origin: window.location.origin,
+        isCheckout
+      };
+      window.parent.postMessage(message, "*");
+    }
+    if (e2.type === EventType.FullSnapshot) {
+      lastFullSnapshotEvent = e2;
+      incrementalSnapshotCount = 0;
+    } else if (e2.type === EventType.IncrementalSnapshot) {
+      if (e2.data.source === IncrementalSource.Mutation && e2.data.isAttachIframe) {
+        return;
+      }
+      incrementalSnapshotCount++;
+      const exceedCount = checkoutEveryNth && incrementalSnapshotCount >= checkoutEveryNth;
+      const exceedTime = checkoutEveryNms && lastFullSnapshotEvent && e2.timestamp - lastFullSnapshotEvent.timestamp > checkoutEveryNms;
+      if (exceedCount || exceedTime) {
+        takeFullSnapshot2(true);
+      }
+    }
+  };
+  const wrappedMutationEmit = (m2) => {
+    wrappedEmit({
+      type: EventType.IncrementalSnapshot,
+      data: {
+        source: IncrementalSource.Mutation,
+        ...m2
+      }
+    });
+  };
+  const wrappedScrollEmit = (p2) => wrappedEmit({
+    type: EventType.IncrementalSnapshot,
+    data: {
+      source: IncrementalSource.Scroll,
+      ...p2
+    }
+  });
+  const wrappedCanvasMutationEmit = (p2) => wrappedEmit({
+    type: EventType.IncrementalSnapshot,
+    data: {
+      source: IncrementalSource.CanvasMutation,
+      ...p2
+    }
+  });
+  const wrappedAdoptedStyleSheetEmit = (a2) => wrappedEmit({
+    type: EventType.IncrementalSnapshot,
+    data: {
+      source: IncrementalSource.AdoptedStyleSheet,
+      ...a2
+    }
+  });
+  const stylesheetManager = new StylesheetManager({
+    mutationCb: wrappedMutationEmit,
+    adoptedStyleSheetCb: wrappedAdoptedStyleSheetEmit
+  });
+  const iframeManager = typeof __RRWEB_EXCLUDE_IFRAME__ === "boolean" && __RRWEB_EXCLUDE_IFRAME__ ? new IframeManagerNoop() : new IframeManager({
+    mirror,
+    mutationCb: wrappedMutationEmit,
+    stylesheetManager,
+    recordCrossOriginIframes,
+    wrappedEmit
+  });
+  for (const plugin of plugins || []) {
+    if (plugin.getMirror)
+      plugin.getMirror({
+        nodeMirror: mirror,
+        crossOriginIframeMirror: iframeManager.crossOriginIframeMirror,
+        crossOriginIframeStyleMirror: iframeManager.crossOriginIframeStyleMirror
+      });
+  }
+  const processedNodeManager = new ProcessedNodeManager();
+  const canvasManager = _getCanvasManager(
+    getCanvasManager,
+    {
+      mirror,
+      win: window,
+      mutationCb: (p2) => wrappedEmit({
+        type: EventType.IncrementalSnapshot,
+        data: {
+          source: IncrementalSource.CanvasMutation,
+          ...p2
+        }
+      }),
+      recordCanvas,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      maxCanvasSize,
+      sampling: sampling["canvas"],
+      dataURLOptions,
+      errorHandler: errorHandler2
+    }
+  );
+  const shadowDomManager = typeof __RRWEB_EXCLUDE_SHADOW_DOM__ === "boolean" && __RRWEB_EXCLUDE_SHADOW_DOM__ ? new ShadowDomManagerNoop() : new ShadowDomManager({
+    mutationCb: wrappedMutationEmit,
+    scrollCb: wrappedScrollEmit,
+    bypassOptions: {
+      onMutation,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      maskAllText,
+      maskTextClass,
+      unmaskTextClass,
+      maskTextSelector,
+      unmaskTextSelector,
+      inlineStylesheet,
+      maskInputOptions,
+      dataURLOptions,
+      maskAttributeFn,
+      maskTextFn,
+      maskInputFn,
+      recordCanvas,
+      inlineImages,
+      sampling,
+      slimDOMOptions,
+      iframeManager,
+      stylesheetManager,
+      canvasManager,
+      keepIframeSrcFn,
+      processedNodeManager
+    },
+    mirror
+  });
+  const takeFullSnapshot2 = (isCheckout = false) => {
+    if (!recordDOM) {
+      return;
+    }
+    wrappedEmit(
+      {
+        type: EventType.Meta,
+        data: {
+          href: window.location.href,
+          width: getWindowWidth(),
+          height: getWindowHeight()
+        }
+      },
+      isCheckout
+    );
+    stylesheetManager.reset();
+    shadowDomManager.init();
+    mutationBuffers.forEach((buf) => buf.lock());
+    const node = snapshot(document, {
+      mirror,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      maskAllText,
+      maskTextClass,
+      unmaskTextClass,
+      maskTextSelector,
+      unmaskTextSelector,
+      inlineStylesheet,
+      maskAllInputs: maskInputOptions,
+      maskAttributeFn,
+      maskInputFn,
+      maskTextFn,
+      slimDOM: slimDOMOptions,
+      dataURLOptions,
+      recordCanvas,
+      inlineImages,
+      onSerialize: (n2) => {
+        if (isSerializedIframe(n2, mirror)) {
+          iframeManager.addIframe(n2);
+        }
+        if (isSerializedStylesheet(n2, mirror)) {
+          stylesheetManager.trackLinkElement(n2);
+        }
+        if (hasShadowRoot(n2)) {
+          shadowDomManager.addShadowRoot(n2.shadowRoot, document);
+        }
+      },
+      onIframeLoad: (iframe, childSn) => {
+        iframeManager.attachIframe(iframe, childSn);
+        if (iframe.contentWindow) {
+          canvasManager.addWindow(iframe.contentWindow);
+        }
+        shadowDomManager.observeAttachShadow(iframe);
+      },
+      onStylesheetLoad: (linkEl, childSn) => {
+        stylesheetManager.attachLinkElement(linkEl, childSn);
+      },
+      onBlockedImageLoad: (_imageEl, serializedNode, { width, height }) => {
+        wrappedMutationEmit({
+          adds: [],
+          removes: [],
+          texts: [],
+          attributes: [
+            {
+              id: serializedNode.id,
+              attributes: {
+                style: {
+                  width: `${width}px`,
+                  height: `${height}px`
+                }
+              }
+            }
+          ]
+        });
+      },
+      keepIframeSrcFn
+    });
+    if (!node) {
+      return console.warn("Failed to snapshot the document");
+    }
+    wrappedEmit({
+      type: EventType.FullSnapshot,
+      data: {
+        node,
+        initialOffset: getWindowScroll(window)
+      }
+    });
+    mutationBuffers.forEach((buf) => buf.unlock());
+    if (document.adoptedStyleSheets && document.adoptedStyleSheets.length > 0)
+      stylesheetManager.adoptStyleSheets(
+        document.adoptedStyleSheets,
+        mirror.getId(document)
+      );
+  };
+  _takeFullSnapshot = takeFullSnapshot2;
+  try {
+    const handlers2 = [];
+    const observe2 = (doc) => {
+      return callbackWrapper$1(initObservers)(
+        {
+          onMutation,
+          mutationCb: wrappedMutationEmit,
+          mousemoveCb: (positions, source) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source,
+              positions
+            }
+          }),
+          mouseInteractionCb: (d2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.MouseInteraction,
+              ...d2
+            }
+          }),
+          scrollCb: wrappedScrollEmit,
+          viewportResizeCb: (d2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.ViewportResize,
+              ...d2
+            }
+          }),
+          inputCb: (v2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.Input,
+              ...v2
+            }
+          }),
+          mediaInteractionCb: (p2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.MediaInteraction,
+              ...p2
+            }
+          }),
+          styleSheetRuleCb: (r2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.StyleSheetRule,
+              ...r2
+            }
+          }),
+          styleDeclarationCb: (r2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.StyleDeclaration,
+              ...r2
+            }
+          }),
+          canvasMutationCb: wrappedCanvasMutationEmit,
+          fontCb: (p2) => wrappedEmit({
+            type: EventType.IncrementalSnapshot,
+            data: {
+              source: IncrementalSource.Font,
+              ...p2
+            }
+          }),
+          selectionCb: (p2) => {
+            wrappedEmit({
+              type: EventType.IncrementalSnapshot,
+              data: {
+                source: IncrementalSource.Selection,
+                ...p2
+              }
+            });
+          },
+          customElementCb: (c2) => {
+            wrappedEmit({
+              type: EventType.IncrementalSnapshot,
+              data: {
+                source: IncrementalSource.CustomElement,
+                ...c2
+              }
+            });
+          },
+          blockClass,
+          ignoreClass,
+          ignoreSelector,
+          maskAllText,
+          maskTextClass,
+          unmaskTextClass,
+          maskTextSelector,
+          unmaskTextSelector,
+          maskInputOptions,
+          inlineStylesheet,
+          sampling,
+          recordDOM,
+          recordCanvas,
+          inlineImages,
+          userTriggeredOnInput,
+          collectFonts,
+          doc,
+          maskAttributeFn,
+          maskInputFn,
+          maskTextFn,
+          keepIframeSrcFn,
+          blockSelector,
+          unblockSelector,
+          slimDOMOptions,
+          dataURLOptions,
+          mirror,
+          iframeManager,
+          stylesheetManager,
+          shadowDomManager,
+          processedNodeManager,
+          canvasManager,
+          ignoreCSSAttributes,
+          plugins: plugins?.filter((p2) => p2.observer)?.map((p2) => ({
+            observer: p2.observer,
+            options: p2.options,
+            callback: (payload) => wrappedEmit({
+              type: EventType.Plugin,
+              data: {
+                plugin: p2.name,
+                payload
+              }
+            })
+          })) || []
+        },
+        {}
+      );
+    };
+    iframeManager.addLoadListener((iframeEl) => {
+      try {
+        handlers2.push(observe2(iframeEl.contentDocument));
+      } catch (error2) {
+        console.warn(error2);
+      }
+    });
+    const init2 = () => {
+      takeFullSnapshot2();
+      handlers2.push(observe2(document));
+    };
+    if (document.readyState === "interactive" || document.readyState === "complete") {
+      init2();
+    } else {
+      handlers2.push(
+        on("DOMContentLoaded", () => {
+          wrappedEmit({
+            type: EventType.DomContentLoaded,
+            data: {}
+          });
+          if (recordAfter === "DOMContentLoaded") init2();
+        })
+      );
+      handlers2.push(
+        on(
+          "load",
+          () => {
+            wrappedEmit({
+              type: EventType.Load,
+              data: {}
+            });
+            if (recordAfter === "load") init2();
+          },
+          window
+        )
+      );
+    }
+    return () => {
+      handlers2.forEach((h2) => h2());
+      processedNodeManager.destroy();
+      _takeFullSnapshot = void 0;
+      unregisterErrorHandler();
+    };
+  } catch (error2) {
+    console.warn(error2);
+  }
+}
+function takeFullSnapshot(isCheckout) {
+  if (!_takeFullSnapshot) {
+    throw new Error("please take full snapshot after start recording");
+  }
+  _takeFullSnapshot(isCheckout);
+}
+record.mirror = mirror;
+record.takeFullSnapshot = takeFullSnapshot;
+function _getCanvasManager(getCanvasManagerFn, options) {
+  try {
+    return getCanvasManagerFn ? getCanvasManagerFn(options) : new CanvasManagerNoop();
+  } catch {
+    console.warn("Unable to initialize CanvasManager");
+    return new CanvasManagerNoop();
+  }
+}
+var n$1;
+!function(t2) {
+  t2[t2.NotStarted = 0] = "NotStarted", t2[t2.Running = 1] = "Running", t2[t2.Stopped = 2] = "Stopped";
+}(n$1 || (n$1 = {}));
+const ReplayEventTypeIncrementalSnapshot = 3;
+const ReplayEventTypeCustom = 5;
+function timestampToMs(timestamp) {
+  const isMs = timestamp > 9999999999;
+  return isMs ? timestamp : timestamp * 1e3;
+}
+function timestampToS(timestamp) {
+  const isMs = timestamp > 9999999999;
+  return isMs ? timestamp / 1e3 : timestamp;
+}
+function addBreadcrumbEvent(replay, breadcrumb) {
+  if (breadcrumb.category === "sentry.transaction") {
+    return;
+  }
+  if (["ui.click", "ui.input"].includes(breadcrumb.category)) {
+    replay.triggerUserActivity();
+  } else {
+    replay.checkAndHandleExpiredSession();
+  }
+  replay.addUpdate(() => {
+    replay.throttledAddEvent({
+      type: EventType.Custom,
+      // TODO: We were converting from ms to seconds for breadcrumbs, spans,
+      // but maybe we should just keep them as milliseconds
+      timestamp: (breadcrumb.timestamp || 0) * 1e3,
+      data: {
+        tag: "breadcrumb",
+        // normalize to max. 10 depth and 1_000 properties per object
+        payload: normalize(breadcrumb, 10, 1e3)
+      }
+    });
+    return breadcrumb.category === "console";
+  });
+}
+const INTERACTIVE_SELECTOR = "button,a";
+function getClosestInteractive(element) {
+  const closestInteractive = element.closest(INTERACTIVE_SELECTOR);
+  return closestInteractive || element;
+}
+function getClickTargetNode(event) {
+  const target = getTargetNode(event);
+  if (!target || !(target instanceof Element)) {
+    return target;
+  }
+  return getClosestInteractive(target);
+}
+function getTargetNode(event) {
+  if (isEventWithTarget(event)) {
+    return event.target;
+  }
+  return event;
+}
+function isEventWithTarget(event) {
+  return typeof event === "object" && !!event && "target" in event;
+}
+let handlers;
+function onWindowOpen(cb) {
+  if (!handlers) {
+    handlers = [];
+    monkeyPatchWindowOpen();
+  }
+  handlers.push(cb);
+  return () => {
+    const pos = handlers ? handlers.indexOf(cb) : -1;
+    if (pos > -1) {
+      handlers.splice(pos, 1);
+    }
+  };
+}
+function monkeyPatchWindowOpen() {
+  fill(WINDOW, "open", function(originalWindowOpen) {
+    return function(...args) {
+      if (handlers) {
+        try {
+          handlers.forEach((handler) => handler());
+        } catch {
+        }
+      }
+      return originalWindowOpen.apply(WINDOW, args);
+    };
+  });
+}
+const IncrementalMutationSources = /* @__PURE__ */ new Set([
+  IncrementalSource.Mutation,
+  IncrementalSource.StyleSheetRule,
+  IncrementalSource.StyleDeclaration,
+  IncrementalSource.AdoptedStyleSheet,
+  IncrementalSource.CanvasMutation,
+  IncrementalSource.Selection,
+  IncrementalSource.MediaInteraction
+]);
+function handleClick(clickDetector, clickBreadcrumb, node) {
+  clickDetector.handleClick(clickBreadcrumb, node);
+}
+class ClickDetector {
+  // protected for testing
+  constructor(replay, slowClickConfig, _addBreadcrumbEvent = addBreadcrumbEvent) {
+    this._lastMutation = 0;
+    this._lastScroll = 0;
+    this._clicks = [];
+    this._timeout = slowClickConfig.timeout / 1e3;
+    this._threshold = slowClickConfig.threshold / 1e3;
+    this._scrollTimeout = slowClickConfig.scrollTimeout / 1e3;
+    this._replay = replay;
+    this._ignoreSelector = slowClickConfig.ignoreSelector;
+    this._addBreadcrumbEvent = _addBreadcrumbEvent;
+  }
+  /** Register click detection handlers on mutation or scroll. */
+  addListeners() {
+    const cleanupWindowOpen = onWindowOpen(() => {
+      this._lastMutation = nowInSeconds();
+    });
+    this._teardown = () => {
+      cleanupWindowOpen();
+      this._clicks = [];
+      this._lastMutation = 0;
+      this._lastScroll = 0;
+    };
+  }
+  /** Clean up listeners. */
+  removeListeners() {
+    if (this._teardown) {
+      this._teardown();
+    }
+    if (this._checkClickTimeout) {
+      clearTimeout(this._checkClickTimeout);
+    }
+  }
+  /** @inheritDoc */
+  handleClick(breadcrumb, node) {
+    if (ignoreElement(node, this._ignoreSelector) || !isClickBreadcrumb(breadcrumb)) {
+      return;
+    }
+    const newClick = {
+      timestamp: timestampToS(breadcrumb.timestamp),
+      clickBreadcrumb: breadcrumb,
+      // Set this to 0 so we know it originates from the click breadcrumb
+      clickCount: 0,
+      node
+    };
+    if (this._clicks.some((click) => click.node === newClick.node && Math.abs(click.timestamp - newClick.timestamp) < 1)) {
+      return;
+    }
+    this._clicks.push(newClick);
+    if (this._clicks.length === 1) {
+      this._scheduleCheckClicks();
+    }
+  }
+  /** @inheritDoc */
+  registerMutation(timestamp = Date.now()) {
+    this._lastMutation = timestampToS(timestamp);
+  }
+  /** @inheritDoc */
+  registerScroll(timestamp = Date.now()) {
+    this._lastScroll = timestampToS(timestamp);
+  }
+  /** @inheritDoc */
+  registerClick(element) {
+    const node = getClosestInteractive(element);
+    this._handleMultiClick(node);
+  }
+  /** Count multiple clicks on elements. */
+  _handleMultiClick(node) {
+    this._getClicks(node).forEach((click) => {
+      click.clickCount++;
+    });
+  }
+  /** Get all pending clicks for a given node. */
+  _getClicks(node) {
+    return this._clicks.filter((click) => click.node === node);
+  }
+  /** Check the clicks that happened. */
+  _checkClicks() {
+    const timedOutClicks = [];
+    const now = nowInSeconds();
+    this._clicks.forEach((click) => {
+      if (!click.mutationAfter && this._lastMutation) {
+        click.mutationAfter = click.timestamp <= this._lastMutation ? this._lastMutation - click.timestamp : void 0;
+      }
+      if (!click.scrollAfter && this._lastScroll) {
+        click.scrollAfter = click.timestamp <= this._lastScroll ? this._lastScroll - click.timestamp : void 0;
+      }
+      if (click.timestamp + this._timeout <= now) {
+        timedOutClicks.push(click);
+      }
+    });
+    for (const click of timedOutClicks) {
+      const pos = this._clicks.indexOf(click);
+      if (pos > -1) {
+        this._generateBreadcrumbs(click);
+        this._clicks.splice(pos, 1);
+      }
+    }
+    if (this._clicks.length) {
+      this._scheduleCheckClicks();
+    }
+  }
+  /** Generate matching breadcrumb(s) for the click. */
+  _generateBreadcrumbs(click) {
+    const replay = this._replay;
+    const hadScroll = click.scrollAfter && click.scrollAfter <= this._scrollTimeout;
+    const hadMutation = click.mutationAfter && click.mutationAfter <= this._threshold;
+    const isSlowClick = !hadScroll && !hadMutation;
+    const { clickCount, clickBreadcrumb } = click;
+    if (isSlowClick) {
+      const timeAfterClickMs = Math.min(click.mutationAfter || this._timeout, this._timeout) * 1e3;
+      const endReason = timeAfterClickMs < this._timeout * 1e3 ? "mutation" : "timeout";
+      const breadcrumb = {
+        type: "default",
+        message: clickBreadcrumb.message,
+        timestamp: clickBreadcrumb.timestamp,
+        category: "ui.slowClickDetected",
+        data: {
+          ...clickBreadcrumb.data,
+          url: WINDOW.location.href,
+          route: replay.getCurrentRoute(),
+          timeAfterClickMs,
+          endReason,
+          // If clickCount === 0, it means multiClick was not correctly captured here
+          // - we still want to send 1 in this case
+          clickCount: clickCount || 1
+        }
+      };
+      this._addBreadcrumbEvent(replay, breadcrumb);
+      return;
+    }
+    if (clickCount > 1) {
+      const breadcrumb = {
+        type: "default",
+        message: clickBreadcrumb.message,
+        timestamp: clickBreadcrumb.timestamp,
+        category: "ui.multiClick",
+        data: {
+          ...clickBreadcrumb.data,
+          url: WINDOW.location.href,
+          route: replay.getCurrentRoute(),
+          clickCount,
+          metric: true
+        }
+      };
+      this._addBreadcrumbEvent(replay, breadcrumb);
+    }
+  }
+  /** Schedule to check current clicks. */
+  _scheduleCheckClicks() {
+    if (this._checkClickTimeout) {
+      clearTimeout(this._checkClickTimeout);
+    }
+    this._checkClickTimeout = setTimeout$3(() => this._checkClicks(), 1e3);
+  }
+}
+const SLOW_CLICK_TAGS = ["A", "BUTTON", "INPUT"];
+function ignoreElement(node, ignoreSelector) {
+  if (!SLOW_CLICK_TAGS.includes(node.tagName)) {
+    return true;
+  }
+  if (node.tagName === "INPUT" && !["submit", "button"].includes(node.getAttribute("type") || "")) {
+    return true;
+  }
+  if (node.tagName === "A" && (node.hasAttribute("download") || node.hasAttribute("target") && node.getAttribute("target") !== "_self")) {
+    return true;
+  }
+  if (ignoreSelector && node.matches(ignoreSelector)) {
+    return true;
+  }
+  return false;
+}
+function isClickBreadcrumb(breadcrumb) {
+  return !!(breadcrumb.data && typeof breadcrumb.data.nodeId === "number" && breadcrumb.timestamp);
+}
+function nowInSeconds() {
+  return Date.now() / 1e3;
+}
+function updateClickDetectorForRecordingEvent(clickDetector, event) {
+  try {
+    if (!isIncrementalEvent(event)) {
+      return;
+    }
+    const { source } = event.data;
+    if (IncrementalMutationSources.has(source)) {
+      clickDetector.registerMutation(event.timestamp);
+    }
+    if (source === IncrementalSource.Scroll) {
+      clickDetector.registerScroll(event.timestamp);
+    }
+    if (isIncrementalMouseInteraction(event)) {
+      const { type, id } = event.data;
+      const node = record.mirror.getNode(id);
+      if (node instanceof HTMLElement && type === MouseInteractions.Click) {
+        clickDetector.registerClick(node);
+      }
+    }
+  } catch {
+  }
+}
+function isIncrementalEvent(event) {
+  return event.type === ReplayEventTypeIncrementalSnapshot;
+}
+function isIncrementalMouseInteraction(event) {
+  return event.data.source === IncrementalSource.MouseInteraction;
+}
+function createBreadcrumb(breadcrumb) {
+  return {
+    timestamp: Date.now() / 1e3,
+    type: "default",
+    ...breadcrumb
+  };
+}
+var NodeType = /* @__PURE__ */ ((NodeType2) => {
+  NodeType2[NodeType2["Document"] = 0] = "Document";
+  NodeType2[NodeType2["DocumentType"] = 1] = "DocumentType";
+  NodeType2[NodeType2["Element"] = 2] = "Element";
+  NodeType2[NodeType2["Text"] = 3] = "Text";
+  NodeType2[NodeType2["CDATA"] = 4] = "CDATA";
+  NodeType2[NodeType2["Comment"] = 5] = "Comment";
+  return NodeType2;
+})(NodeType || {});
+const ATTRIBUTES_TO_RECORD = /* @__PURE__ */ new Set([
+  "id",
+  "class",
+  "aria-label",
+  "role",
+  "name",
+  "alt",
+  "title",
+  "data-test-id",
+  "data-testid",
+  "disabled",
+  "aria-disabled",
+  "data-sentry-component"
+]);
+function getAttributesToRecord(attributes) {
+  const obj = {};
+  if (!attributes["data-sentry-component"] && attributes["data-sentry-element"]) {
+    attributes["data-sentry-component"] = attributes["data-sentry-element"];
+  }
+  for (const key in attributes) {
+    if (ATTRIBUTES_TO_RECORD.has(key)) {
+      let normalizedKey = key;
+      if (key === "data-testid" || key === "data-test-id") {
+        normalizedKey = "testId";
+      }
+      obj[normalizedKey] = attributes[key];
+    }
+  }
+  return obj;
+}
+const handleDomListener = (replay) => {
+  return (handlerData) => {
+    if (!replay.isEnabled()) {
+      return;
+    }
+    const result = handleDom(handlerData);
+    if (!result) {
+      return;
+    }
+    const isClick = handlerData.name === "click";
+    const event = isClick ? handlerData.event : void 0;
+    if (isClick && replay.clickDetector && event?.target && !event.altKey && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
+      handleClick(
+        replay.clickDetector,
+        result,
+        getClickTargetNode(handlerData.event)
+      );
+    }
+    addBreadcrumbEvent(replay, result);
+  };
+};
+function getBaseDomBreadcrumb(target, message) {
+  const nodeId = record.mirror.getId(target);
+  const node = nodeId && record.mirror.getNode(nodeId);
+  const meta = node && record.mirror.getMeta(node);
+  const element = meta && isElement(meta) ? meta : null;
+  return {
+    message,
+    data: element ? {
+      nodeId,
+      node: {
+        id: nodeId,
+        tagName: element.tagName,
+        textContent: Array.from(element.childNodes).map((node2) => node2.type === NodeType.Text && node2.textContent).filter(Boolean).map((text) => text.trim()).join(""),
+        attributes: getAttributesToRecord(element.attributes)
+      }
+    } : {}
+  };
+}
+function handleDom(handlerData) {
+  const { target, message } = getDomTarget(handlerData);
+  return createBreadcrumb({
+    category: `ui.${handlerData.name}`,
+    ...getBaseDomBreadcrumb(target, message)
+  });
+}
+function getDomTarget(handlerData) {
+  const isClick = handlerData.name === "click";
+  let message;
+  let target = null;
+  try {
+    target = isClick ? getClickTargetNode(handlerData.event) : getTargetNode(handlerData.event);
+    message = htmlTreeAsString(target, { maxStringLength: 200 }) || "<unknown>";
+  } catch {
+    message = "<unknown>";
+  }
+  return { target, message };
+}
+function isElement(node) {
+  return node.type === NodeType.Element;
+}
+function handleKeyboardEvent(replay, event) {
+  if (!replay.isEnabled()) {
+    return;
+  }
+  replay.updateUserActivity();
+  const breadcrumb = getKeyboardBreadcrumb(event);
+  if (!breadcrumb) {
+    return;
+  }
+  addBreadcrumbEvent(replay, breadcrumb);
+}
+function getKeyboardBreadcrumb(event) {
+  const { metaKey, shiftKey, ctrlKey, altKey, key, target } = event;
+  if (!target || isInputElement(target) || !key) {
+    return null;
+  }
+  const hasModifierKey = metaKey || ctrlKey || altKey;
+  const isCharacterKey = key.length === 1;
+  if (!hasModifierKey && isCharacterKey) {
+    return null;
+  }
+  const message = htmlTreeAsString(target, { maxStringLength: 200 }) || "<unknown>";
+  const baseBreadcrumb = getBaseDomBreadcrumb(target, message);
+  return createBreadcrumb({
+    category: "ui.keyDown",
+    message,
+    data: {
+      ...baseBreadcrumb.data,
+      metaKey,
+      shiftKey,
+      ctrlKey,
+      altKey,
+      key
+    }
+  });
+}
+function isInputElement(target) {
+  return target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+}
+const ENTRY_TYPES = {
+  // @ts-expect-error TODO: entry type does not fit the create* functions entry type
+  resource: createResourceEntry,
+  paint: createPaintEntry,
+  // @ts-expect-error TODO: entry type does not fit the create* functions entry type
+  navigation: createNavigationEntry
+};
+function webVitalHandler(getter, replay) {
+  return ({ metric }) => void replay.replayPerformanceEntries.push(getter(metric));
+}
+function createPerformanceEntries(entries) {
+  return entries.map(createPerformanceEntry).filter(Boolean);
+}
+function createPerformanceEntry(entry) {
+  const entryType = ENTRY_TYPES[entry.entryType];
+  if (!entryType) {
+    return null;
+  }
+  return entryType(entry);
+}
+function getAbsoluteTime(time) {
+  return ((browserPerformanceTimeOrigin() || WINDOW.performance.timeOrigin) + time) / 1e3;
+}
+function createPaintEntry(entry) {
+  const { duration, entryType, name, startTime } = entry;
+  const start = getAbsoluteTime(startTime);
+  return {
+    type: entryType,
+    name,
+    start,
+    end: start + duration,
+    data: void 0
+  };
+}
+function createNavigationEntry(entry) {
+  const {
+    entryType,
+    name,
+    decodedBodySize,
+    duration,
+    domComplete,
+    encodedBodySize,
+    domContentLoadedEventStart,
+    domContentLoadedEventEnd,
+    domInteractive,
+    loadEventStart,
+    loadEventEnd,
+    redirectCount,
+    startTime,
+    transferSize,
+    type
+  } = entry;
+  if (duration === 0) {
+    return null;
+  }
+  return {
+    type: `${entryType}.${type}`,
+    start: getAbsoluteTime(startTime),
+    end: getAbsoluteTime(domComplete),
+    name,
+    data: {
+      size: transferSize,
+      decodedBodySize,
+      encodedBodySize,
+      duration,
+      domInteractive,
+      domContentLoadedEventStart,
+      domContentLoadedEventEnd,
+      loadEventStart,
+      loadEventEnd,
+      domComplete,
+      redirectCount
+    }
+  };
+}
+function createResourceEntry(entry) {
+  const {
+    entryType,
+    initiatorType,
+    name,
+    responseEnd,
+    startTime,
+    decodedBodySize,
+    encodedBodySize,
+    responseStatus,
+    transferSize
+  } = entry;
+  if (["fetch", "xmlhttprequest"].includes(initiatorType)) {
+    return null;
+  }
+  return {
+    type: `${entryType}.${initiatorType}`,
+    start: getAbsoluteTime(startTime),
+    end: getAbsoluteTime(responseEnd),
+    name,
+    data: {
+      size: transferSize,
+      statusCode: responseStatus,
+      decodedBodySize,
+      encodedBodySize
+    }
+  };
+}
+function getLargestContentfulPaint(metric) {
+  const lastEntry = metric.entries[metric.entries.length - 1];
+  const node = lastEntry?.element ? [lastEntry.element] : void 0;
+  return getWebVital(metric, "largest-contentful-paint", node);
+}
+function isLayoutShift(entry) {
+  return entry.sources !== void 0;
+}
+function getCumulativeLayoutShift(metric) {
+  const layoutShifts = [];
+  const nodes = [];
+  for (const entry of metric.entries) {
+    if (isLayoutShift(entry)) {
+      const nodeIds = [];
+      for (const source of entry.sources) {
+        if (source.node) {
+          nodes.push(source.node);
+          const nodeId = record.mirror.getId(source.node);
+          if (nodeId) {
+            nodeIds.push(nodeId);
+          }
+        }
+      }
+      layoutShifts.push({ value: entry.value, nodeIds: nodeIds.length ? nodeIds : void 0 });
+    }
+  }
+  return getWebVital(metric, "cumulative-layout-shift", nodes, layoutShifts);
+}
+function getInteractionToNextPaint(metric) {
+  const lastEntry = metric.entries[metric.entries.length - 1];
+  const node = lastEntry?.target ? [lastEntry.target] : void 0;
+  return getWebVital(metric, "interaction-to-next-paint", node);
+}
+function getWebVital(metric, name, nodes, attributions) {
+  const value = metric.value;
+  const rating = metric.rating;
+  const end = getAbsoluteTime(value);
+  return {
+    type: "web-vital",
+    name,
+    start: end,
+    end,
+    data: {
+      value,
+      size: value,
+      rating,
+      nodeIds: nodes ? nodes.map((node) => record.mirror.getId(node)) : void 0,
+      attributions
+    }
+  };
+}
+function setupPerformanceObserver(replay) {
+  function addPerformanceEntry(entry) {
+    if (!replay.performanceEntries.includes(entry)) {
+      replay.performanceEntries.push(entry);
+    }
+  }
+  function onEntries({ entries }) {
+    entries.forEach(addPerformanceEntry);
+  }
+  const clearCallbacks = [];
+  ["navigation", "paint", "resource"].forEach((type) => {
+    clearCallbacks.push(addPerformanceInstrumentationHandler(type, onEntries));
+  });
+  clearCallbacks.push(
+    addLcpInstrumentationHandler(webVitalHandler(getLargestContentfulPaint, replay)),
+    addClsInstrumentationHandler(webVitalHandler(getCumulativeLayoutShift, replay)),
+    addInpInstrumentationHandler(webVitalHandler(getInteractionToNextPaint, replay))
+  );
+  return () => {
+    clearCallbacks.forEach((clearCallback) => clearCallback());
+  };
+}
+const DEBUG_BUILD = typeof __SENTRY_DEBUG__ === "undefined" || __SENTRY_DEBUG__;
+const r = `var t=Uint8Array,n=Uint16Array,r=Int32Array,e=new t([0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0,0]),i=new t([0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,0,0]),s=new t([16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15]),a=function(t,e){for(var i=new n(31),s=0;s<31;++s)i[s]=e+=1<<t[s-1];var a=new r(i[30]);for(s=1;s<30;++s)for(var o=i[s];o<i[s+1];++o)a[o]=o-i[s]<<5|s;return{b:i,r:a}},o=a(e,2),h=o.b,f=o.r;h[28]=258,f[258]=28;for(var l=a(i,0).r,u=new n(32768),c=0;c<32768;++c){var v=(43690&c)>>1|(21845&c)<<1;v=(61680&(v=(52428&v)>>2|(13107&v)<<2))>>4|(3855&v)<<4,u[c]=((65280&v)>>8|(255&v)<<8)>>1}var d=function(t,r,e){for(var i=t.length,s=0,a=new n(r);s<i;++s)t[s]&&++a[t[s]-1];var o,h=new n(r);for(s=1;s<r;++s)h[s]=h[s-1]+a[s-1]<<1;if(e){o=new n(1<<r);var f=15-r;for(s=0;s<i;++s)if(t[s])for(var l=s<<4|t[s],c=r-t[s],v=h[t[s]-1]++<<c,d=v|(1<<c)-1;v<=d;++v)o[u[v]>>f]=l}else for(o=new n(i),s=0;s<i;++s)t[s]&&(o[s]=u[h[t[s]-1]++]>>15-t[s]);return o},p=new t(288);for(c=0;c<144;++c)p[c]=8;for(c=144;c<256;++c)p[c]=9;for(c=256;c<280;++c)p[c]=7;for(c=280;c<288;++c)p[c]=8;var g=new t(32);for(c=0;c<32;++c)g[c]=5;var w=d(p,9,0),y=d(g,5,0),m=function(t){return(t+7)/8|0},b=function(n,r,e){return(null==e||e>n.length)&&(e=n.length),new t(n.subarray(r,e))},M=["unexpected EOF","invalid block type","invalid length/literal","invalid distance","stream finished","no stream handler",,"no callback","invalid UTF-8 data","extra field too long","date not in range 1980-2099","filename too long","stream finishing","invalid zip data"],E=function(t,n,r){var e=new Error(n||M[t]);if(e.code=t,Error.captureStackTrace&&Error.captureStackTrace(e,E),!r)throw e;return e},z=function(t,n,r){r<<=7&n;var e=n/8|0;t[e]|=r,t[e+1]|=r>>8},_=function(t,n,r){r<<=7&n;var e=n/8|0;t[e]|=r,t[e+1]|=r>>8,t[e+2]|=r>>16},x=function(r,e){for(var i=[],s=0;s<r.length;++s)r[s]&&i.push({s:s,f:r[s]});var a=i.length,o=i.slice();if(!a)return{t:F,l:0};if(1==a){var h=new t(i[0].s+1);return h[i[0].s]=1,{t:h,l:1}}i.sort(function(t,n){return t.f-n.f}),i.push({s:-1,f:25001});var f=i[0],l=i[1],u=0,c=1,v=2;for(i[0]={s:-1,f:f.f+l.f,l:f,r:l};c!=a-1;)f=i[i[u].f<i[v].f?u++:v++],l=i[u!=c&&i[u].f<i[v].f?u++:v++],i[c++]={s:-1,f:f.f+l.f,l:f,r:l};var d=o[0].s;for(s=1;s<a;++s)o[s].s>d&&(d=o[s].s);var p=new n(d+1),g=A(i[c-1],p,0);if(g>e){s=0;var w=0,y=g-e,m=1<<y;for(o.sort(function(t,n){return p[n.s]-p[t.s]||t.f-n.f});s<a;++s){var b=o[s].s;if(!(p[b]>e))break;w+=m-(1<<g-p[b]),p[b]=e}for(w>>=y;w>0;){var M=o[s].s;p[M]<e?w-=1<<e-p[M]++-1:++s}for(;s>=0&&w;--s){var E=o[s].s;p[E]==e&&(--p[E],++w)}g=e}return{t:new t(p),l:g}},A=function(t,n,r){return-1==t.s?Math.max(A(t.l,n,r+1),A(t.r,n,r+1)):n[t.s]=r},D=function(t){for(var r=t.length;r&&!t[--r];);for(var e=new n(++r),i=0,s=t[0],a=1,o=function(t){e[i++]=t},h=1;h<=r;++h)if(t[h]==s&&h!=r)++a;else{if(!s&&a>2){for(;a>138;a-=138)o(32754);a>2&&(o(a>10?a-11<<5|28690:a-3<<5|12305),a=0)}else if(a>3){for(o(s),--a;a>6;a-=6)o(8304);a>2&&(o(a-3<<5|8208),a=0)}for(;a--;)o(s);a=1,s=t[h]}return{c:e.subarray(0,i),n:r}},T=function(t,n){for(var r=0,e=0;e<n.length;++e)r+=t[e]*n[e];return r},k=function(t,n,r){var e=r.length,i=m(n+2);t[i]=255&e,t[i+1]=e>>8,t[i+2]=255^t[i],t[i+3]=255^t[i+1];for(var s=0;s<e;++s)t[i+s+4]=r[s];return 8*(i+4+e)},U=function(t,r,a,o,h,f,l,u,c,v,m){z(r,m++,a),++h[256];for(var b=x(h,15),M=b.t,E=b.l,A=x(f,15),U=A.t,C=A.l,F=D(M),I=F.c,S=F.n,L=D(U),O=L.c,j=L.n,q=new n(19),B=0;B<I.length;++B)++q[31&I[B]];for(B=0;B<O.length;++B)++q[31&O[B]];for(var G=x(q,7),H=G.t,J=G.l,K=19;K>4&&!H[s[K-1]];--K);var N,P,Q,R,V=v+5<<3,W=T(h,p)+T(f,g)+l,X=T(h,M)+T(f,U)+l+14+3*K+T(q,H)+2*q[16]+3*q[17]+7*q[18];if(c>=0&&V<=W&&V<=X)return k(r,m,t.subarray(c,c+v));if(z(r,m,1+(X<W)),m+=2,X<W){N=d(M,E,0),P=M,Q=d(U,C,0),R=U;var Y=d(H,J,0);z(r,m,S-257),z(r,m+5,j-1),z(r,m+10,K-4),m+=14;for(B=0;B<K;++B)z(r,m+3*B,H[s[B]]);m+=3*K;for(var Z=[I,O],$=0;$<2;++$){var tt=Z[$];for(B=0;B<tt.length;++B){var nt=31&tt[B];z(r,m,Y[nt]),m+=H[nt],nt>15&&(z(r,m,tt[B]>>5&127),m+=tt[B]>>12)}}}else N=w,P=p,Q=y,R=g;for(B=0;B<u;++B){var rt=o[B];if(rt>255){_(r,m,N[(nt=rt>>18&31)+257]),m+=P[nt+257],nt>7&&(z(r,m,rt>>23&31),m+=e[nt]);var et=31&rt;_(r,m,Q[et]),m+=R[et],et>3&&(_(r,m,rt>>5&8191),m+=i[et])}else _(r,m,N[rt]),m+=P[rt]}return _(r,m,N[256]),m+P[256]},C=new r([65540,131080,131088,131104,262176,1048704,1048832,2114560,2117632]),F=new t(0),I=function(){for(var t=new Int32Array(256),n=0;n<256;++n){for(var r=n,e=9;--e;)r=(1&r&&-306674912)^r>>>1;t[n]=r}return t}(),S=function(){var t=1,n=0;return{p:function(r){for(var e=t,i=n,s=0|r.length,a=0;a!=s;){for(var o=Math.min(a+2655,s);a<o;++a)i+=e+=r[a];e=(65535&e)+15*(e>>16),i=(65535&i)+15*(i>>16)}t=e,n=i},d:function(){return(255&(t%=65521))<<24|(65280&t)<<8|(255&(n%=65521))<<8|n>>8}}},L=function(s,a,o,h,u){if(!u&&(u={l:1},a.dictionary)){var c=a.dictionary.subarray(-32768),v=new t(c.length+s.length);v.set(c),v.set(s,c.length),s=v,u.w=c.length}return function(s,a,o,h,u,c){var v=c.z||s.length,d=new t(h+v+5*(1+Math.ceil(v/7e3))+u),p=d.subarray(h,d.length-u),g=c.l,w=7&(c.r||0);if(a){w&&(p[0]=c.r>>3);for(var y=C[a-1],M=y>>13,E=8191&y,z=(1<<o)-1,_=c.p||new n(32768),x=c.h||new n(z+1),A=Math.ceil(o/3),D=2*A,T=function(t){return(s[t]^s[t+1]<<A^s[t+2]<<D)&z},F=new r(25e3),I=new n(288),S=new n(32),L=0,O=0,j=c.i||0,q=0,B=c.w||0,G=0;j+2<v;++j){var H=T(j),J=32767&j,K=x[H];if(_[J]=K,x[H]=J,B<=j){var N=v-j;if((L>7e3||q>24576)&&(N>423||!g)){w=U(s,p,0,F,I,S,O,q,G,j-G,w),q=L=O=0,G=j;for(var P=0;P<286;++P)I[P]=0;for(P=0;P<30;++P)S[P]=0}var Q=2,R=0,V=E,W=J-K&32767;if(N>2&&H==T(j-W))for(var X=Math.min(M,N)-1,Y=Math.min(32767,j),Z=Math.min(258,N);W<=Y&&--V&&J!=K;){if(s[j+Q]==s[j+Q-W]){for(var $=0;$<Z&&s[j+$]==s[j+$-W];++$);if($>Q){if(Q=$,R=W,$>X)break;var tt=Math.min(W,$-2),nt=0;for(P=0;P<tt;++P){var rt=j-W+P&32767,et=rt-_[rt]&32767;et>nt&&(nt=et,K=rt)}}}W+=(J=K)-(K=_[J])&32767}if(R){F[q++]=268435456|f[Q]<<18|l[R];var it=31&f[Q],st=31&l[R];O+=e[it]+i[st],++I[257+it],++S[st],B=j+Q,++L}else F[q++]=s[j],++I[s[j]]}}for(j=Math.max(j,B);j<v;++j)F[q++]=s[j],++I[s[j]];w=U(s,p,g,F,I,S,O,q,G,j-G,w),g||(c.r=7&w|p[w/8|0]<<3,w-=7,c.h=x,c.p=_,c.i=j,c.w=B)}else{for(j=c.w||0;j<v+g;j+=65535){var at=j+65535;at>=v&&(p[w/8|0]=g,at=v),w=k(p,w+1,s.subarray(j,at))}c.i=v}return b(d,0,h+m(w)+u)}(s,null==a.level?6:a.level,null==a.mem?u.l?Math.ceil(1.5*Math.max(8,Math.min(13,Math.log(s.length)))):20:12+a.mem,o,h,u)},O=function(t,n,r){for(;r;++n)t[n]=r,r>>>=8},j=function(){function n(n,r){if("function"==typeof n&&(r=n,n={}),this.ondata=r,this.o=n||{},this.s={l:0,i:32768,w:32768,z:32768},this.b=new t(98304),this.o.dictionary){var e=this.o.dictionary.subarray(-32768);this.b.set(e,32768-e.length),this.s.i=32768-e.length}}return n.prototype.p=function(t,n){this.ondata(L(t,this.o,0,0,this.s),n)},n.prototype.push=function(n,r){this.ondata||E(5),this.s.l&&E(4);var e=n.length+this.s.z;if(e>this.b.length){if(e>2*this.b.length-32768){var i=new t(-32768&e);i.set(this.b.subarray(0,this.s.z)),this.b=i}var s=this.b.length-this.s.z;this.b.set(n.subarray(0,s),this.s.z),this.s.z=this.b.length,this.p(this.b,!1),this.b.set(this.b.subarray(-32768)),this.b.set(n.subarray(s),32768),this.s.z=n.length-s+32768,this.s.i=32766,this.s.w=32768}else this.b.set(n,this.s.z),this.s.z+=n.length;this.s.l=1&r,(this.s.z>this.s.w+8191||r)&&(this.p(this.b,r||!1),this.s.w=this.s.i,this.s.i-=2)},n.prototype.flush=function(){this.ondata||E(5),this.s.l&&E(4),this.p(this.b,!1),this.s.w=this.s.i,this.s.i-=2},n}();function q(t,n){n||(n={});var r=function(){var t=-1;return{p:function(n){for(var r=t,e=0;e<n.length;++e)r=I[255&r^n[e]]^r>>>8;t=r},d:function(){return~t}}}(),e=t.length;r.p(t);var i,s=L(t,n,10+((i=n).filename?i.filename.length+1:0),8),a=s.length;return function(t,n){var r=n.filename;if(t[0]=31,t[1]=139,t[2]=8,t[8]=n.level<2?4:9==n.level?2:0,t[9]=3,0!=n.mtime&&O(t,4,Math.floor(new Date(n.mtime||Date.now())/1e3)),r){t[3]=8;for(var e=0;e<=r.length;++e)t[e+10]=r.charCodeAt(e)}}(s,n),O(s,a-8,r.d()),O(s,a-4,e),s}var B=function(){function t(t,n){this.c=S(),this.v=1,j.call(this,t,n)}return t.prototype.push=function(t,n){this.c.p(t),j.prototype.push.call(this,t,n)},t.prototype.p=function(t,n){var r=L(t,this.o,this.v&&(this.o.dictionary?6:2),n&&4,this.s);this.v&&(function(t,n){var r=n.level,e=0==r?0:r<6?1:9==r?3:2;if(t[0]=120,t[1]=e<<6|(n.dictionary&&32),t[1]|=31-(t[0]<<8|t[1])%31,n.dictionary){var i=S();i.p(n.dictionary),O(t,2,i.d())}}(r,this.o),this.v=0),n&&O(r,r.length-4,this.c.d()),this.ondata(r,n)},t.prototype.flush=function(){j.prototype.flush.call(this)},t}(),G="undefined"!=typeof TextEncoder&&new TextEncoder,H="undefined"!=typeof TextDecoder&&new TextDecoder;try{H.decode(F,{stream:!0})}catch(t){}var J=function(){function t(t){this.ondata=t}return t.prototype.push=function(t,n){this.ondata||E(5),this.d&&E(4),this.ondata(K(t),this.d=n||!1)},t}();function K(n,r){if(G)return G.encode(n);for(var e=n.length,i=new t(n.length+(n.length>>1)),s=0,a=function(t){i[s++]=t},o=0;o<e;++o){if(s+5>i.length){var h=new t(s+8+(e-o<<1));h.set(i),i=h}var f=n.charCodeAt(o);f<128||r?a(f):f<2048?(a(192|f>>6),a(128|63&f)):f>55295&&f<57344?(a(240|(f=65536+(1047552&f)|1023&n.charCodeAt(++o))>>18),a(128|f>>12&63),a(128|f>>6&63),a(128|63&f)):(a(224|f>>12),a(128|f>>6&63),a(128|63&f))}return b(i,0,s)}const N=new class{constructor(){this._init()}clear(){this._init()}addEvent(t){if(!t)throw new Error("Adding invalid event");const n=this._hasEvents?",":"";this.stream.push(n+t),this._hasEvents=!0}finish(){this.stream.push("]",!0);const t=function(t){let n=0;for(const r of t)n+=r.length;const r=new Uint8Array(n);for(let n=0,e=0,i=t.length;n<i;n++){const i=t[n];r.set(i,e),e+=i.length}return r}(this._deflatedData);return this._init(),t}_init(){this._hasEvents=!1,this._deflatedData=[],this.deflate=new B,this.deflate.ondata=(t,n)=>{this._deflatedData.push(t)},this.stream=new J((t,n)=>{this.deflate.push(t,n)}),this.stream.push("[")}},P={clear:()=>{N.clear()},addEvent:t=>N.addEvent(t),finish:()=>N.finish(),compress:t=>function(t){return q(K(t))}(t)};addEventListener("message",function(t){const n=t.data.method,r=t.data.id,e=t.data.arg;if(n in P&&"function"==typeof P[n])try{const t=P[n](e);postMessage({id:r,method:n,success:!0,response:t})}catch(t){postMessage({id:r,method:n,success:!1,response:t.message}),console.error(t)}}),postMessage({id:void 0,method:"init",success:!0,response:void 0});`;
+function e() {
+  const e2 = new Blob([r]);
+  return URL.createObjectURL(e2);
+}
+const CONSOLE_LEVELS = ["log", "warn", "error"];
+const PREFIX = "[Replay] ";
+function _addBreadcrumb(message, level = "info") {
+  addBreadcrumb(
+    {
+      category: "console",
+      data: {
+        logger: "replay"
+      },
+      level,
+      message: `${PREFIX}${message}`
+    },
+    { level }
+  );
+}
+function makeReplayDebugLogger() {
+  let _capture = false;
+  let _trace = false;
+  const _debug = {
+    exception: () => void 0,
+    infoTick: () => void 0,
+    setConfig: (opts) => {
+      _capture = !!opts.captureExceptions;
+      _trace = !!opts.traceInternals;
+    }
+  };
+  if (DEBUG_BUILD) {
+    CONSOLE_LEVELS.forEach((name) => {
+      _debug[name] = (...args) => {
+        debug$2[name](PREFIX, ...args);
+        if (_trace) {
+          _addBreadcrumb(args.join(""), severityLevelFromString(name));
+        }
+      };
+    });
+    _debug.exception = (error2, ...message) => {
+      if (message.length && _debug.error) {
+        _debug.error(...message);
+      }
+      debug$2.error(PREFIX, error2);
+      if (_capture) {
+        captureException(error2, {
+          mechanism: {
+            handled: true,
+            type: "auto.function.replay.debug"
+          }
+        });
+      } else if (_trace) {
+        _addBreadcrumb(error2, "error");
+      }
+    };
+    _debug.infoTick = (...args) => {
+      debug$2.log(PREFIX, ...args);
+      if (_trace) {
+        setTimeout(() => _addBreadcrumb(args[0]), 0);
+      }
+    };
+  } else {
+    CONSOLE_LEVELS.forEach((name) => {
+      _debug[name] = () => void 0;
+    });
+  }
+  return _debug;
+}
+const debug = makeReplayDebugLogger();
+class EventBufferSizeExceededError extends Error {
+  constructor() {
+    super(`Event buffer exceeded maximum size of ${REPLAY_MAX_EVENT_BUFFER_SIZE}.`);
+  }
+}
+class EventBufferArray {
+  /** All the events that are buffered to be sent. */
+  /** @inheritdoc */
+  /** @inheritdoc */
+  constructor() {
+    this.events = [];
+    this._totalSize = 0;
+    this.hasCheckout = false;
+    this.waitForCheckout = false;
+  }
+  /** @inheritdoc */
+  get hasEvents() {
+    return this.events.length > 0;
+  }
+  /** @inheritdoc */
+  get type() {
+    return "sync";
+  }
+  /** @inheritdoc */
+  destroy() {
+    this.events = [];
+  }
+  /** @inheritdoc */
+  async addEvent(event) {
+    const eventSize = JSON.stringify(event).length;
+    this._totalSize += eventSize;
+    if (this._totalSize > REPLAY_MAX_EVENT_BUFFER_SIZE) {
+      throw new EventBufferSizeExceededError();
+    }
+    this.events.push(event);
+  }
+  /** @inheritdoc */
+  finish() {
+    return new Promise((resolve2) => {
+      const eventsRet = this.events;
+      this.clear();
+      resolve2(JSON.stringify(eventsRet));
+    });
+  }
+  /** @inheritdoc */
+  clear() {
+    this.events = [];
+    this._totalSize = 0;
+    this.hasCheckout = false;
+  }
+  /** @inheritdoc */
+  getEarliestTimestamp() {
+    const timestamp = this.events.map((event) => event.timestamp).sort()[0];
+    if (!timestamp) {
+      return null;
+    }
+    return timestampToMs(timestamp);
+  }
+}
+class WorkerHandler {
+  constructor(worker) {
+    this._worker = worker;
+    this._id = 0;
+  }
+  /**
+   * Ensure the worker is ready (or not).
+   * This will either resolve when the worker is ready, or reject if an error occurred.
+   */
+  ensureReady() {
+    if (this._ensureReadyPromise) {
+      return this._ensureReadyPromise;
+    }
+    this._ensureReadyPromise = new Promise((resolve2, reject) => {
+      this._worker.addEventListener(
+        "message",
+        ({ data }) => {
+          if (data.success) {
+            resolve2();
+          } else {
+            reject();
+          }
+        },
+        { once: true }
+      );
+      this._worker.addEventListener(
+        "error",
+        (error2) => {
+          reject(error2);
+        },
+        { once: true }
+      );
+    });
+    return this._ensureReadyPromise;
+  }
+  /**
+   * Destroy the worker.
+   */
+  destroy() {
+    DEBUG_BUILD && debug.log("Destroying compression worker");
+    this._worker.terminate();
+  }
+  /**
+   * Post message to worker and wait for response before resolving promise.
+   */
+  postMessage(method, arg) {
+    const id = this._getAndIncrementId();
+    return new Promise((resolve2, reject) => {
+      const listener = ({ data }) => {
+        const response = data;
+        if (response.method !== method) {
+          return;
+        }
+        if (response.id !== id) {
+          return;
+        }
+        this._worker.removeEventListener("message", listener);
+        if (!response.success) {
+          DEBUG_BUILD && debug.error("Error in compression worker: ", response.response);
+          reject(new Error("Error in compression worker"));
+          return;
+        }
+        resolve2(response.response);
+      };
+      this._worker.addEventListener("message", listener);
+      this._worker.postMessage({ id, method, arg });
+    });
+  }
+  /** Get the current ID and increment it for the next call. */
+  _getAndIncrementId() {
+    return this._id++;
+  }
+}
+class EventBufferCompressionWorker {
+  /** @inheritdoc */
+  /** @inheritdoc */
+  constructor(worker) {
+    this._worker = new WorkerHandler(worker);
+    this._earliestTimestamp = null;
+    this._totalSize = 0;
+    this.hasCheckout = false;
+    this.waitForCheckout = false;
+  }
+  /** @inheritdoc */
+  get hasEvents() {
+    return !!this._earliestTimestamp;
+  }
+  /** @inheritdoc */
+  get type() {
+    return "worker";
+  }
+  /**
+   * Ensure the worker is ready (or not).
+   * This will either resolve when the worker is ready, or reject if an error occurred.
+   */
+  ensureReady() {
+    return this._worker.ensureReady();
+  }
+  /**
+   * Destroy the event buffer.
+   */
+  destroy() {
+    this._worker.destroy();
+  }
+  /**
+   * Add an event to the event buffer.
+   *
+   * Returns true if event was successfully received and processed by worker.
+   */
+  addEvent(event) {
+    const timestamp = timestampToMs(event.timestamp);
+    if (!this._earliestTimestamp || timestamp < this._earliestTimestamp) {
+      this._earliestTimestamp = timestamp;
+    }
+    const data = JSON.stringify(event);
+    this._totalSize += data.length;
+    if (this._totalSize > REPLAY_MAX_EVENT_BUFFER_SIZE) {
+      return Promise.reject(new EventBufferSizeExceededError());
+    }
+    return this._sendEventToWorker(data);
+  }
+  /**
+   * Finish the event buffer and return the compressed data.
+   */
+  finish() {
+    return this._finishRequest();
+  }
+  /** @inheritdoc */
+  clear() {
+    this._earliestTimestamp = null;
+    this._totalSize = 0;
+    this.hasCheckout = false;
+    this._worker.postMessage("clear").then(null, (e2) => {
+      DEBUG_BUILD && debug.exception(e2, 'Sending "clear" message to worker failed', e2);
+    });
+  }
+  /** @inheritdoc */
+  getEarliestTimestamp() {
+    return this._earliestTimestamp;
+  }
+  /**
+   * Send the event to the worker.
+   */
+  _sendEventToWorker(data) {
+    return this._worker.postMessage("addEvent", data);
+  }
+  /**
+   * Finish the request and return the compressed data from the worker.
+   */
+  async _finishRequest() {
+    const response = await this._worker.postMessage("finish");
+    this._earliestTimestamp = null;
+    this._totalSize = 0;
+    return response;
+  }
+}
+class EventBufferProxy {
+  constructor(worker) {
+    this._fallback = new EventBufferArray();
+    this._compression = new EventBufferCompressionWorker(worker);
+    this._used = this._fallback;
+    this._ensureWorkerIsLoadedPromise = this._ensureWorkerIsLoaded();
+  }
+  /** @inheritdoc */
+  get waitForCheckout() {
+    return this._used.waitForCheckout;
+  }
+  /** @inheritdoc */
+  get type() {
+    return this._used.type;
+  }
+  /** @inheritDoc */
+  get hasEvents() {
+    return this._used.hasEvents;
+  }
+  /** @inheritdoc */
+  get hasCheckout() {
+    return this._used.hasCheckout;
+  }
+  /** @inheritdoc */
+  set hasCheckout(value) {
+    this._used.hasCheckout = value;
+  }
+  /** @inheritdoc */
+  // eslint-disable-next-line @typescript-eslint/adjacent-overload-signatures
+  set waitForCheckout(value) {
+    this._used.waitForCheckout = value;
+  }
+  /** @inheritDoc */
+  destroy() {
+    this._fallback.destroy();
+    this._compression.destroy();
+  }
+  /** @inheritdoc */
+  clear() {
+    return this._used.clear();
+  }
+  /** @inheritdoc */
+  getEarliestTimestamp() {
+    return this._used.getEarliestTimestamp();
+  }
+  /**
+   * Add an event to the event buffer.
+   *
+   * Returns true if event was successfully added.
+   */
+  addEvent(event) {
+    return this._used.addEvent(event);
+  }
+  /** @inheritDoc */
+  async finish() {
+    await this.ensureWorkerIsLoaded();
+    return this._used.finish();
+  }
+  /** Ensure the worker has loaded. */
+  ensureWorkerIsLoaded() {
+    return this._ensureWorkerIsLoadedPromise;
+  }
+  /** Actually check if the worker has been loaded. */
+  async _ensureWorkerIsLoaded() {
+    try {
+      await this._compression.ensureReady();
+    } catch (error2) {
+      DEBUG_BUILD && debug.exception(error2, "Failed to load the compression worker, falling back to simple buffer");
+      return;
+    }
+    await this._switchToCompressionWorker();
+  }
+  /** Switch the used buffer to the compression worker. */
+  async _switchToCompressionWorker() {
+    const { events, hasCheckout, waitForCheckout } = this._fallback;
+    const addEventPromises = [];
+    for (const event of events) {
+      addEventPromises.push(this._compression.addEvent(event));
+    }
+    this._compression.hasCheckout = hasCheckout;
+    this._compression.waitForCheckout = waitForCheckout;
+    this._used = this._compression;
+    try {
+      await Promise.all(addEventPromises);
+      this._fallback.clear();
+    } catch (error2) {
+      DEBUG_BUILD && debug.exception(error2, "Failed to add events when switching buffers.");
+    }
+  }
+}
+function createEventBuffer({
+  useCompression,
+  workerUrl: customWorkerUrl
+}) {
+  if (useCompression && // eslint-disable-next-line no-restricted-globals
+  window.Worker) {
+    const worker = _loadWorker(customWorkerUrl);
+    if (worker) {
+      return worker;
+    }
+  }
+  DEBUG_BUILD && debug.log("Using simple buffer");
+  return new EventBufferArray();
+}
+function _loadWorker(customWorkerUrl) {
+  try {
+    const workerUrl = customWorkerUrl || _getWorkerUrl();
+    if (!workerUrl) {
+      return;
+    }
+    DEBUG_BUILD && debug.log(`Using compression worker${customWorkerUrl ? ` from ${customWorkerUrl}` : ""}`);
+    const worker = new Worker(workerUrl);
+    return new EventBufferProxy(worker);
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "Failed to create compression worker");
+  }
+}
+function _getWorkerUrl() {
+  if (typeof __SENTRY_EXCLUDE_REPLAY_WORKER__ === "undefined" || !__SENTRY_EXCLUDE_REPLAY_WORKER__) {
+    return e();
+  }
+  return "";
+}
+function hasSessionStorage() {
+  try {
+    return "sessionStorage" in WINDOW && !!WINDOW.sessionStorage;
+  } catch {
+    return false;
+  }
+}
+function clearSession(replay) {
+  deleteSession();
+  replay.session = void 0;
+}
+function deleteSession() {
+  if (!hasSessionStorage()) {
+    return;
+  }
+  try {
+    WINDOW.sessionStorage.removeItem(REPLAY_SESSION_KEY);
+  } catch {
+  }
+}
+function isSampled(sampleRate) {
+  if (sampleRate === void 0) {
+    return false;
+  }
+  return Math.random() < sampleRate;
+}
+function saveSession(session) {
+  if (!hasSessionStorage()) {
+    return;
+  }
+  try {
+    WINDOW.sessionStorage.setItem(REPLAY_SESSION_KEY, JSON.stringify(session));
+  } catch {
+  }
+}
+function makeSession(session) {
+  const now = Date.now();
+  const id = session.id || uuid4();
+  const started = session.started || now;
+  const lastActivity = session.lastActivity || now;
+  const segmentId = session.segmentId || 0;
+  const sampled = session.sampled;
+  const previousSessionId = session.previousSessionId;
+  return {
+    id,
+    started,
+    lastActivity,
+    segmentId,
+    sampled,
+    previousSessionId
+  };
+}
+function getSessionSampleType(sessionSampleRate, allowBuffering) {
+  return isSampled(sessionSampleRate) ? "session" : allowBuffering ? "buffer" : false;
+}
+function createSession({ sessionSampleRate, allowBuffering, stickySession = false }, { previousSessionId } = {}) {
+  const sampled = getSessionSampleType(sessionSampleRate, allowBuffering);
+  const session = makeSession({
+    sampled,
+    previousSessionId
+  });
+  if (stickySession) {
+    saveSession(session);
+  }
+  return session;
+}
+function fetchSession() {
+  if (!hasSessionStorage()) {
+    return null;
+  }
+  try {
+    const sessionStringFromStorage = WINDOW.sessionStorage.getItem(REPLAY_SESSION_KEY);
+    if (!sessionStringFromStorage) {
+      return null;
+    }
+    const sessionObj = JSON.parse(sessionStringFromStorage);
+    DEBUG_BUILD && debug.infoTick("Loading existing session");
+    return makeSession(sessionObj);
+  } catch {
+    return null;
+  }
+}
+function isExpired(initialTime, expiry, targetTime = +/* @__PURE__ */ new Date()) {
+  if (initialTime === null || expiry === void 0 || expiry < 0) {
+    return true;
+  }
+  if (expiry === 0) {
+    return false;
+  }
+  return initialTime + expiry <= targetTime;
+}
+function isSessionExpired(session, {
+  maxReplayDuration,
+  sessionIdleExpire,
+  targetTime = Date.now()
+}) {
+  return (
+    // First, check that maximum session length has not been exceeded
+    isExpired(session.started, maxReplayDuration, targetTime) || // check that the idle timeout has not been exceeded (i.e. user has
+    // performed an action within the last `sessionIdleExpire` ms)
+    isExpired(session.lastActivity, sessionIdleExpire, targetTime)
+  );
+}
+function shouldRefreshSession(session, { sessionIdleExpire, maxReplayDuration }) {
+  if (!isSessionExpired(session, { sessionIdleExpire, maxReplayDuration })) {
+    return false;
+  }
+  if (session.sampled === "buffer" && session.segmentId === 0) {
+    return false;
+  }
+  return true;
+}
+function loadOrCreateSession({
+  sessionIdleExpire,
+  maxReplayDuration,
+  previousSessionId
+}, sessionOptions) {
+  const existingSession = sessionOptions.stickySession && fetchSession();
+  if (!existingSession) {
+    DEBUG_BUILD && debug.infoTick("Creating new session");
+    return createSession(sessionOptions, { previousSessionId });
+  }
+  if (!shouldRefreshSession(existingSession, { sessionIdleExpire, maxReplayDuration })) {
+    return existingSession;
+  }
+  DEBUG_BUILD && debug.infoTick("Session in sessionStorage is expired, creating new one...");
+  return createSession(sessionOptions, { previousSessionId: existingSession.id });
+}
+function isCustomEvent(event) {
+  return event.type === EventType.Custom;
+}
+function addEventSync(replay, event, isCheckout) {
+  if (!shouldAddEvent(replay, event)) {
+    return false;
+  }
+  _addEvent(replay, event, isCheckout);
+  return true;
+}
+function addEvent(replay, event, isCheckout) {
+  if (!shouldAddEvent(replay, event)) {
+    return Promise.resolve(null);
+  }
+  return _addEvent(replay, event, isCheckout);
+}
+async function _addEvent(replay, event, isCheckout) {
+  const { eventBuffer } = replay;
+  if (!eventBuffer || eventBuffer.waitForCheckout && !isCheckout) {
+    return null;
+  }
+  const isBufferMode = replay.recordingMode === "buffer";
+  try {
+    if (isCheckout && isBufferMode) {
+      eventBuffer.clear();
+    }
+    if (isCheckout) {
+      eventBuffer.hasCheckout = true;
+      eventBuffer.waitForCheckout = false;
+    }
+    const replayOptions = replay.getOptions();
+    const eventAfterPossibleCallback = maybeApplyCallback(event, replayOptions.beforeAddRecordingEvent);
+    if (!eventAfterPossibleCallback) {
+      return;
+    }
+    return await eventBuffer.addEvent(eventAfterPossibleCallback);
+  } catch (error2) {
+    const isExceeded = error2 && error2 instanceof EventBufferSizeExceededError;
+    const reason = isExceeded ? "addEventSizeExceeded" : "addEvent";
+    if (isExceeded && isBufferMode) {
+      eventBuffer.clear();
+      eventBuffer.waitForCheckout = true;
+      return null;
+    }
+    replay.handleException(error2);
+    await replay.stop({ reason });
+    const client = getClient();
+    if (client) {
+      client.recordDroppedEvent("internal_sdk_error", "replay");
+    }
+  }
+}
+function shouldAddEvent(replay, event) {
+  if (!replay.eventBuffer || replay.isPaused() || !replay.isEnabled()) {
+    return false;
+  }
+  const timestampInMs = timestampToMs(event.timestamp);
+  if (timestampInMs + replay.timeouts.sessionIdlePause < Date.now()) {
+    return false;
+  }
+  if (timestampInMs > replay.getContext().initialTimestamp + replay.getOptions().maxReplayDuration) {
+    DEBUG_BUILD && debug.infoTick(`Skipping event with timestamp ${timestampInMs} because it is after maxReplayDuration`);
+    return false;
+  }
+  return true;
+}
+function maybeApplyCallback(event, callback) {
+  try {
+    if (typeof callback === "function" && isCustomEvent(event)) {
+      return callback(event);
+    }
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "An error occurred in the `beforeAddRecordingEvent` callback, skipping the event...");
+    return null;
+  }
+  return event;
+}
+function isErrorEvent(event) {
+  return !event.type;
+}
+function isTransactionEvent(event) {
+  return event.type === "transaction";
+}
+function isReplayEvent(event) {
+  return event.type === "replay_event";
+}
+function isFeedbackEvent(event) {
+  return event.type === "feedback";
+}
+function handleAfterSendEvent(replay) {
+  return (event, sendResponse) => {
+    if (!replay.isEnabled() || !isErrorEvent(event) && !isTransactionEvent(event)) {
+      return;
+    }
+    const statusCode = sendResponse.statusCode;
+    if (!statusCode || statusCode < 200 || statusCode >= 300) {
+      return;
+    }
+    if (isTransactionEvent(event)) {
+      handleTransactionEvent(replay, event);
+      return;
+    }
+    handleErrorEvent(replay, event);
+  };
+}
+function handleTransactionEvent(replay, event) {
+  const replayContext = replay.getContext();
+  if (event.contexts?.trace?.trace_id && replayContext.traceIds.size < 100) {
+    replayContext.traceIds.add(event.contexts.trace.trace_id);
+  }
+}
+function handleErrorEvent(replay, event) {
+  const replayContext = replay.getContext();
+  if (event.event_id && replayContext.errorIds.size < 100) {
+    replayContext.errorIds.add(event.event_id);
+  }
+  if (replay.recordingMode !== "buffer" || !event.tags || !event.tags.replayId) {
+    return;
+  }
+  const { beforeErrorSampling } = replay.getOptions();
+  if (typeof beforeErrorSampling === "function" && !beforeErrorSampling(event)) {
+    return;
+  }
+  setTimeout$3(async () => {
+    try {
+      await replay.sendBufferedReplayOrFlush();
+    } catch (err) {
+      replay.handleException(err);
+    }
+  });
+}
+function handleBeforeSendEvent(replay) {
+  return (event) => {
+    if (!replay.isEnabled() || !isErrorEvent(event)) {
+      return;
+    }
+    handleHydrationError(replay, event);
+  };
+}
+function handleHydrationError(replay, event) {
+  const exceptionValue = event.exception?.values?.[0]?.value;
+  if (typeof exceptionValue !== "string") {
+    return;
+  }
+  if (
+    // Only matches errors in production builds of react-dom
+    // Example https://reactjs.org/docs/error-decoder.html?invariant=423
+    // With newer React versions, the messages changed to a different website https://react.dev/errors/418
+    exceptionValue.match(
+      /(reactjs\.org\/docs\/error-decoder\.html\?invariant=|react\.dev\/errors\/)(418|419|422|423|425)/
+    ) || // Development builds of react-dom
+    // Error 1: Hydration failed because the initial UI does not match what was rendered on the server.
+    // Error 2: Text content does not match server-rendered HTML. Warning: Text content did not match.
+    exceptionValue.match(/(does not match server-rendered HTML|Hydration failed because)/i)
+  ) {
+    const breadcrumb = createBreadcrumb({
+      category: "replay.hydrate-error",
+      data: {
+        url: getLocationHref()
+      }
+    });
+    addBreadcrumbEvent(replay, breadcrumb);
+  }
+}
+function handleBreadcrumbs(replay) {
+  const client = getClient();
+  if (!client) {
+    return;
+  }
+  client.on("beforeAddBreadcrumb", (breadcrumb) => beforeAddBreadcrumb(replay, breadcrumb));
+}
+function beforeAddBreadcrumb(replay, breadcrumb) {
+  if (!replay.isEnabled() || !isBreadcrumbWithCategory(breadcrumb)) {
+    return;
+  }
+  const result = normalizeBreadcrumb(breadcrumb);
+  if (result) {
+    addBreadcrumbEvent(replay, result);
+  }
+}
+function normalizeBreadcrumb(breadcrumb) {
+  if (!isBreadcrumbWithCategory(breadcrumb) || [
+    // fetch & xhr are handled separately,in handleNetworkBreadcrumbs
+    "fetch",
+    "xhr",
+    // These two are breadcrumbs for emitted sentry events, we don't care about them
+    "sentry.event",
+    "sentry.transaction"
+  ].includes(breadcrumb.category) || // We capture UI breadcrumbs separately
+  breadcrumb.category.startsWith("ui.")) {
+    return null;
+  }
+  if (breadcrumb.category === "console") {
+    return normalizeConsoleBreadcrumb(breadcrumb);
+  }
+  return createBreadcrumb(breadcrumb);
+}
+function normalizeConsoleBreadcrumb(breadcrumb) {
+  const args = breadcrumb.data?.arguments;
+  if (!Array.isArray(args) || args.length === 0) {
+    return createBreadcrumb(breadcrumb);
+  }
+  let isTruncated = false;
+  const normalizedArgs = args.map((arg) => {
+    if (!arg) {
+      return arg;
+    }
+    if (typeof arg === "string") {
+      if (arg.length > CONSOLE_ARG_MAX_SIZE) {
+        isTruncated = true;
+        return `${arg.slice(0, CONSOLE_ARG_MAX_SIZE)}…`;
+      }
+      return arg;
+    }
+    if (typeof arg === "object") {
+      try {
+        const normalizedArg = normalize(arg, 7);
+        const stringified = JSON.stringify(normalizedArg);
+        if (stringified.length > CONSOLE_ARG_MAX_SIZE) {
+          isTruncated = true;
+          return `${JSON.stringify(normalizedArg, null, 2).slice(0, CONSOLE_ARG_MAX_SIZE)}…`;
+        }
+        return normalizedArg;
+      } catch {
+      }
+    }
+    return arg;
+  });
+  return createBreadcrumb({
+    ...breadcrumb,
+    data: {
+      ...breadcrumb.data,
+      arguments: normalizedArgs,
+      ...isTruncated ? { _meta: { warnings: ["CONSOLE_ARG_TRUNCATED"] } } : {}
+    }
+  });
+}
+function isBreadcrumbWithCategory(breadcrumb) {
+  return !!breadcrumb.category;
+}
+function isRrwebError(event, hint) {
+  if (event.type || !event.exception?.values?.length) {
+    return false;
+  }
+  if (hint.originalException?.__rrweb__) {
+    return true;
+  }
+  return false;
+}
+function resetReplayIdOnDynamicSamplingContext() {
+  const dsc = getCurrentScope().getPropagationContext().dsc;
+  if (dsc) {
+    delete dsc.replay_id;
+  }
+  const activeSpan = getActiveSpan();
+  if (activeSpan) {
+    const dsc2 = getDynamicSamplingContextFromSpan(activeSpan);
+    delete dsc2.replay_id;
+  }
+}
+function addFeedbackBreadcrumb(replay, event) {
+  replay.triggerUserActivity();
+  replay.addUpdate(() => {
+    if (!event.timestamp) {
+      return true;
+    }
+    replay.throttledAddEvent({
+      type: EventType.Custom,
+      timestamp: event.timestamp * 1e3,
+      data: {
+        tag: "breadcrumb",
+        payload: {
+          timestamp: event.timestamp,
+          type: "default",
+          category: "sentry.feedback",
+          data: {
+            feedbackId: event.event_id
+          }
+        }
+      }
+    });
+    return false;
+  });
+}
+function shouldSampleForBufferEvent(replay, event) {
+  if (replay.recordingMode !== "buffer") {
+    return false;
+  }
+  if (event.message === UNABLE_TO_SEND_REPLAY) {
+    return false;
+  }
+  if (!event.exception || event.type) {
+    return false;
+  }
+  return isSampled(replay.getOptions().errorSampleRate);
+}
+function handleGlobalEventListener(replay) {
+  return Object.assign(
+    (event, hint) => {
+      if (!replay.isEnabled() || replay.isPaused()) {
+        return event;
+      }
+      if (isReplayEvent(event)) {
+        delete event.breadcrumbs;
+        return event;
+      }
+      if (!isErrorEvent(event) && !isTransactionEvent(event) && !isFeedbackEvent(event)) {
+        return event;
+      }
+      const isSessionActive = replay.checkAndHandleExpiredSession();
+      if (!isSessionActive) {
+        resetReplayIdOnDynamicSamplingContext();
+        return event;
+      }
+      if (isFeedbackEvent(event)) {
+        replay.flush();
+        event.contexts.feedback.replay_id = replay.getSessionId();
+        addFeedbackBreadcrumb(replay, event);
+        return event;
+      }
+      if (isRrwebError(event, hint) && !replay.getOptions()._experiments.captureExceptions) {
+        DEBUG_BUILD && debug.log("Ignoring error from rrweb internals", event);
+        return null;
+      }
+      const isErrorEventSampled = shouldSampleForBufferEvent(replay, event);
+      const shouldTagReplayId = isErrorEventSampled || replay.recordingMode === "session";
+      if (shouldTagReplayId) {
+        event.tags = { ...event.tags, replayId: replay.getSessionId() };
+      }
+      return event;
+    },
+    { id: "Replay" }
+  );
+}
+function createPerformanceSpans(replay, entries) {
+  return entries.map(({ type, start, end, name, data }) => {
+    const response = replay.throttledAddEvent({
+      type: EventType.Custom,
+      timestamp: start,
+      data: {
+        tag: "performanceSpan",
+        payload: {
+          op: type,
+          description: name,
+          startTimestamp: start,
+          endTimestamp: end,
+          data
+        }
+      }
+    });
+    return typeof response === "string" ? Promise.resolve(null) : response;
+  });
+}
+function handleHistory(handlerData) {
+  const { from, to } = handlerData;
+  const now = Date.now() / 1e3;
+  return {
+    type: "navigation.push",
+    start: now,
+    end: now,
+    name: to,
+    data: {
+      previous: from
+    }
+  };
+}
+function handleHistorySpanListener(replay) {
+  return (handlerData) => {
+    if (!replay.isEnabled()) {
+      return;
+    }
+    const result = handleHistory(handlerData);
+    if (result === null) {
+      return;
+    }
+    replay.getContext().urls.push(result.name);
+    replay.triggerUserActivity();
+    replay.addUpdate(() => {
+      createPerformanceSpans(replay, [result]);
+      return false;
+    });
+  };
+}
+function shouldFilterRequest(replay, url) {
+  if (DEBUG_BUILD && replay.getOptions()._experiments.traceInternals) {
+    return false;
+  }
+  return isSentryRequestUrl(url, getClient());
+}
+function addNetworkBreadcrumb(replay, result) {
+  if (!replay.isEnabled()) {
+    return;
+  }
+  if (result === null) {
+    return;
+  }
+  if (shouldFilterRequest(replay, result.name)) {
+    return;
+  }
+  replay.addUpdate(() => {
+    createPerformanceSpans(replay, [result]);
+    return true;
+  });
+}
+function getBodySize(body) {
+  if (!body) {
+    return void 0;
+  }
+  const textEncoder = new TextEncoder();
+  try {
+    if (typeof body === "string") {
+      return textEncoder.encode(body).length;
+    }
+    if (body instanceof URLSearchParams) {
+      return textEncoder.encode(body.toString()).length;
+    }
+    if (body instanceof FormData) {
+      const formDataStr = serializeFormData(body);
+      return textEncoder.encode(formDataStr).length;
+    }
+    if (body instanceof Blob) {
+      return body.size;
+    }
+    if (body instanceof ArrayBuffer) {
+      return body.byteLength;
+    }
+  } catch {
+  }
+  return void 0;
+}
+function parseContentLengthHeader(header) {
+  if (!header) {
+    return void 0;
+  }
+  const size = parseInt(header, 10);
+  return isNaN(size) ? void 0 : size;
+}
+function mergeWarning(info2, warning) {
+  if (!info2) {
+    return {
+      headers: {},
+      size: void 0,
+      _meta: {
+        warnings: [warning]
+      }
+    };
+  }
+  const newMeta = { ...info2._meta };
+  const existingWarnings = newMeta.warnings || [];
+  newMeta.warnings = [...existingWarnings, warning];
+  info2._meta = newMeta;
+  return info2;
+}
+function makeNetworkReplayBreadcrumb(type, data) {
+  if (!data) {
+    return null;
+  }
+  const { startTimestamp, endTimestamp, url, method, statusCode, request, response } = data;
+  const result = {
+    type,
+    start: startTimestamp / 1e3,
+    end: endTimestamp / 1e3,
+    name: url,
+    data: {
+      method,
+      statusCode,
+      request,
+      response
+    }
+  };
+  return result;
+}
+function buildSkippedNetworkRequestOrResponse(bodySize) {
+  return {
+    headers: {},
+    size: bodySize,
+    _meta: {
+      warnings: ["URL_SKIPPED"]
+    }
+  };
+}
+function buildNetworkRequestOrResponse(headers, bodySize, body) {
+  if (!bodySize && Object.keys(headers).length === 0) {
+    return void 0;
+  }
+  if (!bodySize) {
+    return {
+      headers
+    };
+  }
+  if (!body) {
+    return {
+      headers,
+      size: bodySize
+    };
+  }
+  const info2 = {
+    headers,
+    size: bodySize
+  };
+  const { body: normalizedBody, warnings } = normalizeNetworkBody(body);
+  info2.body = normalizedBody;
+  if (warnings?.length) {
+    info2._meta = {
+      warnings
+    };
+  }
+  return info2;
+}
+function getAllowedHeaders(headers, allowedHeaders) {
+  return Object.entries(headers).reduce((filteredHeaders, [key, value]) => {
+    const normalizedKey = key.toLowerCase();
+    if (allowedHeaders.includes(normalizedKey) && headers[key]) {
+      filteredHeaders[normalizedKey] = value;
+    }
+    return filteredHeaders;
+  }, {});
+}
+function normalizeNetworkBody(body) {
+  if (!body || typeof body !== "string") {
+    return {
+      body
+    };
+  }
+  const exceedsSizeLimit = body.length > NETWORK_BODY_MAX_SIZE;
+  const isProbablyJson = _strIsProbablyJson(body);
+  if (exceedsSizeLimit) {
+    const truncatedBody = body.slice(0, NETWORK_BODY_MAX_SIZE);
+    if (isProbablyJson) {
+      return {
+        body: truncatedBody,
+        warnings: ["MAYBE_JSON_TRUNCATED"]
+      };
+    }
+    return {
+      body: `${truncatedBody}…`,
+      warnings: ["TEXT_TRUNCATED"]
+    };
+  }
+  if (isProbablyJson) {
+    try {
+      const jsonBody = JSON.parse(body);
+      return {
+        body: jsonBody
+      };
+    } catch {
+    }
+  }
+  return {
+    body
+  };
+}
+function _strIsProbablyJson(str) {
+  const first = str[0];
+  const last = str[str.length - 1];
+  return first === "[" && last === "]" || first === "{" && last === "}";
+}
+function urlMatches(url, urls) {
+  const fullUrl = getFullUrl(url);
+  return stringMatchesSomePattern(fullUrl, urls);
+}
+function getFullUrl(url, baseURI = WINDOW.document.baseURI) {
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith(WINDOW.location.origin)) {
+    return url;
+  }
+  const fixedUrl = new URL(url, baseURI);
+  if (fixedUrl.origin !== new URL(baseURI).origin) {
+    return url;
+  }
+  const fullUrl = fixedUrl.href;
+  if (!url.endsWith("/") && fullUrl.endsWith("/")) {
+    return fullUrl.slice(0, -1);
+  }
+  return fullUrl;
+}
+async function captureFetchBreadcrumbToReplay(breadcrumb, hint, options) {
+  try {
+    const data = await _prepareFetchData(breadcrumb, hint, options);
+    const result = makeNetworkReplayBreadcrumb("resource.fetch", data);
+    addNetworkBreadcrumb(options.replay, result);
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "Failed to capture fetch breadcrumb");
+  }
+}
+function enrichFetchBreadcrumb(breadcrumb, hint) {
+  const { input, response } = hint;
+  const body = input ? getFetchRequestArgBody(input) : void 0;
+  const reqSize = getBodySize(body);
+  const resSize = response ? parseContentLengthHeader(response.headers.get("content-length")) : void 0;
+  if (reqSize !== void 0) {
+    breadcrumb.data.request_body_size = reqSize;
+  }
+  if (resSize !== void 0) {
+    breadcrumb.data.response_body_size = resSize;
+  }
+}
+async function _prepareFetchData(breadcrumb, hint, options) {
+  const now = Date.now();
+  const { startTimestamp = now, endTimestamp = now } = hint;
+  const {
+    url,
+    method,
+    status_code: statusCode = 0,
+    request_body_size: requestBodySize,
+    response_body_size: responseBodySize
+  } = breadcrumb.data;
+  const captureDetails = urlMatches(url, options.networkDetailAllowUrls) && !urlMatches(url, options.networkDetailDenyUrls);
+  const request = captureDetails ? _getRequestInfo(options, hint.input, requestBodySize) : buildSkippedNetworkRequestOrResponse(requestBodySize);
+  const response = await _getResponseInfo(captureDetails, options, hint.response, responseBodySize);
+  return {
+    startTimestamp,
+    endTimestamp,
+    url,
+    method,
+    statusCode,
+    request,
+    response
+  };
+}
+function _getRequestInfo({ networkCaptureBodies, networkRequestHeaders }, input, requestBodySize) {
+  const headers = input ? getRequestHeaders(input, networkRequestHeaders) : {};
+  if (!networkCaptureBodies) {
+    return buildNetworkRequestOrResponse(headers, requestBodySize, void 0);
+  }
+  const requestBody = getFetchRequestArgBody(input);
+  const [bodyStr, warning] = getBodyString(requestBody, debug);
+  const data = buildNetworkRequestOrResponse(headers, requestBodySize, bodyStr);
+  if (warning) {
+    return mergeWarning(data, warning);
+  }
+  return data;
+}
+async function _getResponseInfo(captureDetails, {
+  networkCaptureBodies,
+  networkResponseHeaders
+}, response, responseBodySize) {
+  if (!captureDetails && responseBodySize !== void 0) {
+    return buildSkippedNetworkRequestOrResponse(responseBodySize);
+  }
+  const headers = response ? getAllHeaders(response.headers, networkResponseHeaders) : {};
+  if (!response || !networkCaptureBodies && responseBodySize !== void 0) {
+    return buildNetworkRequestOrResponse(headers, responseBodySize, void 0);
+  }
+  const [bodyText, warning] = await _parseFetchResponseBody(response);
+  const result = getResponseData(bodyText, {
+    networkCaptureBodies,
+    responseBodySize,
+    captureDetails,
+    headers
+  });
+  if (warning) {
+    return mergeWarning(result, warning);
+  }
+  return result;
+}
+function getResponseData(bodyText, {
+  networkCaptureBodies,
+  responseBodySize,
+  captureDetails,
+  headers
+}) {
+  try {
+    const size = bodyText?.length && responseBodySize === void 0 ? getBodySize(bodyText) : responseBodySize;
+    if (!captureDetails) {
+      return buildSkippedNetworkRequestOrResponse(size);
+    }
+    if (networkCaptureBodies) {
+      return buildNetworkRequestOrResponse(headers, size, bodyText);
+    }
+    return buildNetworkRequestOrResponse(headers, size, void 0);
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "Failed to serialize response body");
+    return buildNetworkRequestOrResponse(headers, responseBodySize, void 0);
+  }
+}
+async function _parseFetchResponseBody(response) {
+  const res = _tryCloneResponse(response);
+  if (!res) {
+    return [void 0, "BODY_PARSE_ERROR"];
+  }
+  try {
+    const text = await _tryGetResponseText(res);
+    return [text];
+  } catch (error2) {
+    if (error2 instanceof Error && error2.message.indexOf("Timeout") > -1) {
+      DEBUG_BUILD && debug.warn("Parsing text body from response timed out");
+      return [void 0, "BODY_PARSE_TIMEOUT"];
+    }
+    DEBUG_BUILD && debug.exception(error2, "Failed to get text body from response");
+    return [void 0, "BODY_PARSE_ERROR"];
+  }
+}
+function getAllHeaders(headers, allowedHeaders) {
+  const allHeaders = {};
+  allowedHeaders.forEach((header) => {
+    if (headers.get(header)) {
+      allHeaders[header] = headers.get(header);
+    }
+  });
+  return allHeaders;
+}
+function getRequestHeaders(fetchArgs, allowedHeaders) {
+  if (fetchArgs.length === 1 && typeof fetchArgs[0] !== "string") {
+    return getHeadersFromOptions(fetchArgs[0], allowedHeaders);
+  }
+  if (fetchArgs.length === 2) {
+    return getHeadersFromOptions(fetchArgs[1], allowedHeaders);
+  }
+  return {};
+}
+function getHeadersFromOptions(input, allowedHeaders) {
+  if (!input) {
+    return {};
+  }
+  const headers = input.headers;
+  if (!headers) {
+    return {};
+  }
+  if (headers instanceof Headers) {
+    return getAllHeaders(headers, allowedHeaders);
+  }
+  if (Array.isArray(headers)) {
+    return {};
+  }
+  return getAllowedHeaders(headers, allowedHeaders);
+}
+function _tryCloneResponse(response) {
+  try {
+    return response.clone();
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "Failed to clone response body");
+  }
+}
+function _tryGetResponseText(response) {
+  return new Promise((resolve2, reject) => {
+    const timeout = setTimeout$3(() => reject(new Error("Timeout while trying to read response body")), 500);
+    _getResponseText(response).then(
+      (txt) => resolve2(txt),
+      (reason) => reject(reason)
+    ).finally(() => clearTimeout(timeout));
+  });
+}
+async function _getResponseText(response) {
+  return await response.text();
+}
+async function captureXhrBreadcrumbToReplay(breadcrumb, hint, options) {
+  try {
+    const data = _prepareXhrData(breadcrumb, hint, options);
+    const result = makeNetworkReplayBreadcrumb("resource.xhr", data);
+    addNetworkBreadcrumb(options.replay, result);
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "Failed to capture xhr breadcrumb");
+  }
+}
+function enrichXhrBreadcrumb(breadcrumb, hint) {
+  const { xhr, input } = hint;
+  if (!xhr) {
+    return;
+  }
+  const reqSize = getBodySize(input);
+  const resSize = xhr.getResponseHeader("content-length") ? parseContentLengthHeader(xhr.getResponseHeader("content-length")) : _getBodySize(xhr.response, xhr.responseType);
+  if (reqSize !== void 0) {
+    breadcrumb.data.request_body_size = reqSize;
+  }
+  if (resSize !== void 0) {
+    breadcrumb.data.response_body_size = resSize;
+  }
+}
+function _prepareXhrData(breadcrumb, hint, options) {
+  const now = Date.now();
+  const { startTimestamp = now, endTimestamp = now, input, xhr } = hint;
+  const {
+    url,
+    method,
+    status_code: statusCode = 0,
+    request_body_size: requestBodySize,
+    response_body_size: responseBodySize
+  } = breadcrumb.data;
+  if (!url) {
+    return null;
+  }
+  if (!xhr || !urlMatches(url, options.networkDetailAllowUrls) || urlMatches(url, options.networkDetailDenyUrls)) {
+    const request2 = buildSkippedNetworkRequestOrResponse(requestBodySize);
+    const response2 = buildSkippedNetworkRequestOrResponse(responseBodySize);
+    return {
+      startTimestamp,
+      endTimestamp,
+      url,
+      method,
+      statusCode,
+      request: request2,
+      response: response2
+    };
+  }
+  const xhrInfo = xhr[SENTRY_XHR_DATA_KEY];
+  const networkRequestHeaders = xhrInfo ? getAllowedHeaders(xhrInfo.request_headers, options.networkRequestHeaders) : {};
+  const networkResponseHeaders = getAllowedHeaders(getResponseHeaders(xhr), options.networkResponseHeaders);
+  const [requestBody, requestWarning] = options.networkCaptureBodies ? getBodyString(input, debug) : [void 0];
+  const [responseBody, responseWarning] = options.networkCaptureBodies ? _getXhrResponseBody(xhr) : [void 0];
+  const request = buildNetworkRequestOrResponse(networkRequestHeaders, requestBodySize, requestBody);
+  const response = buildNetworkRequestOrResponse(networkResponseHeaders, responseBodySize, responseBody);
+  return {
+    startTimestamp,
+    endTimestamp,
+    url,
+    method,
+    statusCode,
+    request: requestWarning ? mergeWarning(request, requestWarning) : request,
+    response: responseWarning ? mergeWarning(response, responseWarning) : response
+  };
+}
+function getResponseHeaders(xhr) {
+  const headers = xhr.getAllResponseHeaders();
+  if (!headers) {
+    return {};
+  }
+  return headers.split("\r\n").reduce((acc, line) => {
+    const [key, value] = line.split(": ");
+    if (value) {
+      acc[key.toLowerCase()] = value;
+    }
+    return acc;
+  }, {});
+}
+function _getXhrResponseBody(xhr) {
+  const errors = [];
+  try {
+    return [xhr.responseText];
+  } catch (e2) {
+    errors.push(e2);
+  }
+  try {
+    return _parseXhrResponse(xhr.response, xhr.responseType);
+  } catch (e2) {
+    errors.push(e2);
+  }
+  DEBUG_BUILD && debug.warn("Failed to get xhr response body", ...errors);
+  return [void 0];
+}
+function _parseXhrResponse(body, responseType) {
+  try {
+    if (typeof body === "string") {
+      return [body];
+    }
+    if (body instanceof Document) {
+      return [body.body.outerHTML];
+    }
+    if (responseType === "json" && body && typeof body === "object") {
+      return [JSON.stringify(body)];
+    }
+    if (!body) {
+      return [void 0];
+    }
+  } catch (error2) {
+    DEBUG_BUILD && debug.exception(error2, "Failed to serialize body", body);
+    return [void 0, "BODY_PARSE_ERROR"];
+  }
+  DEBUG_BUILD && debug.log("Skipping network body because of body type", body);
+  return [void 0, "UNPARSEABLE_BODY_TYPE"];
+}
+function _getBodySize(body, responseType) {
+  try {
+    const bodyStr = responseType === "json" && body && typeof body === "object" ? JSON.stringify(body) : body;
+    return getBodySize(bodyStr);
+  } catch {
+    return void 0;
+  }
+}
+function handleNetworkBreadcrumbs(replay) {
+  const client = getClient();
+  try {
+    const {
+      networkDetailAllowUrls,
+      networkDetailDenyUrls,
+      networkCaptureBodies,
+      networkRequestHeaders,
+      networkResponseHeaders
+    } = replay.getOptions();
+    const options = {
+      replay,
+      networkDetailAllowUrls,
+      networkDetailDenyUrls,
+      networkCaptureBodies,
+      networkRequestHeaders,
+      networkResponseHeaders
+    };
+    if (client) {
+      client.on("beforeAddBreadcrumb", (breadcrumb, hint) => beforeAddNetworkBreadcrumb(options, breadcrumb, hint));
+    }
+  } catch {
+  }
+}
+function beforeAddNetworkBreadcrumb(options, breadcrumb, hint) {
+  if (!breadcrumb.data) {
+    return;
+  }
+  try {
+    if (_isXhrBreadcrumb(breadcrumb) && _isXhrHint(hint)) {
+      enrichXhrBreadcrumb(breadcrumb, hint);
+      captureXhrBreadcrumbToReplay(breadcrumb, hint, options);
+    }
+    if (_isFetchBreadcrumb(breadcrumb) && _isFetchHint(hint)) {
+      enrichFetchBreadcrumb(breadcrumb, hint);
+      captureFetchBreadcrumbToReplay(breadcrumb, hint, options);
+    }
+  } catch (e2) {
+    DEBUG_BUILD && debug.exception(e2, "Error when enriching network breadcrumb");
+  }
+}
+function _isXhrBreadcrumb(breadcrumb) {
+  return breadcrumb.category === "xhr";
+}
+function _isFetchBreadcrumb(breadcrumb) {
+  return breadcrumb.category === "fetch";
+}
+function _isXhrHint(hint) {
+  return hint?.xhr;
+}
+function _isFetchHint(hint) {
+  return hint?.response;
+}
+function addGlobalListeners(replay) {
+  const client = getClient();
+  addClickKeypressInstrumentationHandler(handleDomListener(replay));
+  addHistoryInstrumentationHandler(handleHistorySpanListener(replay));
+  handleBreadcrumbs(replay);
+  handleNetworkBreadcrumbs(replay);
+  const eventProcessor = handleGlobalEventListener(replay);
+  addEventProcessor(eventProcessor);
+  if (client) {
+    client.on("beforeSendEvent", handleBeforeSendEvent(replay));
+    client.on("afterSendEvent", handleAfterSendEvent(replay));
+    client.on("createDsc", (dsc) => {
+      const replayId = replay.getSessionId();
+      if (replayId && replay.isEnabled() && replay.recordingMode === "session") {
+        const isSessionActive = replay.checkAndHandleExpiredSession();
+        if (isSessionActive) {
+          dsc.replay_id = replayId;
+        }
+      }
+    });
+    client.on("spanStart", (span) => {
+      replay.lastActiveSpan = span;
+    });
+    client.on("spanEnd", (span) => {
+      replay.lastActiveSpan = span;
+    });
+    client.on("beforeSendFeedback", async (feedbackEvent, options) => {
+      const replayId = replay.getSessionId();
+      if (options?.includeReplay && replay.isEnabled() && replayId && feedbackEvent.contexts?.feedback) {
+        if (feedbackEvent.contexts.feedback.source === "api") {
+          await replay.sendBufferedReplayOrFlush();
+        }
+        feedbackEvent.contexts.feedback.replay_id = replayId;
+      }
+    });
+    client.on("openFeedbackWidget", async () => {
+      await replay.sendBufferedReplayOrFlush();
+    });
+  }
+}
+async function addMemoryEntry(replay) {
+  try {
+    return Promise.all(
+      createPerformanceSpans(replay, [
+        // @ts-expect-error memory doesn't exist on type Performance as the API is non-standard (we check that it exists above)
+        createMemoryEntry(WINDOW.performance.memory)
+      ])
+    );
+  } catch {
+    return [];
+  }
+}
+function createMemoryEntry(memoryEntry) {
+  const { jsHeapSizeLimit, totalJSHeapSize, usedJSHeapSize } = memoryEntry;
+  const time = Date.now() / 1e3;
+  return {
+    type: "memory",
+    name: "memory",
+    start: time,
+    end: time,
+    data: {
+      memory: {
+        jsHeapSizeLimit,
+        totalJSHeapSize,
+        usedJSHeapSize
+      }
+    }
+  };
+}
+function debounce(func, wait, options) {
+  return debounce$1(func, wait, {
+    ...options,
+    // @ts-expect-error - Not quite sure why these types do not match, but this is fine
+    setTimeoutImpl: setTimeout$3
+  });
+}
+const NAVIGATOR = GLOBAL_OBJ.navigator;
+function getRecordingSamplingOptions() {
+  if (/iPhone|iPad|iPod/i.test(NAVIGATOR?.userAgent ?? "") || /Macintosh/i.test(NAVIGATOR?.userAgent ?? "") && NAVIGATOR?.maxTouchPoints && NAVIGATOR?.maxTouchPoints > 1) {
+    return {
+      sampling: {
+        mousemove: false
+      }
+    };
+  }
+  return {};
+}
+function getHandleRecordingEmit(replay) {
+  let hadFirstEvent = false;
+  return (event, _isCheckout) => {
+    if (!replay.checkAndHandleExpiredSession()) {
+      DEBUG_BUILD && debug.warn("Received replay event after session expired.");
+      return;
+    }
+    const isCheckout = _isCheckout || !hadFirstEvent;
+    hadFirstEvent = true;
+    if (replay.clickDetector) {
+      updateClickDetectorForRecordingEvent(replay.clickDetector, event);
+    }
+    replay.addUpdate(() => {
+      if (replay.recordingMode === "buffer" && isCheckout) {
+        replay.setInitialState();
+      }
+      if (!addEventSync(replay, event, isCheckout)) {
+        return true;
+      }
+      if (!isCheckout) {
+        return false;
+      }
+      const session = replay.session;
+      addSettingsEvent(replay, isCheckout);
+      if (replay.recordingMode === "buffer" && session && replay.eventBuffer) {
+        const earliestEvent = replay.eventBuffer.getEarliestTimestamp();
+        if (earliestEvent) {
+          DEBUG_BUILD && debug.log(`Updating session start time to earliest event in buffer to ${new Date(earliestEvent)}`);
+          session.started = earliestEvent;
+          if (replay.getOptions().stickySession) {
+            saveSession(session);
+          }
+        }
+      }
+      if (session?.previousSessionId) {
+        return true;
+      }
+      if (replay.recordingMode === "session") {
+        void replay.flush();
+      }
+      return true;
+    });
+  };
+}
+function createOptionsEvent(replay) {
+  const options = replay.getOptions();
+  return {
+    type: EventType.Custom,
+    timestamp: Date.now(),
+    data: {
+      tag: "options",
+      payload: {
+        shouldRecordCanvas: replay.isRecordingCanvas(),
+        sessionSampleRate: options.sessionSampleRate,
+        errorSampleRate: options.errorSampleRate,
+        useCompressionOption: options.useCompression,
+        blockAllMedia: options.blockAllMedia,
+        maskAllText: options.maskAllText,
+        maskAllInputs: options.maskAllInputs,
+        useCompression: replay.eventBuffer ? replay.eventBuffer.type === "worker" : false,
+        networkDetailHasUrls: options.networkDetailAllowUrls.length > 0,
+        networkCaptureBodies: options.networkCaptureBodies,
+        networkRequestHasHeaders: options.networkRequestHeaders.length > 0,
+        networkResponseHasHeaders: options.networkResponseHeaders.length > 0
+      }
+    }
+  };
+}
+function addSettingsEvent(replay, isCheckout) {
+  if (!isCheckout || !replay.session || replay.session.segmentId !== 0) {
+    return;
+  }
+  addEventSync(replay, createOptionsEvent(replay), false);
+}
+function closestElementOfNode$2(node) {
+  if (!node) {
+    return null;
+  }
+  try {
+    const el = node.nodeType === node.ELEMENT_NODE ? node : node.parentElement;
+    return el;
+  } catch {
+    return null;
+  }
+}
+function createReplayEnvelope(replayEvent, recordingData, dsn, tunnel) {
+  return createEnvelope(
+    createEventEnvelopeHeaders(replayEvent, getSdkMetadataForEnvelopeHeader(replayEvent), tunnel, dsn),
+    [
+      [{ type: "replay_event" }, replayEvent],
+      [
+        {
+          type: "replay_recording",
+          // If string then we need to encode to UTF8, otherwise will have
+          // wrong size. TextEncoder has similar browser support to
+          // MutationObserver, although it does not accept IE11.
+          length: typeof recordingData === "string" ? new TextEncoder().encode(recordingData).length : recordingData.length
+        },
+        recordingData
+      ]
+    ]
+  );
+}
+function prepareRecordingData({
+  recordingData,
+  headers
+}) {
+  let payloadWithSequence;
+  const replayHeaders = `${JSON.stringify(headers)}
+`;
+  if (typeof recordingData === "string") {
+    payloadWithSequence = `${replayHeaders}${recordingData}`;
+  } else {
+    const enc = new TextEncoder();
+    const sequence = enc.encode(replayHeaders);
+    payloadWithSequence = new Uint8Array(sequence.length + recordingData.length);
+    payloadWithSequence.set(sequence);
+    payloadWithSequence.set(recordingData, sequence.length);
+  }
+  return payloadWithSequence;
+}
+async function prepareReplayEvent({
+  client,
+  scope,
+  replayId: event_id,
+  event
+}) {
+  const integrations = typeof client["_integrations"] === "object" && client["_integrations"] !== null && !Array.isArray(client["_integrations"]) ? Object.keys(client["_integrations"]) : void 0;
+  const eventHint = { event_id, integrations };
+  client.emit("preprocessEvent", event, eventHint);
+  const preparedEvent = await prepareEvent(
+    client.getOptions(),
+    event,
+    eventHint,
+    scope,
+    client,
+    getIsolationScope()
+  );
+  if (!preparedEvent) {
+    return null;
+  }
+  client.emit("postprocessEvent", preparedEvent, eventHint);
+  preparedEvent.platform = preparedEvent.platform || "javascript";
+  const metadata = client.getSdkMetadata();
+  const { name, version, settings } = metadata?.sdk || {};
+  preparedEvent.sdk = {
+    ...preparedEvent.sdk,
+    name: name || "sentry.javascript.unknown",
+    version: version || "0.0.0",
+    settings
+  };
+  return preparedEvent;
+}
+async function sendReplayRequest({
+  recordingData,
+  replayId,
+  segmentId: segment_id,
+  eventContext,
+  timestamp,
+  session
+}) {
+  const preparedRecordingData = prepareRecordingData({
+    recordingData,
+    headers: {
+      segment_id
+    }
+  });
+  const { urls, errorIds, traceIds, initialTimestamp } = eventContext;
+  const client = getClient();
+  const scope = getCurrentScope();
+  const transport = client?.getTransport();
+  const dsn = client?.getDsn();
+  if (!client || !transport || !dsn || !session.sampled) {
+    return Promise.resolve({});
+  }
+  const baseEvent = {
+    type: REPLAY_EVENT_NAME,
+    replay_start_timestamp: initialTimestamp / 1e3,
+    timestamp: timestamp / 1e3,
+    error_ids: errorIds,
+    trace_ids: traceIds,
+    urls,
+    replay_id: replayId,
+    segment_id,
+    replay_type: session.sampled
+  };
+  const replayEvent = await prepareReplayEvent({ scope, client, replayId, event: baseEvent });
+  if (!replayEvent) {
+    client.recordDroppedEvent("event_processor", "replay");
+    DEBUG_BUILD && debug.log("An event processor returned `null`, will not send event.");
+    return Promise.resolve({});
+  }
+  delete replayEvent.sdkProcessingMetadata;
+  const envelope = createReplayEnvelope(replayEvent, preparedRecordingData, dsn, client.getOptions().tunnel);
+  let response;
+  try {
+    response = await transport.send(envelope);
+  } catch (err) {
+    const error2 = new Error(UNABLE_TO_SEND_REPLAY);
+    try {
+      error2.cause = err;
+    } catch {
+    }
+    throw error2;
+  }
+  if (typeof response.statusCode === "number" && (response.statusCode < 200 || response.statusCode >= 300)) {
+    throw new TransportStatusCodeError(response.statusCode);
+  }
+  const rateLimits = updateRateLimits({}, response);
+  if (isRateLimited(rateLimits, "replay")) {
+    throw new RateLimitError(rateLimits);
+  }
+  return response;
+}
+class TransportStatusCodeError extends Error {
+  constructor(statusCode) {
+    super(`Transport returned status code ${statusCode}`);
+  }
+}
+class RateLimitError extends Error {
+  constructor(rateLimits) {
+    super("Rate limit hit");
+    this.rateLimits = rateLimits;
+  }
+}
+async function sendReplay(replayData, retryConfig = {
+  count: 0,
+  interval: RETRY_BASE_INTERVAL
+}) {
+  const { recordingData, onError } = replayData;
+  if (!recordingData.length) {
+    return;
+  }
+  try {
+    await sendReplayRequest(replayData);
+    return true;
+  } catch (err) {
+    if (err instanceof TransportStatusCodeError || err instanceof RateLimitError) {
+      throw err;
+    }
+    setContext("Replays", {
+      _retryCount: retryConfig.count
+    });
+    if (onError) {
+      onError(err);
+    }
+    if (retryConfig.count >= RETRY_MAX_COUNT) {
+      const error2 = new Error(`${UNABLE_TO_SEND_REPLAY} - max retries exceeded`);
+      try {
+        error2.cause = err;
+      } catch {
+      }
+      throw error2;
+    }
+    retryConfig.interval *= ++retryConfig.count;
+    return new Promise((resolve2, reject) => {
+      setTimeout$3(async () => {
+        try {
+          await sendReplay(replayData, retryConfig);
+          resolve2(true);
+        } catch (err2) {
+          reject(err2);
+        }
+      }, retryConfig.interval);
+    });
+  }
+}
+const THROTTLED = "__THROTTLED";
+const SKIPPED = "__SKIPPED";
+function throttle(fn, maxCount, durationSeconds) {
+  const counter = /* @__PURE__ */ new Map();
+  const _cleanup = (now) => {
+    const threshold = now - durationSeconds;
+    counter.forEach((_value, key) => {
+      if (key < threshold) {
+        counter.delete(key);
+      }
+    });
+  };
+  const _getTotalCount = () => {
+    return [...counter.values()].reduce((a2, b2) => a2 + b2, 0);
+  };
+  let isThrottled = false;
+  return (...rest) => {
+    const now = Math.floor(Date.now() / 1e3);
+    _cleanup(now);
+    if (_getTotalCount() >= maxCount) {
+      const wasThrottled = isThrottled;
+      isThrottled = true;
+      return wasThrottled ? SKIPPED : THROTTLED;
+    }
+    isThrottled = false;
+    const count2 = counter.get(now) || 0;
+    counter.set(now, count2 + 1);
+    return fn(...rest);
+  };
+}
+class ReplayContainer {
+  /**
+   * Recording can happen in one of two modes:
+   *   - session: Record the whole session, sending it continuously
+   *   - buffer: Always keep the last 60s of recording, requires:
+   *     - having replaysOnErrorSampleRate > 0 to capture replay when an error occurs
+   *     - or calling `flush()` to send the replay
+   */
+  /**
+   * The current or last active span.
+   * This is only available when performance is enabled.
+   */
+  /**
+   * These are here so we can overwrite them in tests etc.
+   * @hidden
+   */
+  /** The replay has to be manually started, because no sample rate (neither session or error) was provided. */
+  /**
+   * Options to pass to `rrweb.record()`
+   */
+  /**
+   * Timestamp of the last user activity. This lives across sessions.
+   */
+  /**
+   * Is the integration currently active?
+   */
+  /**
+   * Paused is a state where:
+   * - DOM Recording is not listening at all
+   * - Nothing will be added to event buffer (e.g. core SDK events)
+   */
+  /**
+   * Have we attached listeners to the core SDK?
+   * Note we have to track this as there is no way to remove instrumentation handlers.
+   */
+  /**
+   * Function to stop recording
+   */
+  /**
+   * Internal use for canvas recording options
+   */
+  /**
+   * Handle when visibility of the page content changes. Opening a new tab will
+   * cause the state to change to hidden because of content of current page will
+   * be hidden. Likewise, moving a different window to cover the contents of the
+   * page will also trigger a change to a hidden state.
+   */
+  /**
+   * Handle when page is blurred
+   */
+  /**
+   * Handle when page is focused
+   */
+  /** Ensure page remains active when a key is pressed. */
+  constructor({
+    options,
+    recordingOptions
+  }) {
+    this.eventBuffer = null;
+    this.performanceEntries = [];
+    this.replayPerformanceEntries = [];
+    this.recordingMode = "session";
+    this.timeouts = {
+      sessionIdlePause: SESSION_IDLE_PAUSE_DURATION,
+      sessionIdleExpire: SESSION_IDLE_EXPIRE_DURATION
+    };
+    this._lastActivity = Date.now();
+    this._isEnabled = false;
+    this._isPaused = false;
+    this._requiresManualStart = false;
+    this._hasInitializedCoreListeners = false;
+    this._context = {
+      errorIds: /* @__PURE__ */ new Set(),
+      traceIds: /* @__PURE__ */ new Set(),
+      urls: [],
+      initialTimestamp: Date.now(),
+      initialUrl: ""
+    };
+    this._recordingOptions = recordingOptions;
+    this._options = options;
+    this._debouncedFlush = debounce(() => this._flush(), this._options.flushMinDelay, {
+      maxWait: this._options.flushMaxDelay
+    });
+    this._throttledAddEvent = throttle(
+      (event, isCheckout) => addEvent(this, event, isCheckout),
+      // Max 300 events...
+      300,
+      // ... per 5s
+      5
+    );
+    const { slowClickTimeout, slowClickIgnoreSelectors } = this.getOptions();
+    const slowClickConfig = slowClickTimeout ? {
+      threshold: Math.min(SLOW_CLICK_THRESHOLD, slowClickTimeout),
+      timeout: slowClickTimeout,
+      scrollTimeout: SLOW_CLICK_SCROLL_TIMEOUT,
+      ignoreSelector: slowClickIgnoreSelectors ? slowClickIgnoreSelectors.join(",") : ""
+    } : void 0;
+    if (slowClickConfig) {
+      this.clickDetector = new ClickDetector(this, slowClickConfig);
+    }
+    if (DEBUG_BUILD) {
+      const experiments = options._experiments;
+      debug.setConfig({
+        captureExceptions: !!experiments.captureExceptions,
+        traceInternals: !!experiments.traceInternals
+      });
+    }
+    this._handleVisibilityChange = () => {
+      if (WINDOW.document.visibilityState === "visible") {
+        this._doChangeToForegroundTasks();
+      } else {
+        this._doChangeToBackgroundTasks();
+      }
+    };
+    this._handleWindowBlur = () => {
+      const breadcrumb = createBreadcrumb({
+        category: "ui.blur"
+      });
+      this._doChangeToBackgroundTasks(breadcrumb);
+    };
+    this._handleWindowFocus = () => {
+      const breadcrumb = createBreadcrumb({
+        category: "ui.focus"
+      });
+      this._doChangeToForegroundTasks(breadcrumb);
+    };
+    this._handleKeyboardEvent = (event) => {
+      handleKeyboardEvent(this, event);
+    };
+  }
+  /** Get the event context. */
+  getContext() {
+    return this._context;
+  }
+  /** If recording is currently enabled. */
+  isEnabled() {
+    return this._isEnabled;
+  }
+  /** If recording is currently paused. */
+  isPaused() {
+    return this._isPaused;
+  }
+  /**
+   * Determine if canvas recording is enabled
+   */
+  isRecordingCanvas() {
+    return Boolean(this._canvas);
+  }
+  /** Get the replay integration options. */
+  getOptions() {
+    return this._options;
+  }
+  /** A wrapper to conditionally capture exceptions. */
+  handleException(error2) {
+    DEBUG_BUILD && debug.exception(error2);
+    if (this._options.onError) {
+      this._options.onError(error2);
+    }
+  }
+  /**
+   * Initializes the plugin based on sampling configuration. Should not be
+   * called outside of constructor.
+   */
+  initializeSampling(previousSessionId) {
+    const { errorSampleRate, sessionSampleRate } = this._options;
+    const requiresManualStart = errorSampleRate <= 0 && sessionSampleRate <= 0;
+    this._requiresManualStart = requiresManualStart;
+    if (requiresManualStart) {
+      return;
+    }
+    this._initializeSessionForSampling(previousSessionId);
+    if (!this.session) {
+      DEBUG_BUILD && debug.exception(new Error("Unable to initialize and create session"));
+      return;
+    }
+    if (this.session.sampled === false) {
+      return;
+    }
+    this.recordingMode = this.session.sampled === "buffer" && this.session.segmentId === 0 ? "buffer" : "session";
+    DEBUG_BUILD && debug.infoTick(`Starting replay in ${this.recordingMode} mode`);
+    this._initializeRecording();
+  }
+  /**
+   * Start a replay regardless of sampling rate. Calling this will always
+   * create a new session. Will log a message if replay is already in progress.
+   *
+   * Creates or loads a session, attaches listeners to varying events (DOM,
+   * _performanceObserver, Recording, Sentry SDK, etc)
+   */
+  start() {
+    if (this._isEnabled && this.recordingMode === "session") {
+      DEBUG_BUILD && debug.log("Recording is already in progress");
+      return;
+    }
+    if (this._isEnabled && this.recordingMode === "buffer") {
+      DEBUG_BUILD && debug.log("Buffering is in progress, call `flush()` to save the replay");
+      return;
+    }
+    DEBUG_BUILD && debug.infoTick("Starting replay in session mode");
+    this._updateUserActivity();
+    const session = loadOrCreateSession(
+      {
+        maxReplayDuration: this._options.maxReplayDuration,
+        sessionIdleExpire: this.timeouts.sessionIdleExpire
+      },
+      {
+        stickySession: this._options.stickySession,
+        // This is intentional: create a new session-based replay when calling `start()`
+        sessionSampleRate: 1,
+        allowBuffering: false
+      }
+    );
+    this.session = session;
+    this.recordingMode = "session";
+    this._initializeRecording();
+  }
+  /**
+   * Start replay buffering. Buffers until `flush()` is called or, if
+   * `replaysOnErrorSampleRate` > 0, an error occurs.
+   */
+  startBuffering() {
+    if (this._isEnabled) {
+      DEBUG_BUILD && debug.log("Buffering is in progress, call `flush()` to save the replay");
+      return;
+    }
+    DEBUG_BUILD && debug.infoTick("Starting replay in buffer mode");
+    const session = loadOrCreateSession(
+      {
+        sessionIdleExpire: this.timeouts.sessionIdleExpire,
+        maxReplayDuration: this._options.maxReplayDuration
+      },
+      {
+        stickySession: this._options.stickySession,
+        sessionSampleRate: 0,
+        allowBuffering: true
+      }
+    );
+    this.session = session;
+    this.recordingMode = "buffer";
+    this._initializeRecording();
+  }
+  /**
+   * Start recording.
+   *
+   * Note that this will cause a new DOM checkout
+   */
+  startRecording() {
+    try {
+      const canvasOptions = this._canvas;
+      this._stopRecording = record({
+        ...this._recordingOptions,
+        // When running in error sampling mode, we need to overwrite `checkoutEveryNms`
+        // Without this, it would record forever, until an error happens, which we don't want
+        // instead, we'll always keep the last 60 seconds of replay before an error happened
+        ...this.recordingMode === "buffer" ? { checkoutEveryNms: BUFFER_CHECKOUT_TIME } : (
+          // Otherwise, use experimental option w/ min checkout time of 6 minutes
+          // This is to improve playback seeking as there could potentially be
+          // less mutations to process in the worse cases.
+          //
+          // checkout by "N" events is probably ideal, but means we have less
+          // control about the number of checkouts we make (which generally
+          // increases replay size)
+          this._options._experiments.continuousCheckout && {
+            // Minimum checkout time is 6 minutes
+            checkoutEveryNms: Math.max(36e4, this._options._experiments.continuousCheckout)
+          }
+        ),
+        emit: getHandleRecordingEmit(this),
+        ...getRecordingSamplingOptions(),
+        onMutation: this._onMutationHandler.bind(this),
+        ...canvasOptions ? {
+          recordCanvas: canvasOptions.recordCanvas,
+          getCanvasManager: canvasOptions.getCanvasManager,
+          sampling: canvasOptions.sampling,
+          dataURLOptions: canvasOptions.dataURLOptions
+        } : {}
+      });
+    } catch (err) {
+      this.handleException(err);
+    }
+  }
+  /**
+   * Stops the recording, if it was running.
+   *
+   * Returns true if it was previously stopped, or is now stopped,
+   * otherwise false.
+   */
+  stopRecording() {
+    try {
+      if (this._stopRecording) {
+        this._stopRecording();
+        this._stopRecording = void 0;
+      }
+      return true;
+    } catch (err) {
+      this.handleException(err);
+      return false;
+    }
+  }
+  /**
+   * Currently, this needs to be manually called (e.g. for tests). Sentry SDK
+   * does not support a teardown
+   */
+  async stop({ forceFlush = false, reason } = {}) {
+    if (!this._isEnabled) {
+      return;
+    }
+    this._isEnabled = false;
+    this.recordingMode = "buffer";
+    try {
+      DEBUG_BUILD && debug.log(`Stopping Replay${reason ? ` triggered by ${reason}` : ""}`);
+      resetReplayIdOnDynamicSamplingContext();
+      this._removeListeners();
+      this.stopRecording();
+      this._debouncedFlush.cancel();
+      if (forceFlush) {
+        await this._flush({ force: true });
+      }
+      this.eventBuffer?.destroy();
+      this.eventBuffer = null;
+      clearSession(this);
+    } catch (err) {
+      this.handleException(err);
+    }
+  }
+  /**
+   * Pause some replay functionality. See comments for `_isPaused`.
+   * This differs from stop as this only stops DOM recording, it is
+   * not as thorough of a shutdown as `stop()`.
+   */
+  pause() {
+    if (this._isPaused) {
+      return;
+    }
+    this._isPaused = true;
+    this.stopRecording();
+    DEBUG_BUILD && debug.log("Pausing replay");
+  }
+  /**
+   * Resumes recording, see notes for `pause().
+   *
+   * Note that calling `startRecording()` here will cause a
+   * new DOM checkout.`
+   */
+  resume() {
+    if (!this._isPaused || !this._checkSession()) {
+      return;
+    }
+    this._isPaused = false;
+    this.startRecording();
+    DEBUG_BUILD && debug.log("Resuming replay");
+  }
+  /**
+   * If not in "session" recording mode, flush event buffer which will create a new replay.
+   * Unless `continueRecording` is false, the replay will continue to record and
+   * behave as a "session"-based replay.
+   *
+   * Otherwise, queue up a flush.
+   */
+  async sendBufferedReplayOrFlush({ continueRecording = true } = {}) {
+    if (this.recordingMode === "session") {
+      return this.flushImmediate();
+    }
+    const activityTime = Date.now();
+    DEBUG_BUILD && debug.log("Converting buffer to session");
+    await this.flushImmediate();
+    const hasStoppedRecording = this.stopRecording();
+    if (!continueRecording || !hasStoppedRecording) {
+      return;
+    }
+    if (this.recordingMode === "session") {
+      return;
+    }
+    this.recordingMode = "session";
+    if (this.session) {
+      this._updateUserActivity(activityTime);
+      this._updateSessionActivity(activityTime);
+      this._maybeSaveSession();
+    }
+    this.startRecording();
+  }
+  /**
+   * We want to batch uploads of replay events. Save events only if
+   * `<flushMinDelay>` milliseconds have elapsed since the last event
+   * *OR* if `<flushMaxDelay>` milliseconds have elapsed.
+   *
+   * Accepts a callback to perform side-effects and returns true to stop batch
+   * processing and hand back control to caller.
+   */
+  addUpdate(cb) {
+    const cbResult = cb();
+    if (this.recordingMode === "buffer" || !this._isEnabled) {
+      return;
+    }
+    if (cbResult === true) {
+      return;
+    }
+    this._debouncedFlush();
+  }
+  /**
+   * Updates the user activity timestamp and resumes recording. This should be
+   * called in an event handler for a user action that we consider as the user
+   * being "active" (e.g. a mouse click).
+   */
+  triggerUserActivity() {
+    this._updateUserActivity();
+    if (!this._stopRecording) {
+      if (!this._checkSession()) {
+        return;
+      }
+      this.resume();
+      return;
+    }
+    this.checkAndHandleExpiredSession();
+    this._updateSessionActivity();
+  }
+  /**
+   * Updates the user activity timestamp *without* resuming
+   * recording. Some user events (e.g. keydown) can be create
+   * low-value replays that only contain the keypress as a
+   * breadcrumb. Instead this would require other events to
+   * create a new replay after a session has expired.
+   */
+  updateUserActivity() {
+    this._updateUserActivity();
+    this._updateSessionActivity();
+  }
+  /**
+   * Only flush if `this.recordingMode === 'session'`
+   */
+  conditionalFlush() {
+    if (this.recordingMode === "buffer") {
+      return Promise.resolve();
+    }
+    return this.flushImmediate();
+  }
+  /**
+   * Flush using debounce flush
+   */
+  flush() {
+    return this._debouncedFlush();
+  }
+  /**
+   * Always flush via `_debouncedFlush` so that we do not have flushes triggered
+   * from calling both `flush` and `_debouncedFlush`. Otherwise, there could be
+   * cases of multiple flushes happening closely together.
+   */
+  flushImmediate() {
+    this._debouncedFlush();
+    return this._debouncedFlush.flush();
+  }
+  /**
+   * Cancels queued up flushes.
+   */
+  cancelFlush() {
+    this._debouncedFlush.cancel();
+  }
+  /** Get the current session (=replay) ID
+   *
+   * @param onlyIfSampled - If true, will only return the session ID if the session is sampled.
+   */
+  getSessionId(onlyIfSampled) {
+    if (onlyIfSampled && this.session?.sampled === false) {
+      return void 0;
+    }
+    return this.session?.id;
+  }
+  /**
+   * Checks if recording should be stopped due to user inactivity. Otherwise
+   * check if session is expired and create a new session if so. Triggers a new
+   * full snapshot on new session.
+   *
+   * Returns true if session is not expired, false otherwise.
+   * @hidden
+   */
+  checkAndHandleExpiredSession() {
+    if (this._lastActivity && isExpired(this._lastActivity, this.timeouts.sessionIdlePause) && this.session && this.session.sampled === "session") {
+      this.pause();
+      return;
+    }
+    if (!this._checkSession()) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Capture some initial state that can change throughout the lifespan of the
+   * replay. This is required because otherwise they would be captured at the
+   * first flush.
+   */
+  setInitialState() {
+    const urlPath = `${WINDOW.location.pathname}${WINDOW.location.hash}${WINDOW.location.search}`;
+    const url = `${WINDOW.location.origin}${urlPath}`;
+    this.performanceEntries = [];
+    this.replayPerformanceEntries = [];
+    this._clearContext();
+    this._context.initialUrl = url;
+    this._context.initialTimestamp = Date.now();
+    this._context.urls.push(url);
+  }
+  /**
+   * Add a breadcrumb event, that may be throttled.
+   * If it was throttled, we add a custom breadcrumb to indicate that.
+   */
+  throttledAddEvent(event, isCheckout) {
+    const res = this._throttledAddEvent(event, isCheckout);
+    if (res === THROTTLED) {
+      const breadcrumb = createBreadcrumb({
+        category: "replay.throttled"
+      });
+      this.addUpdate(() => {
+        return !addEventSync(this, {
+          type: ReplayEventTypeCustom,
+          timestamp: breadcrumb.timestamp || 0,
+          data: {
+            tag: "breadcrumb",
+            payload: breadcrumb,
+            metric: true
+          }
+        });
+      });
+    }
+    return res;
+  }
+  /**
+   * This will get the parametrized route name of the current page.
+   * This is only available if performance is enabled, and if an instrumented router is used.
+   */
+  getCurrentRoute() {
+    const lastActiveSpan = this.lastActiveSpan || getActiveSpan();
+    const lastRootSpan = lastActiveSpan && getRootSpan(lastActiveSpan);
+    const attributes = lastRootSpan && spanToJSON(lastRootSpan).data || {};
+    const source = attributes[SEMANTIC_ATTRIBUTE_SENTRY_SOURCE];
+    if (!lastRootSpan || !source || !["route", "custom"].includes(source)) {
+      return void 0;
+    }
+    return spanToJSON(lastRootSpan).description;
+  }
+  /**
+   * Initialize and start all listeners to varying events (DOM,
+   * Performance Observer, Recording, Sentry SDK, etc)
+   */
+  _initializeRecording() {
+    this.setInitialState();
+    this._updateSessionActivity();
+    this.eventBuffer = createEventBuffer({
+      useCompression: this._options.useCompression,
+      workerUrl: this._options.workerUrl
+    });
+    this._removeListeners();
+    this._addListeners();
+    this._isEnabled = true;
+    this._isPaused = false;
+    this.startRecording();
+  }
+  /**
+   * Loads (or refreshes) the current session.
+   */
+  _initializeSessionForSampling(previousSessionId) {
+    const allowBuffering = this._options.errorSampleRate > 0;
+    const session = loadOrCreateSession(
+      {
+        sessionIdleExpire: this.timeouts.sessionIdleExpire,
+        maxReplayDuration: this._options.maxReplayDuration,
+        previousSessionId
+      },
+      {
+        stickySession: this._options.stickySession,
+        sessionSampleRate: this._options.sessionSampleRate,
+        allowBuffering
+      }
+    );
+    this.session = session;
+  }
+  /**
+   * Checks and potentially refreshes the current session.
+   * Returns false if session is not recorded.
+   */
+  _checkSession() {
+    if (!this.session) {
+      return false;
+    }
+    const currentSession = this.session;
+    if (shouldRefreshSession(currentSession, {
+      sessionIdleExpire: this.timeouts.sessionIdleExpire,
+      maxReplayDuration: this._options.maxReplayDuration
+    })) {
+      this._refreshSession(currentSession);
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Refresh a session with a new one.
+   * This stops the current session (without forcing a flush, as that would never work since we are expired),
+   * and then does a new sampling based on the refreshed session.
+   */
+  async _refreshSession(session) {
+    if (!this._isEnabled) {
+      return;
+    }
+    await this.stop({ reason: "refresh session" });
+    this.initializeSampling(session.id);
+  }
+  /**
+   * Adds listeners to record events for the replay
+   */
+  _addListeners() {
+    try {
+      WINDOW.document.addEventListener("visibilitychange", this._handleVisibilityChange);
+      WINDOW.addEventListener("blur", this._handleWindowBlur);
+      WINDOW.addEventListener("focus", this._handleWindowFocus);
+      WINDOW.addEventListener("keydown", this._handleKeyboardEvent);
+      if (this.clickDetector) {
+        this.clickDetector.addListeners();
+      }
+      if (!this._hasInitializedCoreListeners) {
+        addGlobalListeners(this);
+        this._hasInitializedCoreListeners = true;
+      }
+    } catch (err) {
+      this.handleException(err);
+    }
+    this._performanceCleanupCallback = setupPerformanceObserver(this);
+  }
+  /**
+   * Cleans up listeners that were created in `_addListeners`
+   */
+  _removeListeners() {
+    try {
+      WINDOW.document.removeEventListener("visibilitychange", this._handleVisibilityChange);
+      WINDOW.removeEventListener("blur", this._handleWindowBlur);
+      WINDOW.removeEventListener("focus", this._handleWindowFocus);
+      WINDOW.removeEventListener("keydown", this._handleKeyboardEvent);
+      if (this.clickDetector) {
+        this.clickDetector.removeListeners();
+      }
+      if (this._performanceCleanupCallback) {
+        this._performanceCleanupCallback();
+      }
+    } catch (err) {
+      this.handleException(err);
+    }
+  }
+  /**
+   * Tasks to run when we consider a page to be hidden (via blurring and/or visibility)
+   */
+  _doChangeToBackgroundTasks(breadcrumb) {
+    if (!this.session) {
+      return;
+    }
+    const expired = isSessionExpired(this.session, {
+      maxReplayDuration: this._options.maxReplayDuration,
+      sessionIdleExpire: this.timeouts.sessionIdleExpire
+    });
+    if (expired) {
+      return;
+    }
+    if (breadcrumb) {
+      this._createCustomBreadcrumb(breadcrumb);
+    }
+    void this.conditionalFlush();
+  }
+  /**
+   * Tasks to run when we consider a page to be visible (via focus and/or visibility)
+   */
+  _doChangeToForegroundTasks(breadcrumb) {
+    if (!this.session) {
+      return;
+    }
+    const isSessionActive = this.checkAndHandleExpiredSession();
+    if (!isSessionActive) {
+      DEBUG_BUILD && debug.log("Document has become active, but session has expired");
+      return;
+    }
+    if (breadcrumb) {
+      this._createCustomBreadcrumb(breadcrumb);
+    }
+  }
+  /**
+   * Update user activity (across session lifespans)
+   */
+  _updateUserActivity(_lastActivity = Date.now()) {
+    this._lastActivity = _lastActivity;
+  }
+  /**
+   * Updates the session's last activity timestamp
+   */
+  _updateSessionActivity(_lastActivity = Date.now()) {
+    if (this.session) {
+      this.session.lastActivity = _lastActivity;
+      this._maybeSaveSession();
+    }
+  }
+  /**
+   * Helper to create (and buffer) a replay breadcrumb from a core SDK breadcrumb
+   */
+  _createCustomBreadcrumb(breadcrumb) {
+    this.addUpdate(() => {
+      this.throttledAddEvent({
+        type: EventType.Custom,
+        timestamp: breadcrumb.timestamp || 0,
+        data: {
+          tag: "breadcrumb",
+          payload: breadcrumb
+        }
+      });
+    });
+  }
+  /**
+   * Observed performance events are added to `this.performanceEntries`. These
+   * are included in the replay event before it is finished and sent to Sentry.
+   */
+  _addPerformanceEntries() {
+    let performanceEntries = createPerformanceEntries(this.performanceEntries).concat(this.replayPerformanceEntries);
+    this.performanceEntries = [];
+    this.replayPerformanceEntries = [];
+    if (this._requiresManualStart) {
+      const initialTimestampInSeconds = this._context.initialTimestamp / 1e3;
+      performanceEntries = performanceEntries.filter((entry) => entry.start >= initialTimestampInSeconds);
+    }
+    return Promise.all(createPerformanceSpans(this, performanceEntries));
+  }
+  /**
+   * Clear _context
+   */
+  _clearContext() {
+    this._context.errorIds.clear();
+    this._context.traceIds.clear();
+    this._context.urls = [];
+  }
+  /** Update the initial timestamp based on the buffer content. */
+  _updateInitialTimestampFromEventBuffer() {
+    const { session, eventBuffer } = this;
+    if (!session || !eventBuffer || this._requiresManualStart) {
+      return;
+    }
+    if (session.segmentId) {
+      return;
+    }
+    const earliestEvent = eventBuffer.getEarliestTimestamp();
+    if (earliestEvent && earliestEvent < this._context.initialTimestamp) {
+      this._context.initialTimestamp = earliestEvent;
+    }
+  }
+  /**
+   * Return and clear _context
+   */
+  _popEventContext() {
+    const _context = {
+      initialTimestamp: this._context.initialTimestamp,
+      initialUrl: this._context.initialUrl,
+      errorIds: Array.from(this._context.errorIds),
+      traceIds: Array.from(this._context.traceIds),
+      urls: this._context.urls
+    };
+    this._clearContext();
+    return _context;
+  }
+  /**
+   * Flushes replay event buffer to Sentry.
+   *
+   * Performance events are only added right before flushing - this is
+   * due to the buffered performance observer events.
+   *
+   * Should never be called directly, only by `flush`
+   */
+  async _runFlush() {
+    const replayId = this.getSessionId();
+    if (!this.session || !this.eventBuffer || !replayId) {
+      DEBUG_BUILD && debug.error("No session or eventBuffer found to flush.");
+      return;
+    }
+    await this._addPerformanceEntries();
+    if (!this.eventBuffer?.hasEvents) {
+      return;
+    }
+    await addMemoryEntry(this);
+    if (!this.eventBuffer) {
+      return;
+    }
+    if (replayId !== this.getSessionId()) {
+      return;
+    }
+    try {
+      this._updateInitialTimestampFromEventBuffer();
+      const timestamp = Date.now();
+      if (timestamp - this._context.initialTimestamp > this._options.maxReplayDuration + 3e4) {
+        throw new Error("Session is too long, not sending replay");
+      }
+      const eventContext = this._popEventContext();
+      const segmentId = this.session.segmentId++;
+      this._maybeSaveSession();
+      const recordingData = await this.eventBuffer.finish();
+      await sendReplay({
+        replayId,
+        recordingData,
+        segmentId,
+        eventContext,
+        session: this.session,
+        timestamp,
+        onError: (err) => this.handleException(err)
+      });
+    } catch (err) {
+      this.handleException(err);
+      this.stop({ reason: "sendReplay" });
+      const client = getClient();
+      if (client) {
+        const dropReason = err instanceof RateLimitError ? "ratelimit_backoff" : "send_error";
+        client.recordDroppedEvent(dropReason, "replay");
+      }
+    }
+  }
+  /**
+   * Flush recording data to Sentry. Creates a lock so that only a single flush
+   * can be active at a time. Do not call this directly.
+   */
+  async _flush({
+    force = false
+  } = {}) {
+    if (!this._isEnabled && !force) {
+      return;
+    }
+    if (!this.checkAndHandleExpiredSession()) {
+      DEBUG_BUILD && debug.error("Attempting to finish replay event after session expired.");
+      return;
+    }
+    if (!this.session) {
+      return;
+    }
+    const start = this.session.started;
+    const now = Date.now();
+    const duration = now - start;
+    this._debouncedFlush.cancel();
+    const tooShort = duration < this._options.minReplayDuration;
+    const tooLong = duration > this._options.maxReplayDuration + 5e3;
+    if (tooShort || tooLong) {
+      DEBUG_BUILD && debug.log(
+        `Session duration (${Math.floor(duration / 1e3)}s) is too ${tooShort ? "short" : "long"}, not sending replay.`
+      );
+      if (tooShort) {
+        this._debouncedFlush();
+      }
+      return;
+    }
+    const eventBuffer = this.eventBuffer;
+    if (eventBuffer && this.session.segmentId === 0 && !eventBuffer.hasCheckout) {
+      DEBUG_BUILD && debug.log("Flushing initial segment without checkout.");
+    }
+    const _flushInProgress = !!this._flushLock;
+    if (!this._flushLock) {
+      this._flushLock = this._runFlush();
+    }
+    try {
+      await this._flushLock;
+    } catch (err) {
+      this.handleException(err);
+    } finally {
+      this._flushLock = void 0;
+      if (_flushInProgress) {
+        this._debouncedFlush();
+      }
+    }
+  }
+  /** Save the session, if it is sticky */
+  _maybeSaveSession() {
+    if (this.session && this._options.stickySession) {
+      saveSession(this.session);
+    }
+  }
+  /** Handler for rrweb.record.onMutation */
+  _onMutationHandler(mutations) {
+    const { ignoreMutations } = this._options._experiments;
+    if (ignoreMutations?.length) {
+      if (mutations.some((mutation) => {
+        const el = closestElementOfNode$2(mutation.target);
+        const selector = ignoreMutations.join(",");
+        return el?.matches(selector);
+      })) {
+        return false;
+      }
+    }
+    const count2 = mutations.length;
+    const mutationLimit = this._options.mutationLimit;
+    const mutationBreadcrumbLimit = this._options.mutationBreadcrumbLimit;
+    const overMutationLimit = mutationLimit && count2 > mutationLimit;
+    if (count2 > mutationBreadcrumbLimit || overMutationLimit) {
+      const breadcrumb = createBreadcrumb({
+        category: "replay.mutations",
+        data: {
+          count: count2,
+          limit: overMutationLimit
+        }
+      });
+      this._createCustomBreadcrumb(breadcrumb);
+    }
+    if (overMutationLimit) {
+      this.stop({ reason: "mutationLimit", forceFlush: this.recordingMode === "session" });
+      return false;
+    }
+    return true;
+  }
+}
+function getOption(selectors, defaultSelectors) {
+  return [
+    ...selectors,
+    // sentry defaults
+    ...defaultSelectors
+  ].join(",");
+}
+function getPrivacyOptions({ mask, unmask, block, unblock, ignore }) {
+  const defaultBlockedElements = ["base", "iframe[srcdoc]:not([src])"];
+  const maskSelector = getOption(mask, [".sentry-mask", "[data-sentry-mask]"]);
+  const unmaskSelector = getOption(unmask, []);
+  const options = {
+    // We are making the decision to make text and input selectors the same
+    maskTextSelector: maskSelector,
+    unmaskTextSelector: unmaskSelector,
+    blockSelector: getOption(block, [".sentry-block", "[data-sentry-block]", ...defaultBlockedElements]),
+    unblockSelector: getOption(unblock, []),
+    ignoreSelector: getOption(ignore, [".sentry-ignore", "[data-sentry-ignore]", 'input[type="file"]'])
+  };
+  return options;
+}
+function maskAttribute({
+  el,
+  key,
+  maskAttributes,
+  maskAllText,
+  privacyOptions,
+  value
+}) {
+  if (!maskAllText) {
+    return value;
+  }
+  if (privacyOptions.unmaskTextSelector && el.matches(privacyOptions.unmaskTextSelector)) {
+    return value;
+  }
+  if (maskAttributes.includes(key) || // Need to mask `value` attribute for `<input>` if it's a button-like
+  // type
+  key === "value" && el.tagName === "INPUT" && ["submit", "button"].includes(el.getAttribute("type") || "")) {
+    return value.replace(/[\S]/g, "*");
+  }
+  return value;
+}
+const MEDIA_SELECTORS = 'img,image,svg,video,object,picture,embed,map,audio,link[rel="icon"],link[rel="apple-touch-icon"]';
+const DEFAULT_NETWORK_HEADERS = ["content-length", "content-type", "accept"];
+let _initialized = false;
+const replayIntegration = (options) => {
+  return new Replay(options);
+};
+class Replay {
+  /**
+   * @inheritDoc
+   */
+  /**
+   * Options to pass to `rrweb.record()`
+   */
+  /**
+   * Initial options passed to the replay integration, merged with default values.
+   * Note: `sessionSampleRate` and `errorSampleRate` are not required here, as they
+   * can only be finally set when setupOnce() is called.
+   *
+   * @private
+   */
+  constructor({
+    flushMinDelay = DEFAULT_FLUSH_MIN_DELAY,
+    flushMaxDelay = DEFAULT_FLUSH_MAX_DELAY,
+    minReplayDuration = MIN_REPLAY_DURATION,
+    maxReplayDuration = MAX_REPLAY_DURATION,
+    stickySession = true,
+    useCompression = true,
+    workerUrl,
+    _experiments = {},
+    maskAllText = true,
+    maskAllInputs = true,
+    blockAllMedia = true,
+    mutationBreadcrumbLimit = 750,
+    mutationLimit = 1e4,
+    slowClickTimeout = 7e3,
+    slowClickIgnoreSelectors = [],
+    networkDetailAllowUrls = [],
+    networkDetailDenyUrls = [],
+    networkCaptureBodies = true,
+    networkRequestHeaders = [],
+    networkResponseHeaders = [],
+    mask = [],
+    maskAttributes = ["title", "placeholder", "aria-label"],
+    unmask = [],
+    block = [],
+    unblock = [],
+    ignore = [],
+    maskFn,
+    beforeAddRecordingEvent,
+    beforeErrorSampling,
+    onError
+  } = {}) {
+    this.name = "Replay";
+    const privacyOptions = getPrivacyOptions({
+      mask,
+      unmask,
+      block,
+      unblock,
+      ignore
+    });
+    this._recordingOptions = {
+      maskAllInputs,
+      maskAllText,
+      maskInputOptions: { password: true },
+      maskTextFn: maskFn,
+      maskInputFn: maskFn,
+      maskAttributeFn: (key, value, el) => maskAttribute({
+        maskAttributes,
+        maskAllText,
+        privacyOptions,
+        key,
+        value,
+        el
+      }),
+      ...privacyOptions,
+      // Our defaults
+      slimDOMOptions: "all",
+      inlineStylesheet: true,
+      // Disable inline images as it will increase segment/replay size
+      inlineImages: false,
+      // collect fonts, but be aware that `sentry.io` needs to be an allowed
+      // origin for playback
+      collectFonts: true,
+      errorHandler: (err) => {
+        try {
+          err.__rrweb__ = true;
+        } catch {
+        }
+      },
+      // experimental support for recording iframes from different origins
+      recordCrossOriginIframes: Boolean(_experiments.recordCrossOriginIframes)
+    };
+    this._initialOptions = {
+      flushMinDelay,
+      flushMaxDelay,
+      minReplayDuration: Math.min(minReplayDuration, MIN_REPLAY_DURATION_LIMIT),
+      maxReplayDuration: Math.min(maxReplayDuration, MAX_REPLAY_DURATION),
+      stickySession,
+      useCompression,
+      workerUrl,
+      blockAllMedia,
+      maskAllInputs,
+      maskAllText,
+      mutationBreadcrumbLimit,
+      mutationLimit,
+      slowClickTimeout,
+      slowClickIgnoreSelectors,
+      networkDetailAllowUrls,
+      networkDetailDenyUrls,
+      networkCaptureBodies,
+      networkRequestHeaders: _getMergedNetworkHeaders(networkRequestHeaders),
+      networkResponseHeaders: _getMergedNetworkHeaders(networkResponseHeaders),
+      beforeAddRecordingEvent,
+      beforeErrorSampling,
+      onError,
+      _experiments
+    };
+    if (this._initialOptions.blockAllMedia) {
+      this._recordingOptions.blockSelector = !this._recordingOptions.blockSelector ? MEDIA_SELECTORS : `${this._recordingOptions.blockSelector},${MEDIA_SELECTORS}`;
+    }
+    if (this._isInitialized && isBrowser()) {
+      throw new Error("Multiple Sentry Session Replay instances are not supported");
+    }
+    this._isInitialized = true;
+  }
+  /** If replay has already been initialized */
+  get _isInitialized() {
+    return _initialized;
+  }
+  /** Update _isInitialized */
+  set _isInitialized(value) {
+    _initialized = value;
+  }
+  /**
+   * Setup and initialize replay container
+   */
+  afterAllSetup(client) {
+    if (!isBrowser() || this._replay) {
+      return;
+    }
+    this._setup(client);
+    this._initialize(client);
+  }
+  /**
+   * Start a replay regardless of sampling rate. Calling this will always
+   * create a new session. Will log a message if replay is already in progress.
+   *
+   * Creates or loads a session, attaches listeners to varying events (DOM,
+   * PerformanceObserver, Recording, Sentry SDK, etc)
+   */
+  start() {
+    if (!this._replay) {
+      return;
+    }
+    this._replay.start();
+  }
+  /**
+   * Start replay buffering. Buffers until `flush()` is called or, if
+   * `replaysOnErrorSampleRate` > 0, until an error occurs.
+   */
+  startBuffering() {
+    if (!this._replay) {
+      return;
+    }
+    this._replay.startBuffering();
+  }
+  /**
+   * Currently, this needs to be manually called (e.g. for tests). Sentry SDK
+   * does not support a teardown
+   */
+  stop() {
+    if (!this._replay) {
+      return Promise.resolve();
+    }
+    return this._replay.stop({ forceFlush: this._replay.recordingMode === "session" });
+  }
+  /**
+   * If not in "session" recording mode, flush event buffer which will create a new replay.
+   * If replay is not enabled, a new session replay is started.
+   * Unless `continueRecording` is false, the replay will continue to record and
+   * behave as a "session"-based replay.
+   *
+   * Otherwise, queue up a flush.
+   */
+  flush(options) {
+    if (!this._replay) {
+      return Promise.resolve();
+    }
+    if (!this._replay.isEnabled()) {
+      this._replay.start();
+      return Promise.resolve();
+    }
+    return this._replay.sendBufferedReplayOrFlush(options);
+  }
+  /**
+   * Get the current session ID.
+   *
+   * @param onlyIfSampled - If true, will only return the session ID if the session is sampled.
+   *
+   */
+  getReplayId(onlyIfSampled) {
+    if (!this._replay?.isEnabled()) {
+      return;
+    }
+    return this._replay.getSessionId(onlyIfSampled);
+  }
+  /**
+   * Get the current recording mode. This can be either `session` or `buffer`.
+   *
+   * `session`: Recording the whole session, sending it continuously
+   * `buffer`: Always keeping the last 60s of recording, requires:
+   *   - having replaysOnErrorSampleRate > 0 to capture replay when an error occurs
+   *   - or calling `flush()` to send the replay
+   */
+  getRecordingMode() {
+    if (!this._replay?.isEnabled()) {
+      return;
+    }
+    return this._replay.recordingMode;
+  }
+  /**
+   * Initializes replay.
+   */
+  _initialize(client) {
+    if (!this._replay) {
+      return;
+    }
+    this._maybeLoadFromReplayCanvasIntegration(client);
+    this._replay.initializeSampling();
+  }
+  /** Setup the integration. */
+  _setup(client) {
+    const finalOptions = loadReplayOptionsFromClient(this._initialOptions, client);
+    this._replay = new ReplayContainer({
+      options: finalOptions,
+      recordingOptions: this._recordingOptions
+    });
+  }
+  /** Get canvas options from ReplayCanvas integration, if it is also added. */
+  _maybeLoadFromReplayCanvasIntegration(client) {
+    try {
+      const canvasIntegration = client.getIntegrationByName("ReplayCanvas");
+      if (!canvasIntegration) {
+        return;
+      }
+      this._replay["_canvas"] = canvasIntegration.getOptions();
+    } catch {
+    }
+  }
+}
+function loadReplayOptionsFromClient(initialOptions, client) {
+  const opt = client.getOptions();
+  const finalOptions = {
+    sessionSampleRate: 0,
+    errorSampleRate: 0,
+    ...initialOptions
+  };
+  const replaysSessionSampleRate = parseSampleRate(opt.replaysSessionSampleRate);
+  const replaysOnErrorSampleRate = parseSampleRate(opt.replaysOnErrorSampleRate);
+  if (replaysSessionSampleRate == null && replaysOnErrorSampleRate == null) {
+    consoleSandbox(() => {
+      console.warn(
+        "Replay is disabled because neither `replaysSessionSampleRate` nor `replaysOnErrorSampleRate` are set."
+      );
+    });
+  }
+  if (replaysSessionSampleRate != null) {
+    finalOptions.sessionSampleRate = replaysSessionSampleRate;
+  }
+  if (replaysOnErrorSampleRate != null) {
+    finalOptions.errorSampleRate = replaysOnErrorSampleRate;
+  }
+  return finalOptions;
+}
+function _getMergedNetworkHeaders(headers) {
+  return [...DEFAULT_NETWORK_HEADERS, ...headers.map((header) => header.toLowerCase())];
+}
+function getReplay() {
+  const client = getClient();
+  return client?.getIntegrationByName("Replay");
+}
+var __defProp$1 = Object.defineProperty;
+var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField$1 = (obj, key, value) => __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+class Mirror2 {
+  constructor() {
+    __publicField$1(this, "idNodeMap", /* @__PURE__ */ new Map());
+    __publicField$1(this, "nodeMetaMap", /* @__PURE__ */ new WeakMap());
+  }
+  getId(n2) {
+    if (!n2) return -1;
+    const id = this.getMeta(n2)?.id;
+    return id ?? -1;
+  }
+  getNode(id) {
+    return this.idNodeMap.get(id) || null;
+  }
+  getIds() {
+    return Array.from(this.idNodeMap.keys());
+  }
+  getMeta(n2) {
+    return this.nodeMetaMap.get(n2) || null;
+  }
+  // removes the node from idNodeMap
+  // doesn't remove the node from nodeMetaMap
+  removeNodeFromMap(n2) {
+    const id = this.getId(n2);
+    this.idNodeMap.delete(id);
+    if (n2.childNodes) {
+      n2.childNodes.forEach(
+        (childNode) => this.removeNodeFromMap(childNode)
+      );
+    }
+  }
+  has(id) {
+    return this.idNodeMap.has(id);
+  }
+  hasNode(node) {
+    return this.nodeMetaMap.has(node);
+  }
+  add(n2, meta) {
+    const id = meta.id;
+    this.idNodeMap.set(id, n2);
+    this.nodeMetaMap.set(n2, meta);
+  }
+  replace(id, n2) {
+    const oldNode = this.getNode(id);
+    if (oldNode) {
+      const meta = this.nodeMetaMap.get(oldNode);
+      if (meta) this.nodeMetaMap.set(n2, meta);
+    }
+    this.idNodeMap.set(id, n2);
+  }
+  reset() {
+    this.idNodeMap = /* @__PURE__ */ new Map();
+    this.nodeMetaMap = /* @__PURE__ */ new WeakMap();
+  }
+}
+function createMirror$2() {
+  return new Mirror2();
+}
+function elementClassMatchesRegex(el, regex) {
+  for (let eIndex = el.classList.length; eIndex--; ) {
+    const className = el.classList[eIndex];
+    if (regex.test(className)) {
+      return true;
+    }
+  }
+  return false;
+}
+function distanceToMatch(node, matchPredicate, limit = Infinity, distance = 0) {
+  if (!node) return -1;
+  if (node.nodeType !== node.ELEMENT_NODE) return -1;
+  if (distance > limit) return -1;
+  if (matchPredicate(node)) return distance;
+  return distanceToMatch(node.parentNode, matchPredicate, limit, distance + 1);
+}
+function createMatchPredicate(className, selector) {
+  return (node) => {
+    const el = node;
+    if (el === null) return false;
+    try {
+      if (className) {
+        if (typeof className === "string") {
+          if (el.matches(`.${className}`)) return true;
+        } else if (elementClassMatchesRegex(el, className)) {
+          return true;
+        }
+      }
+      if (selector && el.matches(selector)) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  };
+}
+const DEPARTED_MIRROR_ACCESS_WARNING = "Please stop import mirror directly. Instead of that,\r\nnow you can use replayer.getMirror() to access the mirror instance of a replayer,\r\nor you can use record.mirror to access the mirror instance during recording.";
+let _mirror = {
+  map: {},
+  getId() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING);
+    return -1;
+  },
+  getNode() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING);
+    return null;
+  },
+  removeNodeFromMap() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING);
+  },
+  has() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING);
+    return false;
+  },
+  reset() {
+    console.error(DEPARTED_MIRROR_ACCESS_WARNING);
+  }
+};
+if (typeof window !== "undefined" && window.Proxy && window.Reflect) {
+  _mirror = new Proxy(_mirror, {
+    get(target, prop, receiver) {
+      if (prop === "map") {
+        console.error(DEPARTED_MIRROR_ACCESS_WARNING);
+      }
+      return Reflect.get(target, prop, receiver);
+    }
+  });
+}
+function hookSetter(target, key, d2, isRevoked, win = window) {
+  const original = win.Object.getOwnPropertyDescriptor(target, key);
+  win.Object.defineProperty(
+    target,
+    key,
+    isRevoked ? d2 : {
+      set(value) {
+        setTimeout$1(() => {
+          d2.set.call(this, value);
+        }, 0);
+        if (original && original.set) {
+          original.set.call(this, value);
+        }
+      }
+    }
+  );
+  return () => hookSetter(target, key, original || {}, true);
+}
+function patch(source, name, replacement) {
+  try {
+    if (!(name in source)) {
+      return () => {
+      };
+    }
+    const original = source[name];
+    const wrapped = replacement(original);
+    if (typeof wrapped === "function") {
+      wrapped.prototype = wrapped.prototype || {};
+      Object.defineProperties(wrapped, {
+        __rrweb_original__: {
+          enumerable: false,
+          value: original
+        }
+      });
+    }
+    source[name] = wrapped;
+    return () => {
+      source[name] = original;
+    };
+  } catch {
+    return () => {
+    };
+  }
+}
+if (!/* @__PURE__ */ /[1-9][0-9]{12}/.test(Date.now().toString())) ;
+function closestElementOfNode(node) {
+  if (!node) {
+    return null;
+  }
+  try {
+    const el = node.nodeType === node.ELEMENT_NODE ? node : node.parentElement;
+    return el;
+  } catch (error2) {
+    return null;
+  }
+}
+function isBlocked(node, blockClass, blockSelector, unblockSelector, checkAncestors) {
+  if (!node) {
+    return false;
+  }
+  const el = closestElementOfNode(node);
+  if (!el) {
+    return false;
+  }
+  const blockedPredicate = createMatchPredicate(blockClass, blockSelector);
+  const blockDistance = distanceToMatch(el, blockedPredicate);
+  let unblockDistance = -1;
+  if (blockDistance < 0) {
+    return false;
+  }
+  if (unblockSelector) {
+    unblockDistance = distanceToMatch(
+      el,
+      createMatchPredicate(null, unblockSelector)
+    );
+  }
+  if (blockDistance > -1 && unblockDistance < 0) {
+    return true;
+  }
+  return blockDistance < unblockDistance;
+}
+const cachedImplementations = {};
+function getImplementation(name) {
+  const cached = cachedImplementations[name];
+  if (cached) {
+    return cached;
+  }
+  const document2 = window.document;
+  let impl = window[name];
+  if (document2 && typeof document2.createElement === "function") {
+    try {
+      const sandbox = document2.createElement("iframe");
+      sandbox.hidden = true;
+      document2.head.appendChild(sandbox);
+      const contentWindow = sandbox.contentWindow;
+      if (contentWindow && contentWindow[name]) {
+        impl = // eslint-disable-next-line @typescript-eslint/unbound-method
+        contentWindow[name];
+      }
+      document2.head.removeChild(sandbox);
+    } catch (e2) {
+    }
+  }
+  return cachedImplementations[name] = impl.bind(
+    window
+  );
+}
+function onRequestAnimationFrame(...rest) {
+  return getImplementation("requestAnimationFrame")(...rest);
+}
+function setTimeout$1(...rest) {
+  return getImplementation("setTimeout")(...rest);
+}
+var CanvasContext = /* @__PURE__ */ ((CanvasContext2) => {
+  CanvasContext2[CanvasContext2["2D"] = 0] = "2D";
+  CanvasContext2[CanvasContext2["WebGL"] = 1] = "WebGL";
+  CanvasContext2[CanvasContext2["WebGL2"] = 2] = "WebGL2";
+  return CanvasContext2;
+})(CanvasContext || {});
+let errorHandler;
+function registerErrorHandler(handler) {
+  errorHandler = handler;
+}
+const callbackWrapper = (cb) => {
+  if (!errorHandler) {
+    return cb;
+  }
+  const rrwebWrapped = (...rest) => {
+    try {
+      return cb(...rest);
+    } catch (error2) {
+      if (errorHandler && errorHandler(error2) === true) {
+        return () => {
+        };
+      }
+      throw error2;
+    }
+  };
+  return rrwebWrapped;
+};
+var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var lookup = typeof Uint8Array === "undefined" ? [] : new Uint8Array(256);
+for (var i$1 = 0; i$1 < chars.length; i$1++) {
+  lookup[chars.charCodeAt(i$1)] = i$1;
+}
+var encode = function(arraybuffer) {
+  var bytes = new Uint8Array(arraybuffer), i2, len = bytes.length, base64 = "";
+  for (i2 = 0; i2 < len; i2 += 3) {
+    base64 += chars[bytes[i2] >> 2];
+    base64 += chars[(bytes[i2] & 3) << 4 | bytes[i2 + 1] >> 4];
+    base64 += chars[(bytes[i2 + 1] & 15) << 2 | bytes[i2 + 2] >> 6];
+    base64 += chars[bytes[i2 + 2] & 63];
+  }
+  if (len % 3 === 2) {
+    base64 = base64.substring(0, base64.length - 1) + "=";
+  } else if (len % 3 === 1) {
+    base64 = base64.substring(0, base64.length - 2) + "==";
+  }
+  return base64;
+};
+const canvasVarMap = /* @__PURE__ */ new Map();
+function variableListFor$1(ctx, ctor) {
+  let contextMap = canvasVarMap.get(ctx);
+  if (!contextMap) {
+    contextMap = /* @__PURE__ */ new Map();
+    canvasVarMap.set(ctx, contextMap);
+  }
+  if (!contextMap.has(ctor)) {
+    contextMap.set(ctor, []);
+  }
+  return contextMap.get(ctor);
+}
+const saveWebGLVar = (value, win, ctx) => {
+  if (!value || !(isInstanceOfWebGLObject(value, win) || typeof value === "object"))
+    return;
+  const name = value.constructor.name;
+  const list = variableListFor$1(ctx, name);
+  let index = list.indexOf(value);
+  if (index === -1) {
+    index = list.length;
+    list.push(value);
+  }
+  return index;
+};
+function serializeArg(value, win, ctx) {
+  if (value instanceof Array) {
+    return value.map((arg) => serializeArg(arg, win, ctx));
+  } else if (value === null) {
+    return value;
+  } else if (value instanceof Float32Array || value instanceof Float64Array || value instanceof Int32Array || value instanceof Uint32Array || value instanceof Uint8Array || value instanceof Uint16Array || value instanceof Int16Array || value instanceof Int8Array || value instanceof Uint8ClampedArray) {
+    const name = value.constructor.name;
+    return {
+      rr_type: name,
+      args: [Object.values(value)]
+    };
+  } else if (
+    // SharedArrayBuffer disabled on most browsers due to spectre.
+    // More info: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/SharedArrayBuffer
+    // value instanceof SharedArrayBuffer ||
+    value instanceof ArrayBuffer
+  ) {
+    const name = value.constructor.name;
+    const base64 = encode(value);
+    return {
+      rr_type: name,
+      base64
+    };
+  } else if (value instanceof DataView) {
+    const name = value.constructor.name;
+    return {
+      rr_type: name,
+      args: [
+        serializeArg(value.buffer, win, ctx),
+        value.byteOffset,
+        value.byteLength
+      ]
+    };
+  } else if (value instanceof HTMLImageElement) {
+    const name = value.constructor.name;
+    const { src } = value;
+    return {
+      rr_type: name,
+      src
+    };
+  } else if (value instanceof HTMLCanvasElement) {
+    const name = "HTMLImageElement";
+    const src = value.toDataURL();
+    return {
+      rr_type: name,
+      src
+    };
+  } else if (value instanceof ImageData) {
+    const name = value.constructor.name;
+    return {
+      rr_type: name,
+      args: [serializeArg(value.data, win, ctx), value.width, value.height]
+    };
+  } else if (isInstanceOfWebGLObject(value, win) || typeof value === "object") {
+    const name = value.constructor.name;
+    const index = saveWebGLVar(value, win, ctx);
+    return {
+      rr_type: name,
+      index
+    };
+  }
+  return value;
+}
+const serializeArgs = (args, win, ctx) => {
+  return args.map((arg) => serializeArg(arg, win, ctx));
+};
+const isInstanceOfWebGLObject = (value, win) => {
+  const webGLConstructorNames = [
+    "WebGLActiveInfo",
+    "WebGLBuffer",
+    "WebGLFramebuffer",
+    "WebGLProgram",
+    "WebGLRenderbuffer",
+    "WebGLShader",
+    "WebGLShaderPrecisionFormat",
+    "WebGLTexture",
+    "WebGLUniformLocation",
+    "WebGLVertexArrayObject",
+    // In old Chrome versions, value won't be an instanceof WebGLVertexArrayObject.
+    "WebGLVertexArrayObjectOES"
+  ];
+  const supportedWebGLConstructorNames = webGLConstructorNames.filter(
+    (name) => typeof win[name] === "function"
+  );
+  return Boolean(
+    supportedWebGLConstructorNames.find(
+      (name) => value instanceof win[name]
+    )
+  );
+};
+function initCanvas2DMutationObserver(cb, win, blockClass2, blockSelector, unblockSelector) {
+  const handlers2 = [];
+  const props2D = Object.getOwnPropertyNames(
+    win.CanvasRenderingContext2D.prototype
+  );
+  for (const prop of props2D) {
+    try {
+      if (typeof win.CanvasRenderingContext2D.prototype[prop] !== "function") {
+        continue;
+      }
+      const restoreHandler = patch(
+        win.CanvasRenderingContext2D.prototype,
+        prop,
+        function(original) {
+          return function(...args) {
+            if (!isBlocked(
+              this.canvas,
+              blockClass2,
+              blockSelector,
+              unblockSelector,
+              true
+            )) {
+              setTimeout$1(() => {
+                const recordArgs = serializeArgs(args, win, this);
+                cb(this.canvas, {
+                  type: CanvasContext["2D"],
+                  property: prop,
+                  args: recordArgs
+                });
+              }, 0);
+            }
+            return original.apply(this, args);
+          };
+        }
+      );
+      handlers2.push(restoreHandler);
+    } catch {
+      const hookHandler = hookSetter(
+        win.CanvasRenderingContext2D.prototype,
+        prop,
+        {
+          set(v2) {
+            cb(this.canvas, {
+              type: CanvasContext["2D"],
+              property: prop,
+              args: [v2],
+              setter: true
+            });
+          }
+        }
+      );
+      handlers2.push(hookHandler);
+    }
+  }
+  return () => {
+    handlers2.forEach((h2) => h2());
+  };
+}
+function getNormalizedContextName(contextType) {
+  return contextType === "experimental-webgl" ? "webgl" : contextType;
+}
+function initCanvasContextObserver(win, blockClass, blockSelector, unblockSelector, setPreserveDrawingBufferToTrue) {
+  const handlers2 = [];
+  try {
+    const restoreHandler = patch(
+      win.HTMLCanvasElement.prototype,
+      "getContext",
+      function(original) {
+        return function(contextType, ...args) {
+          if (!isBlocked(this, blockClass, blockSelector, unblockSelector, true)) {
+            const ctxName = getNormalizedContextName(contextType);
+            if (!("__context" in this)) this.__context = ctxName;
+            if (setPreserveDrawingBufferToTrue && ["webgl", "webgl2"].includes(ctxName)) {
+              if (args[0] && typeof args[0] === "object") {
+                const contextAttributes = args[0];
+                if (!contextAttributes.preserveDrawingBuffer) {
+                  contextAttributes.preserveDrawingBuffer = true;
+                }
+              } else {
+                args.splice(0, 1, {
+                  preserveDrawingBuffer: true
+                });
+              }
+            }
+          }
+          return original.apply(this, [contextType, ...args]);
+        };
+      }
+    );
+    handlers2.push(restoreHandler);
+  } catch {
+    console.error("failed to patch HTMLCanvasElement.prototype.getContext");
+  }
+  return () => {
+    handlers2.forEach((h2) => h2());
+  };
+}
+function patchGLPrototype(prototype, type, cb, blockClass2, blockSelector, unblockSelector, _mirror2, win) {
+  const handlers2 = [];
+  const props = Object.getOwnPropertyNames(prototype);
+  for (const prop of props) {
+    if (
+      //prop.startsWith('get') ||  // e.g. getProgramParameter, but too risky
+      [
+        "isContextLost",
+        "canvas",
+        "drawingBufferWidth",
+        "drawingBufferHeight"
+      ].includes(prop)
+    ) {
+      continue;
+    }
+    try {
+      if (typeof prototype[prop] !== "function") {
+        continue;
+      }
+      const restoreHandler = patch(
+        prototype,
+        prop,
+        function(original) {
+          return function(...args) {
+            const result = original.apply(this, args);
+            saveWebGLVar(result, win, this);
+            if ("tagName" in this.canvas && !isBlocked(
+              this.canvas,
+              blockClass2,
+              blockSelector,
+              unblockSelector,
+              true
+            )) {
+              const recordArgs = serializeArgs(args, win, this);
+              const mutation = {
+                type,
+                property: prop,
+                args: recordArgs
+              };
+              cb(this.canvas, mutation);
+            }
+            return result;
+          };
+        }
+      );
+      handlers2.push(restoreHandler);
+    } catch {
+      const hookHandler = hookSetter(prototype, prop, {
+        set(v2) {
+          cb(this.canvas, {
+            type,
+            property: prop,
+            args: [v2],
+            setter: true
+          });
+        }
+      });
+      handlers2.push(hookHandler);
+    }
+  }
+  return handlers2;
+}
+function initCanvasWebGLMutationObserver(cb, win, blockClass2, blockSelector, unblockSelector, mirror2) {
+  const handlers2 = [];
+  handlers2.push(
+    ...patchGLPrototype(
+      win.WebGLRenderingContext.prototype,
+      CanvasContext.WebGL,
+      cb,
+      blockClass2,
+      blockSelector,
+      unblockSelector,
+      mirror2,
+      win
+    )
+  );
+  if (typeof win.WebGL2RenderingContext !== "undefined") {
+    handlers2.push(
+      ...patchGLPrototype(
+        win.WebGL2RenderingContext.prototype,
+        CanvasContext.WebGL2,
+        cb,
+        blockClass2,
+        blockSelector,
+        unblockSelector,
+        mirror2,
+        win
+      )
+    );
+  }
+  return () => {
+    handlers2.forEach((h2) => h2());
+  };
+}
+const r$1 = `for(var e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",t="undefined"==typeof Uint8Array?[]:new Uint8Array(256),a=0;a<64;a++)t[e.charCodeAt(a)]=a;var n=function(t){var a,n=new Uint8Array(t),r=n.length,s="";for(a=0;a<r;a+=3)s+=e[n[a]>>2],s+=e[(3&n[a])<<4|n[a+1]>>4],s+=e[(15&n[a+1])<<2|n[a+2]>>6],s+=e[63&n[a+2]];return r%3==2?s=s.substring(0,s.length-1)+"=":r%3==1&&(s=s.substring(0,s.length-2)+"=="),s};const r=new Map,s=new Map;const i=self;i.onmessage=async function(e){if(!("OffscreenCanvas"in globalThis))return i.postMessage({id:e.data.id});{const{id:t,bitmap:a,width:o,height:f,maxCanvasSize:c,dataURLOptions:g}=e.data,u=async function(e,t,a){const r=e+"-"+t;if("OffscreenCanvas"in globalThis){if(s.has(r))return s.get(r);const i=new OffscreenCanvas(e,t);i.getContext("2d");const o=await i.convertToBlob(a),f=await o.arrayBuffer(),c=n(f);return s.set(r,c),c}return""}(o,f,g),[h,d]=function(e,t,a){if(!a)return[e,t];const[n,r]=a;if(e<=n&&t<=r)return[e,t];let s=e,i=t;return s>n&&(i=Math.floor(n*t/e),s=n),i>r&&(s=Math.floor(r*e/t),i=r),[s,i]}(o,f,c),l=new OffscreenCanvas(h,d),w=l.getContext("bitmaprenderer"),p=h===o&&d===f?a:await createImageBitmap(a,{resizeWidth:h,resizeHeight:d,resizeQuality:"low"});w?.transferFromImageBitmap(p),a.close();const y=await l.convertToBlob(g),v=y.type,b=await y.arrayBuffer(),m=n(b);if(p.close(),!r.has(t)&&await u===m)return r.set(t,m),i.postMessage({id:t});if(r.get(t)===m)return i.postMessage({id:t});i.postMessage({id:t,type:v,base64:m,width:o,height:f}),r.set(t,m)}};`;
+function t$1() {
+  const t2 = new Blob([r$1]);
+  return URL.createObjectURL(t2);
+}
+class CanvasManager {
+  constructor(options) {
+    this.pendingCanvasMutations = /* @__PURE__ */ new Map();
+    this.rafStamps = { latestId: 0, invokeId: null };
+    this.shadowDoms = /* @__PURE__ */ new Set();
+    this.windowsSet = /* @__PURE__ */ new WeakSet();
+    this.windows = [];
+    this.restoreHandlers = [];
+    this.frozen = false;
+    this.locked = false;
+    this.snapshotInProgressMap = /* @__PURE__ */ new Map();
+    this.worker = null;
+    this.lastSnapshotTime = 0;
+    this.processMutation = (target, mutation) => {
+      const newFrame = this.rafStamps.invokeId && this.rafStamps.latestId !== this.rafStamps.invokeId;
+      if (newFrame || !this.rafStamps.invokeId)
+        this.rafStamps.invokeId = this.rafStamps.latestId;
+      if (!this.pendingCanvasMutations.has(target)) {
+        this.pendingCanvasMutations.set(target, []);
+      }
+      this.pendingCanvasMutations.get(target).push(mutation);
+    };
+    const {
+      enableManualSnapshot,
+      sampling = "all",
+      win,
+      recordCanvas,
+      errorHandler: errorHandler2
+    } = options;
+    options.sampling = sampling;
+    this.mutationCb = options.mutationCb;
+    this.mirror = options.mirror;
+    this.options = options;
+    if (errorHandler2) {
+      registerErrorHandler(errorHandler2);
+    }
+    if (recordCanvas && typeof sampling === "number" || enableManualSnapshot) {
+      this.worker = this.initFPSWorker();
+    }
+    this.addWindow(win);
+    if (enableManualSnapshot) {
+      return;
+    }
+    callbackWrapper(() => {
+      if (recordCanvas && sampling === "all") {
+        this.startRAFTimestamping();
+        this.startPendingCanvasMutationFlusher();
+      }
+      if (recordCanvas && typeof sampling === "number") {
+        this.initCanvasFPSObserver();
+      }
+    })();
+  }
+  reset() {
+    this.pendingCanvasMutations.clear();
+    this.restoreHandlers.forEach((handler) => {
+      try {
+        handler();
+      } catch (e2) {
+      }
+    });
+    this.restoreHandlers = [];
+    this.windowsSet = /* @__PURE__ */ new WeakSet();
+    this.windows = [];
+    this.shadowDoms = /* @__PURE__ */ new Set();
+    this.worker?.terminate();
+    this.worker = null;
+    this.snapshotInProgressMap = /* @__PURE__ */ new Map();
+  }
+  freeze() {
+    this.frozen = true;
+  }
+  unfreeze() {
+    this.frozen = false;
+  }
+  lock() {
+    this.locked = true;
+  }
+  unlock() {
+    this.locked = false;
+  }
+  addWindow(win) {
+    const {
+      sampling = "all",
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      recordCanvas,
+      enableManualSnapshot
+    } = this.options;
+    if (this.windowsSet.has(win)) return;
+    if (enableManualSnapshot) {
+      this.windowsSet.add(win);
+      this.windows.push(new WeakRef(win));
+      return;
+    }
+    callbackWrapper(() => {
+      if (recordCanvas && sampling === "all") {
+        this.initCanvasMutationObserver(
+          win,
+          blockClass,
+          blockSelector,
+          unblockSelector
+        );
+      }
+      if (recordCanvas && typeof sampling === "number") {
+        const canvasContextReset = initCanvasContextObserver(
+          win,
+          blockClass,
+          blockSelector,
+          unblockSelector,
+          true
+        );
+        this.restoreHandlers.push(() => {
+          canvasContextReset();
+        });
+      }
+    })();
+    this.windowsSet.add(win);
+    this.windows.push(new WeakRef(win));
+  }
+  addShadowRoot(shadowRoot) {
+    this.shadowDoms.add(new WeakRef(shadowRoot));
+  }
+  resetShadowRoots() {
+    this.shadowDoms = /* @__PURE__ */ new Set();
+  }
+  snapshot(canvasElement, options) {
+    if (options?.skipRequestAnimationFrame) {
+      this.takeSnapshot(performance.now(), true, canvasElement);
+      return;
+    }
+    onRequestAnimationFrame(
+      (timestamp) => this.takeSnapshot(timestamp, true, canvasElement)
+    );
+  }
+  initFPSWorker() {
+    const worker = new Worker(t$1());
+    worker.onmessage = (e2) => {
+      const data = e2.data;
+      const { id } = data;
+      this.snapshotInProgressMap.set(id, false);
+      if (!("base64" in data)) return;
+      const { base64, type, width, height } = data;
+      this.mutationCb({
+        id,
+        type: CanvasContext["2D"],
+        commands: [
+          {
+            property: "clearRect",
+            // wipe canvas
+            args: [0, 0, width, height]
+          },
+          {
+            property: "drawImage",
+            // draws (semi-transparent) image
+            args: [
+              {
+                rr_type: "ImageBitmap",
+                args: [
+                  {
+                    rr_type: "Blob",
+                    data: [{ rr_type: "ArrayBuffer", base64 }],
+                    type
+                  }
+                ]
+              },
+              0,
+              0,
+              // The below args are needed if we enforce a max size, we want to
+              // retain the original size when drawing the image (which should be smaller)
+              width,
+              height
+            ]
+          }
+        ]
+      });
+    };
+    return worker;
+  }
+  initCanvasFPSObserver() {
+    let rafId;
+    if (!this.windows.length && !this.shadowDoms.size) {
+      return;
+    }
+    const rafCallback = (timestamp) => {
+      this.takeSnapshot(timestamp, false);
+      rafId = onRequestAnimationFrame(rafCallback);
+    };
+    rafId = onRequestAnimationFrame(rafCallback);
+    this.restoreHandlers.push(() => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+    });
+  }
+  initCanvasMutationObserver(win, blockClass, blockSelector, unblockSelector) {
+    const canvasContextReset = initCanvasContextObserver(
+      win,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      false
+    );
+    const canvas2DReset = initCanvas2DMutationObserver(
+      this.processMutation.bind(this),
+      win,
+      blockClass,
+      blockSelector,
+      unblockSelector
+    );
+    const canvasWebGL1and2Reset = initCanvasWebGLMutationObserver(
+      this.processMutation.bind(this),
+      win,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      this.mirror
+    );
+    this.restoreHandlers.push(() => {
+      canvasContextReset();
+      canvas2DReset();
+      canvasWebGL1and2Reset();
+    });
+  }
+  /**
+   * Returns all `canvas` elements that are not blocked by the given selectors. Searches all windows and shadow roots.
+   */
+  getCanvasElements(blockClass, blockSelector, unblockSelector) {
+    const matchedCanvas = [];
+    const searchCanvas = (root) => {
+      root.querySelectorAll("canvas").forEach((canvas) => {
+        if (!isBlocked(canvas, blockClass, blockSelector, unblockSelector)) {
+          matchedCanvas.push(canvas);
+        }
+      });
+    };
+    for (const item of this.windows) {
+      const window2 = item.deref();
+      let _document;
+      try {
+        _document = window2 && window2.document;
+      } catch {
+      }
+      if (_document) {
+        searchCanvas(_document);
+      }
+    }
+    for (const item of this.shadowDoms) {
+      const shadowRoot = item.deref();
+      if (shadowRoot) {
+        searchCanvas(shadowRoot);
+      }
+    }
+    return matchedCanvas;
+  }
+  /**
+   * Takes a snapshot of the provided canvas element, or will search all windows/shadow roots for canvases. Will self-throttle based on `options.sampling`.
+   *
+   * @returns `true` if the snapshot was taken, `false` if it was throttled.
+   */
+  takeSnapshot(timestamp, isManualSnapshot, canvasElement) {
+    const {
+      sampling,
+      blockClass,
+      blockSelector,
+      unblockSelector,
+      dataURLOptions,
+      maxCanvasSize
+    } = this.options;
+    const fps = sampling === "all" ? 2 : sampling || 2;
+    const timeBetweenSnapshots = 1e3 / fps;
+    const shouldThrottle = this.lastSnapshotTime && timestamp - this.lastSnapshotTime < timeBetweenSnapshots;
+    if (shouldThrottle) {
+      return false;
+    }
+    this.lastSnapshotTime = timestamp;
+    const canvases = canvasElement ? [canvasElement] : this.getCanvasElements(blockClass, blockSelector, unblockSelector);
+    canvases.forEach((canvas) => {
+      const id = this.mirror.getId(canvas);
+      if (!this.mirror.hasNode(canvas) || !canvas.width || !canvas.height || this.snapshotInProgressMap.get(id)) {
+        return;
+      }
+      this.snapshotInProgressMap.set(id, true);
+      if (!isManualSnapshot && ["webgl", "webgl2"].includes(canvas.__context)) {
+        const context = canvas.getContext(canvas.__context);
+        if (context?.getContextAttributes()?.preserveDrawingBuffer === false) {
+          context.clear(context.COLOR_BUFFER_BIT);
+        }
+      }
+      createImageBitmap(canvas).then((bitmap) => {
+        this.worker?.postMessage(
+          {
+            id,
+            bitmap,
+            width: canvas.width,
+            height: canvas.height,
+            dataURLOptions,
+            maxCanvasSize
+          },
+          [bitmap]
+        );
+      }).catch((error2) => {
+        callbackWrapper(() => {
+          this.snapshotInProgressMap.delete(id);
+          throw error2;
+        })();
+      });
+    });
+    return true;
+  }
+  startPendingCanvasMutationFlusher() {
+    onRequestAnimationFrame(() => this.flushPendingCanvasMutations());
+  }
+  startRAFTimestamping() {
+    const setLatestRAFTimestamp = (timestamp) => {
+      this.rafStamps.latestId = timestamp;
+      onRequestAnimationFrame(setLatestRAFTimestamp);
+    };
+    onRequestAnimationFrame(setLatestRAFTimestamp);
+  }
+  flushPendingCanvasMutations() {
+    this.pendingCanvasMutations.forEach(
+      (_values, canvas) => {
+        const id = this.mirror.getId(canvas);
+        this.flushPendingCanvasMutationFor(canvas, id);
+      }
+    );
+    onRequestAnimationFrame(() => this.flushPendingCanvasMutations());
+  }
+  flushPendingCanvasMutationFor(canvas, id) {
+    if (this.frozen || this.locked) {
+      return;
+    }
+    const valuesWithType = this.pendingCanvasMutations.get(canvas);
+    if (!valuesWithType || id === -1) return;
+    const values = valuesWithType.map((value) => {
+      const { type: type2, ...rest } = value;
+      return rest;
+    });
+    const { type } = valuesWithType[0];
+    this.mutationCb({ id, type, commands: values });
+    this.pendingCanvasMutations.delete(canvas);
+  }
+}
+try {
+  if (Array.from([1], (x2) => x2 * 2)[0] !== 2) {
+    const cleanFrame = document.createElement("iframe");
+    document.body.appendChild(cleanFrame);
+    Array.from = cleanFrame.contentWindow?.Array.from || Array.from;
+    document.body.removeChild(cleanFrame);
+  }
+} catch (err) {
+  console.debug("Unable to override Array.from", err);
+}
+createMirror$2();
+var n;
+!function(t2) {
+  t2[t2.NotStarted = 0] = "NotStarted", t2[t2.Running = 1] = "Running", t2[t2.Stopped = 2] = "Stopped";
+}(n || (n = {}));
+const CANVAS_QUALITY = {
+  low: {
+    sampling: {
+      canvas: 1
+    },
+    dataURLOptions: {
+      type: "image/webp",
+      quality: 0.25
+    }
+  },
+  medium: {
+    sampling: {
+      canvas: 2
+    },
+    dataURLOptions: {
+      type: "image/webp",
+      quality: 0.4
+    }
+  },
+  high: {
+    sampling: {
+      canvas: 4
+    },
+    dataURLOptions: {
+      type: "image/webp",
+      quality: 0.5
+    }
+  }
+};
+const INTEGRATION_NAME$3 = "ReplayCanvas";
+const DEFAULT_MAX_CANVAS_SIZE = 1280;
+const _replayCanvasIntegration = (options = {}) => {
+  const [maxCanvasWidth, maxCanvasHeight] = options.maxCanvasSize || [];
+  const _canvasOptions = {
+    quality: options.quality || "medium",
+    enableManualSnapshot: options.enableManualSnapshot,
+    maxCanvasSize: [
+      maxCanvasWidth ? Math.min(maxCanvasWidth, DEFAULT_MAX_CANVAS_SIZE) : DEFAULT_MAX_CANVAS_SIZE,
+      maxCanvasHeight ? Math.min(maxCanvasHeight, DEFAULT_MAX_CANVAS_SIZE) : DEFAULT_MAX_CANVAS_SIZE
+    ]
+  };
+  let canvasManagerResolve;
+  const _canvasManager = new Promise((resolve2) => canvasManagerResolve = resolve2);
+  return {
+    name: INTEGRATION_NAME$3,
+    getOptions() {
+      const { quality, enableManualSnapshot, maxCanvasSize } = _canvasOptions;
+      return {
+        enableManualSnapshot,
+        recordCanvas: true,
+        getCanvasManager: (getCanvasManagerOptions) => {
+          const manager = new CanvasManager({
+            ...getCanvasManagerOptions,
+            enableManualSnapshot,
+            maxCanvasSize,
+            errorHandler: (err) => {
+              try {
+                if (typeof err === "object") {
+                  err.__rrweb__ = true;
+                }
+              } catch {
+              }
+            }
+          });
+          canvasManagerResolve(manager);
+          return manager;
+        },
+        ...CANVAS_QUALITY[quality] || CANVAS_QUALITY.medium
+      };
+    },
+    async snapshot(canvasElement, options2) {
+      const canvasManager = await _canvasManager;
+      canvasManager.snapshot(canvasElement, options2);
+    }
+  };
+};
+const replayCanvasIntegration = defineIntegration(
+  _replayCanvasIntegration
+);
 const responseToSpanId = /* @__PURE__ */ new WeakMap();
 const spanIdToEndTimestamp = /* @__PURE__ */ new Map();
 const defaultRequestInstrumentationOptions = {
@@ -10035,7 +23770,7 @@ function instrumentOutgoingRequests(client, _options) {
     ...defaultRequestInstrumentationOptions,
     ..._options
   };
-  const shouldCreateSpan = typeof shouldCreateSpanForRequest === "function" ? shouldCreateSpanForRequest : (_) => true;
+  const shouldCreateSpan = typeof shouldCreateSpanForRequest === "function" ? shouldCreateSpanForRequest : (_2) => true;
   const shouldAttachHeadersWithTargets = (url) => shouldAttachHeaders(url, tracePropagationTargets);
   const spans = {};
   const propagateTraceparent = client.getOptions().propagateTraceparent;
@@ -10236,25 +23971,25 @@ function baggageHeaderHasSentryValues(baggageHeader) {
 }
 function getFullURL(url) {
   try {
-    const parsed = new URL(url, WINDOW$2.location.origin);
+    const parsed = new URL(url, WINDOW$4.location.origin);
     return parsed.href;
   } catch {
     return void 0;
   }
 }
 function registerBackgroundTabDetection() {
-  if (WINDOW$2.document) {
-    WINDOW$2.document.addEventListener("visibilitychange", () => {
+  if (WINDOW$4.document) {
+    WINDOW$4.document.addEventListener("visibilitychange", () => {
       const activeSpan = getActiveSpan();
       if (!activeSpan) {
         return;
       }
       const rootSpan = getRootSpan(activeSpan);
-      if (WINDOW$2.document.hidden && rootSpan) {
+      if (WINDOW$4.document.hidden && rootSpan) {
         const cancelledStatus = "cancelled";
         const { op, status } = spanToJSON(rootSpan);
-        if (DEBUG_BUILD) {
-          debug.log(`[Tracing] Transaction: ${cancelledStatus} -> since tab moved to the background, op: ${op}`);
+        if (DEBUG_BUILD$1) {
+          debug$2.log(`[Tracing] Transaction: ${cancelledStatus} -> since tab moved to the background, op: ${op}`);
         }
         if (!status) {
           rootSpan.setStatus({ code: SPAN_STATUS_ERROR, message: cancelledStatus });
@@ -10264,7 +23999,7 @@ function registerBackgroundTabDetection() {
       }
     });
   } else {
-    DEBUG_BUILD && debug.warn("[Tracing] Could not set up background tab detection due to lack of global document");
+    DEBUG_BUILD$1 && debug$2.warn("[Tracing] Could not set up background tab detection due to lack of global document");
   }
 }
 const PREVIOUS_TRACE_MAX_DURATION = 3600;
@@ -10339,8 +24074,8 @@ function addPreviousTraceSpanLink(previousTraceInfo, span, oldPropagationContext
     return previousTraceInfo;
   }
   if (Date.now() / 1e3 - previousTraceInfo.startTimestamp <= PREVIOUS_TRACE_MAX_DURATION) {
-    if (DEBUG_BUILD) {
-      debug.log(
+    if (DEBUG_BUILD$1) {
+      debug$2.log(
         `Adding previous_trace ${previousTraceSpanCtx} link to span ${{
           op: spanJson.op,
           ...span.spanContext()
@@ -10362,14 +24097,14 @@ function addPreviousTraceSpanLink(previousTraceInfo, span, oldPropagationContext
 }
 function storePreviousTraceInSessionStorage(previousTraceInfo) {
   try {
-    WINDOW$2.sessionStorage.setItem(PREVIOUS_TRACE_KEY, JSON.stringify(previousTraceInfo));
-  } catch (e) {
-    DEBUG_BUILD && debug.warn("Could not store previous trace in sessionStorage", e);
+    WINDOW$4.sessionStorage.setItem(PREVIOUS_TRACE_KEY, JSON.stringify(previousTraceInfo));
+  } catch (e2) {
+    DEBUG_BUILD$1 && debug$2.warn("Could not store previous trace in sessionStorage", e2);
   }
 }
 function getPreviousTraceFromSessionStorage() {
   try {
-    const previousTraceInfo = WINDOW$2.sessionStorage?.getItem(PREVIOUS_TRACE_KEY);
+    const previousTraceInfo = WINDOW$4.sessionStorage?.getItem(PREVIOUS_TRACE_KEY);
     return JSON.parse(previousTraceInfo);
   } catch {
     return void 0;
@@ -10402,7 +24137,7 @@ const browserTracingIntegration = (options = {}) => {
     name: void 0,
     source: void 0
   };
-  const optionalWindowDocument = WINDOW$2.document;
+  const optionalWindowDocument = WINDOW$4.document;
   const {
     enableInp,
     enableElementTiming,
@@ -10532,7 +24267,7 @@ const browserTracingIntegration = (options = {}) => {
       function maybeEndActiveSpan() {
         const activeSpan = getActiveIdleSpan(client);
         if (activeSpan && !spanToJSON(activeSpan).timestamp) {
-          DEBUG_BUILD && debug.log(`[Tracing] Finishing current active span with op: ${spanToJSON(activeSpan).op}`);
+          DEBUG_BUILD$1 && debug$2.log(`[Tracing] Finishing current active span with op: ${spanToJSON(activeSpan).op}`);
           activeSpan.setAttribute(SEMANTIC_ATTRIBUTE_SENTRY_IDLE_SPAN_FINISH_REASON, "cancelled");
           activeSpan.end();
         }
@@ -10542,7 +24277,7 @@ const browserTracingIntegration = (options = {}) => {
           return;
         }
         if (navigationOptions?.isRedirect) {
-          DEBUG_BUILD && debug.warn("[Tracing] Detected redirect, navigation span will not be the root span, but a child span.");
+          DEBUG_BUILD$1 && debug$2.warn("[Tracing] Detected redirect, navigation span will not be the root span, but a child span.");
           _createRouteSpan(
             client,
             {
@@ -10610,11 +24345,11 @@ const browserTracingIntegration = (options = {}) => {
       if (linkPreviousTrace !== "off") {
         linkTraces(client, { linkPreviousTrace, consistentTraceSampling });
       }
-      if (WINDOW$2.location) {
+      if (WINDOW$4.location) {
         if (instrumentPageLoad) {
           const origin = browserPerformanceTimeOrigin();
           startBrowserTracingPageLoadSpan(client, {
-            name: WINDOW$2.location.pathname,
+            name: WINDOW$4.location.pathname,
             // pageload should always start at timeOrigin (and needs to be in s, not ms)
             startTime: origin ? origin / 1e3 : void 0,
             attributes: {
@@ -10636,7 +24371,7 @@ const browserTracingIntegration = (options = {}) => {
             startBrowserTracingNavigationSpan(
               client,
               {
-                name: parsed?.pathname || WINDOW$2.location.pathname,
+                name: parsed?.pathname || WINDOW$4.location.pathname,
                 attributes: {
                   [SEMANTIC_ATTRIBUTE_SENTRY_SOURCE]: "url",
                   [SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN]: "auto.navigation.browser"
@@ -10694,12 +24429,12 @@ function startBrowserTracingNavigationSpan(client, spanOptions, options) {
   return getActiveIdleSpan(client);
 }
 function getMetaContent(metaName) {
-  const optionalWindowDocument = WINDOW$2.document;
+  const optionalWindowDocument = WINDOW$4.document;
   const metaTag = optionalWindowDocument?.querySelector(`meta[name=${metaName}]`);
   return metaTag?.getAttribute("content") || void 0;
 }
 function registerInteractionListener(client, idleTimeout, finalTimeout, childSpanTimeout, latestRoute) {
-  const optionalWindowDocument = WINDOW$2.document;
+  const optionalWindowDocument = WINDOW$4.document;
   let inflightInteractionSpan;
   const registerInteractionTransaction = () => {
     const op = "ui.action.click";
@@ -10707,7 +24442,7 @@ function registerInteractionListener(client, idleTimeout, finalTimeout, childSpa
     if (activeIdleSpan) {
       const currentRootSpanOp = spanToJSON(activeIdleSpan).op;
       if (["navigation", "pageload"].includes(currentRootSpanOp)) {
-        DEBUG_BUILD && debug.warn(`[Tracing] Did not create ${op} span because a pageload or navigation span is in progress.`);
+        DEBUG_BUILD$1 && debug$2.warn(`[Tracing] Did not create ${op} span because a pageload or navigation span is in progress.`);
         return void 0;
       }
     }
@@ -10717,7 +24452,7 @@ function registerInteractionListener(client, idleTimeout, finalTimeout, childSpa
       inflightInteractionSpan = void 0;
     }
     if (!latestRoute.name) {
-      DEBUG_BUILD && debug.warn(`[Tracing] Did not create ${op} transaction because _latestRouteName is missing.`);
+      DEBUG_BUILD$1 && debug$2.warn(`[Tracing] Did not create ${op} transaction because _latestRouteName is missing.`);
       return void 0;
     }
     inflightInteractionSpan = startIdleSpan(
@@ -10759,6 +24494,917 @@ function isRedirect(activeSpan, lastInteractionTimestamp) {
   }
   return true;
 }
+function reportPageLoaded(client = getClient()) {
+  client?.emit("endPageloadSpan");
+}
+function setActiveSpanInBrowser(span) {
+  const maybePreviousActiveSpan = getActiveSpan();
+  if (maybePreviousActiveSpan === span) {
+    return;
+  }
+  const scope = getCurrentScope();
+  span.end = new Proxy(span.end, {
+    apply(target, thisArg, args) {
+      _setSpanForScope(scope, maybePreviousActiveSpan);
+      return Reflect.apply(target, thisArg, args);
+    }
+  });
+  _setSpanForScope(scope, span);
+}
+function promisifyRequest(request) {
+  return new Promise((resolve2, reject) => {
+    request.oncomplete = request.onsuccess = () => resolve2(request.result);
+    request.onabort = request.onerror = () => reject(request.error);
+  });
+}
+function createStore(dbName, storeName) {
+  const request = indexedDB.open(dbName);
+  request.onupgradeneeded = () => request.result.createObjectStore(storeName);
+  const dbp = promisifyRequest(request);
+  return (callback) => dbp.then((db) => callback(db.transaction(storeName, "readwrite").objectStore(storeName)));
+}
+function keys(store) {
+  return promisifyRequest(store.getAllKeys());
+}
+function push(store, value, maxQueueSize) {
+  return store((store2) => {
+    return keys(store2).then((keys2) => {
+      if (keys2.length >= maxQueueSize) {
+        return;
+      }
+      store2.put(value, Math.max(...keys2, 0) + 1);
+      return promisifyRequest(store2.transaction);
+    });
+  });
+}
+function unshift(store, value, maxQueueSize) {
+  return store((store2) => {
+    return keys(store2).then((keys2) => {
+      if (keys2.length >= maxQueueSize) {
+        return;
+      }
+      store2.put(value, Math.min(...keys2, 0) - 1);
+      return promisifyRequest(store2.transaction);
+    });
+  });
+}
+function shift(store) {
+  return store((store2) => {
+    return keys(store2).then((keys2) => {
+      const firstKey = keys2[0];
+      if (firstKey == null) {
+        return void 0;
+      }
+      return promisifyRequest(store2.get(firstKey)).then((value) => {
+        store2.delete(firstKey);
+        return promisifyRequest(store2.transaction).then(() => value);
+      });
+    });
+  });
+}
+function createIndexedDbStore(options) {
+  let store;
+  function getStore() {
+    if (store == void 0) {
+      store = createStore(options.dbName || "sentry-offline", options.storeName || "queue");
+    }
+    return store;
+  }
+  return {
+    push: async (env) => {
+      try {
+        const serialized = await serializeEnvelope(env);
+        await push(getStore(), serialized, options.maxQueueSize || 30);
+      } catch {
+      }
+    },
+    unshift: async (env) => {
+      try {
+        const serialized = await serializeEnvelope(env);
+        await unshift(getStore(), serialized, options.maxQueueSize || 30);
+      } catch {
+      }
+    },
+    shift: async () => {
+      try {
+        const deserialized = await shift(getStore());
+        if (deserialized) {
+          return parseEnvelope(deserialized);
+        }
+      } catch {
+      }
+      return void 0;
+    }
+  };
+}
+function makeIndexedDbOfflineTransport(createTransport2) {
+  return (options) => {
+    const transport = createTransport2({ ...options, createStore: createIndexedDbStore });
+    WINDOW$4.addEventListener("online", async (_2) => {
+      await transport.flush();
+    });
+    return transport;
+  };
+}
+function makeBrowserOfflineTransport(createTransport2 = makeFetchTransport) {
+  return makeIndexedDbOfflineTransport(makeOfflineTransport(createTransport2));
+}
+const MS_TO_NS = 1e6;
+const THREAD_ID_STRING = String(0);
+const THREAD_NAME = "main";
+const navigator = WINDOW$4.navigator;
+let OS_PLATFORM = "";
+let OS_PLATFORM_VERSION = "";
+let OS_ARCH = "";
+let OS_BROWSER = navigator?.userAgent || "";
+let OS_MODEL = "";
+const OS_LOCALE = navigator?.language || navigator?.languages?.[0] || "";
+function isUserAgentData(data) {
+  return typeof data === "object" && data !== null && "getHighEntropyValues" in data;
+}
+const userAgentData = navigator?.userAgentData;
+if (isUserAgentData(userAgentData)) {
+  userAgentData.getHighEntropyValues(["architecture", "model", "platform", "platformVersion", "fullVersionList"]).then((ua) => {
+    OS_PLATFORM = ua.platform || "";
+    OS_ARCH = ua.architecture || "";
+    OS_MODEL = ua.model || "";
+    OS_PLATFORM_VERSION = ua.platformVersion || "";
+    if (ua.fullVersionList?.length) {
+      const firstUa = ua.fullVersionList[ua.fullVersionList.length - 1];
+      OS_BROWSER = `${firstUa.brand} ${firstUa.version}`;
+    }
+  }).catch((e2) => void 0);
+}
+function isProcessedJSSelfProfile(profile) {
+  return !("thread_metadata" in profile);
+}
+function enrichWithThreadInformation(profile) {
+  if (!isProcessedJSSelfProfile(profile)) {
+    return profile;
+  }
+  return convertJSSelfProfileToSampledFormat(profile);
+}
+function getTraceId(event) {
+  const traceId = event.contexts?.trace?.trace_id;
+  if (typeof traceId === "string" && traceId.length !== 32) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log(`[Profiling] Invalid traceId: ${traceId} on profiled event`);
+    }
+  }
+  if (typeof traceId !== "string") {
+    return "";
+  }
+  return traceId;
+}
+function createProfilePayload(profile_id, start_timestamp, processed_profile, event) {
+  if (event.type !== "transaction") {
+    throw new TypeError("Profiling events may only be attached to transactions, this should never occur.");
+  }
+  if (processed_profile === void 0 || processed_profile === null) {
+    throw new TypeError(
+      `Cannot construct profiling event envelope without a valid profile. Got ${processed_profile} instead.`
+    );
+  }
+  const traceId = getTraceId(event);
+  const enrichedThreadProfile = enrichWithThreadInformation(processed_profile);
+  const transactionStartMs = start_timestamp ? start_timestamp : typeof event.start_timestamp === "number" ? event.start_timestamp * 1e3 : timestampInSeconds() * 1e3;
+  const transactionEndMs = typeof event.timestamp === "number" ? event.timestamp * 1e3 : timestampInSeconds() * 1e3;
+  const profile = {
+    event_id: profile_id,
+    timestamp: new Date(transactionStartMs).toISOString(),
+    platform: "javascript",
+    version: "1",
+    release: event.release || "",
+    environment: event.environment || DEFAULT_ENVIRONMENT,
+    runtime: {
+      name: "javascript",
+      version: WINDOW$4.navigator.userAgent
+    },
+    os: {
+      name: OS_PLATFORM,
+      version: OS_PLATFORM_VERSION,
+      build_number: OS_BROWSER
+    },
+    device: {
+      locale: OS_LOCALE,
+      model: OS_MODEL,
+      manufacturer: OS_BROWSER,
+      architecture: OS_ARCH,
+      is_emulator: false
+    },
+    debug_meta: {
+      images: applyDebugMetadata(processed_profile.resources)
+    },
+    profile: enrichedThreadProfile,
+    transactions: [
+      {
+        name: event.transaction || "",
+        id: event.event_id || uuid4(),
+        trace_id: traceId,
+        active_thread_id: THREAD_ID_STRING,
+        relative_start_ns: "0",
+        relative_end_ns: ((transactionEndMs - transactionStartMs) * 1e6).toFixed(0)
+      }
+    ]
+  };
+  return profile;
+}
+function isAutomatedPageLoadSpan(span) {
+  return spanToJSON(span).op === "pageload";
+}
+function convertJSSelfProfileToSampledFormat(input) {
+  let EMPTY_STACK_ID = void 0;
+  let STACK_ID = 0;
+  const profile = {
+    samples: [],
+    stacks: [],
+    frames: [],
+    thread_metadata: {
+      [THREAD_ID_STRING]: { name: THREAD_NAME }
+    }
+  };
+  const firstSample = input.samples[0];
+  if (!firstSample) {
+    return profile;
+  }
+  const start = firstSample.timestamp;
+  const perfOrigin = browserPerformanceTimeOrigin();
+  const origin = typeof performance.timeOrigin === "number" ? performance.timeOrigin : perfOrigin || 0;
+  const adjustForOriginChange = origin - (perfOrigin || origin);
+  input.samples.forEach((jsSample, i2) => {
+    if (jsSample.stackId === void 0) {
+      if (EMPTY_STACK_ID === void 0) {
+        EMPTY_STACK_ID = STACK_ID;
+        profile.stacks[EMPTY_STACK_ID] = [];
+        STACK_ID++;
+      }
+      profile["samples"][i2] = {
+        // convert ms timestamp to ns
+        elapsed_since_start_ns: ((jsSample.timestamp + adjustForOriginChange - start) * MS_TO_NS).toFixed(0),
+        stack_id: EMPTY_STACK_ID,
+        thread_id: THREAD_ID_STRING
+      };
+      return;
+    }
+    let stackTop = input.stacks[jsSample.stackId];
+    const stack = [];
+    while (stackTop) {
+      stack.push(stackTop.frameId);
+      const frame = input.frames[stackTop.frameId];
+      if (frame && profile.frames[stackTop.frameId] === void 0) {
+        profile.frames[stackTop.frameId] = {
+          function: frame.name,
+          abs_path: typeof frame.resourceId === "number" ? input.resources[frame.resourceId] : void 0,
+          lineno: frame.line,
+          colno: frame.column
+        };
+      }
+      stackTop = stackTop.parentId === void 0 ? void 0 : input.stacks[stackTop.parentId];
+    }
+    const sample = {
+      // convert ms timestamp to ns
+      elapsed_since_start_ns: ((jsSample.timestamp + adjustForOriginChange - start) * MS_TO_NS).toFixed(0),
+      stack_id: STACK_ID,
+      thread_id: THREAD_ID_STRING
+    };
+    profile["stacks"][STACK_ID] = stack;
+    profile["samples"][i2] = sample;
+    STACK_ID++;
+  });
+  return profile;
+}
+function addProfilesToEnvelope(envelope, profiles) {
+  if (!profiles.length) {
+    return envelope;
+  }
+  for (const profile of profiles) {
+    envelope[1].push([{ type: "profile" }, profile]);
+  }
+  return envelope;
+}
+function findProfiledTransactionsFromEnvelope(envelope) {
+  const events = [];
+  forEachEnvelopeItem(envelope, (item, type) => {
+    if (type !== "transaction") {
+      return;
+    }
+    for (let j2 = 1; j2 < item.length; j2++) {
+      const event = item[j2];
+      if (event?.contexts?.profile?.profile_id) {
+        events.push(item[j2]);
+      }
+    }
+  });
+  return events;
+}
+function applyDebugMetadata(resource_paths) {
+  const client = getClient();
+  const options = client?.getOptions();
+  const stackParser = options?.stackParser;
+  if (!stackParser) {
+    return [];
+  }
+  return getDebugImagesForResources(stackParser, resource_paths);
+}
+function isValidSampleRate(rate) {
+  if (typeof rate !== "number" && typeof rate !== "boolean" || typeof rate === "number" && isNaN(rate)) {
+    DEBUG_BUILD$1 && debug$2.warn(
+      `[Profiling] Invalid sample rate. Sample rate must be a boolean or a number between 0 and 1. Got ${JSON.stringify(
+        rate
+      )} of type ${JSON.stringify(typeof rate)}.`
+    );
+    return false;
+  }
+  if (rate === true || rate === false) {
+    return true;
+  }
+  if (rate < 0 || rate > 1) {
+    DEBUG_BUILD$1 && debug$2.warn(`[Profiling] Invalid sample rate. Sample rate must be between 0 and 1. Got ${rate}.`);
+    return false;
+  }
+  return true;
+}
+function isValidProfile(profile) {
+  if (profile.samples.length < 2) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log("[Profiling] Discarding profile because it contains less than 2 samples");
+    }
+    return false;
+  }
+  if (!profile.frames.length) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log("[Profiling] Discarding profile because it contains no frames");
+    }
+    return false;
+  }
+  return true;
+}
+let PROFILING_CONSTRUCTOR_FAILED = false;
+const MAX_PROFILE_DURATION_MS = 3e4;
+function isJSProfilerSupported(maybeProfiler) {
+  return typeof maybeProfiler === "function";
+}
+function startJSSelfProfile() {
+  const JSProfilerConstructor = WINDOW$4.Profiler;
+  if (!isJSProfilerSupported(JSProfilerConstructor)) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log("[Profiling] Profiling is not supported by this browser, Profiler interface missing on window object.");
+    }
+    return;
+  }
+  const samplingIntervalMS = 10;
+  const maxSamples = Math.floor(MAX_PROFILE_DURATION_MS / samplingIntervalMS);
+  try {
+    return new JSProfilerConstructor({ sampleInterval: samplingIntervalMS, maxBufferSize: maxSamples });
+  } catch (e2) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log(
+        "[Profiling] Failed to initialize the Profiling constructor, this is likely due to a missing 'Document-Policy': 'js-profiling' header."
+      );
+      debug$2.log("[Profiling] Disabling profiling for current user session.");
+    }
+    PROFILING_CONSTRUCTOR_FAILED = true;
+  }
+  return;
+}
+function shouldProfileSpan(span) {
+  if (PROFILING_CONSTRUCTOR_FAILED) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log("[Profiling] Profiling has been disabled for the duration of the current user session.");
+    }
+    return false;
+  }
+  if (!span.isRecording()) {
+    if (DEBUG_BUILD$1) {
+      debug$2.log("[Profiling] Discarding profile because transaction was not sampled.");
+    }
+    return false;
+  }
+  const client = getClient();
+  const options = client?.getOptions();
+  if (!options) {
+    DEBUG_BUILD$1 && debug$2.log("[Profiling] Profiling disabled, no options found.");
+    return false;
+  }
+  const profilesSampleRate = options.profilesSampleRate;
+  if (!isValidSampleRate(profilesSampleRate)) {
+    DEBUG_BUILD$1 && debug$2.warn("[Profiling] Discarding profile because of invalid sample rate.");
+    return false;
+  }
+  if (!profilesSampleRate) {
+    DEBUG_BUILD$1 && debug$2.log(
+      "[Profiling] Discarding profile because a negative sampling decision was inherited or profileSampleRate is set to 0"
+    );
+    return false;
+  }
+  const sampled = profilesSampleRate === true ? true : Math.random() < profilesSampleRate;
+  if (!sampled) {
+    DEBUG_BUILD$1 && debug$2.log(
+      `[Profiling] Discarding profile because it's not included in the random sample (sampling rate = ${Number(
+        profilesSampleRate
+      )})`
+    );
+    return false;
+  }
+  return true;
+}
+function createProfilingEvent(profile_id, start_timestamp, profile, event) {
+  if (!isValidProfile(profile)) {
+    return null;
+  }
+  return createProfilePayload(profile_id, start_timestamp, profile, event);
+}
+const PROFILE_MAP = /* @__PURE__ */ new Map();
+function getActiveProfilesCount() {
+  return PROFILE_MAP.size;
+}
+function takeProfileFromGlobalCache(profile_id) {
+  const profile = PROFILE_MAP.get(profile_id);
+  if (profile) {
+    PROFILE_MAP.delete(profile_id);
+  }
+  return profile;
+}
+function addProfileToGlobalCache(profile_id, profile) {
+  PROFILE_MAP.set(profile_id, profile);
+  if (PROFILE_MAP.size > 30) {
+    const last = PROFILE_MAP.keys().next().value;
+    PROFILE_MAP.delete(last);
+  }
+}
+function startProfileForSpan(span) {
+  let startTimestamp;
+  if (isAutomatedPageLoadSpan(span)) {
+    startTimestamp = timestampInSeconds() * 1e3;
+  }
+  const profiler = startJSSelfProfile();
+  if (!profiler) {
+    return;
+  }
+  if (DEBUG_BUILD$1) {
+    debug$2.log(`[Profiling] started profiling span: ${spanToJSON(span).description}`);
+  }
+  const profileId = uuid4();
+  getCurrentScope().setContext("profile", {
+    profile_id: profileId,
+    start_timestamp: startTimestamp
+  });
+  async function onProfileHandler() {
+    if (!span) {
+      return;
+    }
+    if (!profiler) {
+      return;
+    }
+    return profiler.stop().then((profile) => {
+      if (maxDurationTimeoutID) {
+        WINDOW$4.clearTimeout(maxDurationTimeoutID);
+        maxDurationTimeoutID = void 0;
+      }
+      if (DEBUG_BUILD$1) {
+        debug$2.log(`[Profiling] stopped profiling of span: ${spanToJSON(span).description}`);
+      }
+      if (!profile) {
+        if (DEBUG_BUILD$1) {
+          debug$2.log(
+            `[Profiling] profiler returned null profile for: ${spanToJSON(span).description}`,
+            "this may indicate an overlapping span or a call to stopProfiling with a profile title that was never started"
+          );
+        }
+        return;
+      }
+      addProfileToGlobalCache(profileId, profile);
+    }).catch((error2) => {
+      if (DEBUG_BUILD$1) {
+        debug$2.log("[Profiling] error while stopping profiler:", error2);
+      }
+    });
+  }
+  let maxDurationTimeoutID = WINDOW$4.setTimeout(() => {
+    if (DEBUG_BUILD$1) {
+      debug$2.log("[Profiling] max profile duration elapsed, stopping profiling for:", spanToJSON(span).description);
+    }
+    onProfileHandler();
+  }, MAX_PROFILE_DURATION_MS);
+  const originalEnd = span.end.bind(span);
+  function profilingWrappedSpanEnd() {
+    if (!span) {
+      return originalEnd();
+    }
+    void onProfileHandler().then(
+      () => {
+        originalEnd();
+      },
+      () => {
+        originalEnd();
+      }
+    );
+    return span;
+  }
+  span.end = profilingWrappedSpanEnd;
+}
+const INTEGRATION_NAME$2 = "BrowserProfiling";
+const _browserProfilingIntegration = () => {
+  return {
+    name: INTEGRATION_NAME$2,
+    setup(client) {
+      const activeSpan = getActiveSpan();
+      const rootSpan = activeSpan && getRootSpan(activeSpan);
+      if (rootSpan && isAutomatedPageLoadSpan(rootSpan)) {
+        if (shouldProfileSpan(rootSpan)) {
+          startProfileForSpan(rootSpan);
+        }
+      }
+      client.on("spanStart", (span) => {
+        if (span === getRootSpan(span) && shouldProfileSpan(span)) {
+          startProfileForSpan(span);
+        }
+      });
+      client.on("beforeEnvelope", (envelope) => {
+        if (!getActiveProfilesCount()) {
+          return;
+        }
+        const profiledTransactionEvents = findProfiledTransactionsFromEnvelope(envelope);
+        if (!profiledTransactionEvents.length) {
+          return;
+        }
+        const profilesToAddToEnvelope = [];
+        for (const profiledTransaction of profiledTransactionEvents) {
+          const context = profiledTransaction?.contexts;
+          const profile_id = context?.profile?.["profile_id"];
+          const start_timestamp = context?.profile?.["start_timestamp"];
+          if (typeof profile_id !== "string") {
+            DEBUG_BUILD$1 && debug$2.log("[Profiling] cannot find profile for a span without a profile context");
+            continue;
+          }
+          if (!profile_id) {
+            DEBUG_BUILD$1 && debug$2.log("[Profiling] cannot find profile for a span without a profile context");
+            continue;
+          }
+          if (context?.profile) {
+            delete context.profile;
+          }
+          const profile = takeProfileFromGlobalCache(profile_id);
+          if (!profile) {
+            DEBUG_BUILD$1 && debug$2.log(`[Profiling] Could not retrieve profile for span: ${profile_id}`);
+            continue;
+          }
+          const profileEvent = createProfilingEvent(
+            profile_id,
+            start_timestamp,
+            profile,
+            profiledTransaction
+          );
+          if (profileEvent) {
+            profilesToAddToEnvelope.push(profileEvent);
+          }
+        }
+        addProfilesToEnvelope(envelope, profilesToAddToEnvelope);
+      });
+    }
+  };
+};
+const browserProfilingIntegration = defineIntegration(_browserProfilingIntegration);
+const INTEGRATION_NAME$1 = "SpotlightBrowser";
+const _spotlightIntegration = (options = {}) => {
+  const sidecarUrl = options.sidecarUrl || "http://localhost:8969/stream";
+  return {
+    name: INTEGRATION_NAME$1,
+    setup: () => {
+      DEBUG_BUILD$1 && debug$2.log("Using Sidecar URL", sidecarUrl);
+    },
+    // We don't want to send interaction transactions/root spans created from
+    // clicks within Spotlight to Sentry. Neither do we want them to be sent to
+    // spotlight.
+    processEvent: (event) => isSpotlightInteraction(event) ? null : event,
+    afterAllSetup: (client) => {
+      setupSidecarForwarding(client, sidecarUrl);
+    }
+  };
+};
+function setupSidecarForwarding(client, sidecarUrl) {
+  const makeFetch = getNativeImplementation("fetch");
+  let failCount = 0;
+  client.on("beforeEnvelope", (envelope) => {
+    if (failCount > 3) {
+      debug$2.warn("[Spotlight] Disabled Sentry -> Spotlight integration due to too many failed requests:", failCount);
+      return;
+    }
+    makeFetch(sidecarUrl, {
+      method: "POST",
+      body: serializeEnvelope(envelope),
+      headers: {
+        "Content-Type": "application/x-sentry-envelope"
+      },
+      mode: "cors"
+    }).then(
+      (res) => {
+        if (res.status >= 200 && res.status < 400) {
+          failCount = 0;
+        }
+      },
+      (err) => {
+        failCount++;
+        debug$2.error(
+          "Sentry SDK can't connect to Sidecar is it running? See: https://spotlightjs.com/sidecar/npx/",
+          err
+        );
+      }
+    );
+  });
+}
+const spotlightBrowserIntegration = defineIntegration(_spotlightIntegration);
+function isSpotlightInteraction(event) {
+  return Boolean(
+    event.type === "transaction" && event.spans && event.contexts?.trace && event.contexts.trace.op === "ui.action.click" && event.spans.some(({ description }) => description?.includes("#sentry-spotlight"))
+  );
+}
+const launchDarklyIntegration = defineIntegration(() => {
+  return {
+    name: "LaunchDarkly",
+    processEvent(event, _hint, _client) {
+      return _INTERNAL_copyFlagsFromScopeToEvent(event);
+    }
+  };
+});
+function buildLaunchDarklyFlagUsedHandler() {
+  return {
+    name: "sentry-flag-auditor",
+    type: "flag-used",
+    synchronous: true,
+    /**
+     * Handle a flag evaluation by storing its name and value on the current scope.
+     */
+    method: (flagKey, flagDetail, _context) => {
+      _INTERNAL_insertFlagToScope(flagKey, flagDetail.value);
+      _INTERNAL_addFeatureFlagToActiveSpan(flagKey, flagDetail.value);
+    }
+  };
+}
+const openFeatureIntegration = defineIntegration(() => {
+  return {
+    name: "OpenFeature",
+    processEvent(event, _hint, _client) {
+      return _INTERNAL_copyFlagsFromScopeToEvent(event);
+    }
+  };
+});
+class OpenFeatureIntegrationHook {
+  /**
+   * Successful evaluation result.
+   */
+  after(_hookContext, evaluationDetails) {
+    _INTERNAL_insertFlagToScope(evaluationDetails.flagKey, evaluationDetails.value);
+    _INTERNAL_addFeatureFlagToActiveSpan(evaluationDetails.flagKey, evaluationDetails.value);
+  }
+  /**
+   * On error evaluation result.
+   */
+  error(hookContext, _error, _hookHints) {
+    _INTERNAL_insertFlagToScope(hookContext.flagKey, hookContext.defaultValue);
+    _INTERNAL_addFeatureFlagToActiveSpan(hookContext.flagKey, hookContext.defaultValue);
+  }
+}
+const unleashIntegration = defineIntegration(
+  ({ featureFlagClientClass: unleashClientClass }) => {
+    return {
+      name: "Unleash",
+      setupOnce() {
+        const unleashClientPrototype = unleashClientClass.prototype;
+        fill(unleashClientPrototype, "isEnabled", _wrappedIsEnabled);
+      },
+      processEvent(event, _hint, _client) {
+        return _INTERNAL_copyFlagsFromScopeToEvent(event);
+      }
+    };
+  }
+);
+function _wrappedIsEnabled(original) {
+  return function(...args) {
+    const toggleName = args[0];
+    const result = original.apply(this, args);
+    if (typeof toggleName === "string" && typeof result === "boolean") {
+      _INTERNAL_insertFlagToScope(toggleName, result);
+      _INTERNAL_addFeatureFlagToActiveSpan(toggleName, result);
+    } else if (DEBUG_BUILD$1) {
+      debug$2.error(
+        `[Feature Flags] UnleashClient.isEnabled does not match expected signature. arg0: ${toggleName} (${typeof toggleName}), result: ${result} (${typeof result})`
+      );
+    }
+    return result;
+  };
+}
+const statsigIntegration = defineIntegration(
+  ({ featureFlagClient: statsigClient }) => {
+    return {
+      name: "Statsig",
+      setup(_client) {
+        statsigClient.on("gate_evaluation", (event) => {
+          _INTERNAL_insertFlagToScope(event.gate.name, event.gate.value);
+          _INTERNAL_addFeatureFlagToActiveSpan(event.gate.name, event.gate.value);
+        });
+      },
+      processEvent(event, _hint, _client) {
+        return _INTERNAL_copyFlagsFromScopeToEvent(event);
+      }
+    };
+  }
+);
+async function diagnoseSdkConnectivity() {
+  const client = getClient();
+  if (!client) {
+    return "no-client-active";
+  }
+  if (!client.getDsn()) {
+    return "no-dsn-configured";
+  }
+  try {
+    await suppressTracing(
+      () => (
+        // If fetch throws, there is likely an ad blocker active or there are other connective issues.
+        fetch(
+          // We are using the
+          // - "sentry-sdks" org with id 447951 not to pollute any actual organizations.
+          // - "diagnose-sdk-connectivity" project with id 4509632503087104
+          // - the public key of said org/project, which is disabled in the project settings
+          // => this DSN: https://c1dfb07d783ad5325c245c1fd3725390@o447951.ingest.us.sentry.io/4509632503087104 (i.e. disabled)
+          "https://o447951.ingest.sentry.io/api/4509632503087104/envelope/?sentry_version=7&sentry_key=c1dfb07d783ad5325c245c1fd3725390&sentry_client=sentry.javascript.browser%2F1.33.7",
+          {
+            body: "{}",
+            method: "POST",
+            mode: "cors",
+            credentials: "omit"
+          }
+        )
+      )
+    );
+  } catch {
+    return "sentry-unreachable";
+  }
+}
+const INTEGRATION_NAME = "WebWorker";
+const webWorkerIntegration = defineIntegration(({ worker }) => ({
+  name: INTEGRATION_NAME,
+  setupOnce: () => {
+    (Array.isArray(worker) ? worker : [worker]).forEach((w2) => listenForSentryDebugIdMessages(w2));
+  },
+  addWorker: (worker2) => listenForSentryDebugIdMessages(worker2)
+}));
+function listenForSentryDebugIdMessages(worker) {
+  worker.addEventListener("message", (event) => {
+    if (isSentryDebugIdMessage(event.data)) {
+      event.stopImmediatePropagation();
+      DEBUG_BUILD$1 && debug$2.log("Sentry debugId web worker message received", event.data);
+      WINDOW$4._sentryDebugIds = {
+        ...event.data._sentryDebugIds,
+        // debugIds of the main thread have precedence over the worker's in case of a collision.
+        ...WINDOW$4._sentryDebugIds
+      };
+    }
+  });
+}
+function registerWebWorker({ self }) {
+  self.postMessage({
+    _sentryMessage: true,
+    _sentryDebugIds: self._sentryDebugIds ?? void 0
+  });
+}
+function isSentryDebugIdMessage(eventData) {
+  return isPlainObject(eventData) && eventData._sentryMessage === true && "_sentryDebugIds" in eventData && (isPlainObject(eventData._sentryDebugIds) || eventData._sentryDebugIds === void 0);
+}
+const Sentry = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  BrowserClient,
+  OpenFeatureIntegrationHook,
+  SDK_VERSION,
+  SEMANTIC_ATTRIBUTE_SENTRY_OP,
+  SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN,
+  SEMANTIC_ATTRIBUTE_SENTRY_SAMPLE_RATE,
+  SEMANTIC_ATTRIBUTE_SENTRY_SOURCE,
+  Scope,
+  WINDOW: WINDOW$4,
+  addBreadcrumb,
+  addEventProcessor,
+  addIntegration,
+  breadcrumbsIntegration,
+  browserApiErrorsIntegration,
+  browserProfilingIntegration,
+  browserSessionIntegration,
+  browserTracingIntegration,
+  buildLaunchDarklyFlagUsedHandler,
+  captureConsoleIntegration,
+  captureEvent,
+  captureException,
+  captureFeedback,
+  captureMessage,
+  captureSession,
+  chromeStackLineParser,
+  close,
+  consoleLoggingIntegration,
+  contextLinesIntegration,
+  continueTrace,
+  createConsolaReporter,
+  createTransport,
+  createUserFeedbackEnvelope,
+  dedupeIntegration,
+  defaultRequestInstrumentationOptions,
+  defaultStackLineParsers,
+  defaultStackParser,
+  diagnoseSdkConnectivity,
+  endSession,
+  eventFiltersIntegration,
+  eventFromException,
+  eventFromMessage,
+  exceptionFromError,
+  extraErrorDataIntegration,
+  featureFlagsIntegration,
+  feedbackAsyncIntegration,
+  feedbackIntegration: feedbackSyncIntegration,
+  feedbackSyncIntegration,
+  flush,
+  forceLoad,
+  functionToStringIntegration,
+  geckoStackLineParser,
+  getActiveSpan,
+  getClient,
+  getCurrentScope,
+  getDefaultIntegrations,
+  getFeedback,
+  getGlobalScope,
+  getIsolationScope,
+  getReplay,
+  getRootSpan,
+  getSpanDescendants,
+  getSpanStatusFromHttpCode,
+  getTraceData,
+  globalHandlersIntegration,
+  graphqlClientIntegration,
+  httpClientIntegration,
+  httpContextIntegration,
+  inboundFiltersIntegration,
+  init: init$1,
+  instrumentOutgoingRequests,
+  instrumentSupabaseClient,
+  isEnabled,
+  isInitialized,
+  lastEventId,
+  launchDarklyIntegration,
+  lazyLoadIntegration,
+  linkedErrorsIntegration,
+  logger: publicApi$1,
+  makeBrowserOfflineTransport,
+  makeFetchTransport,
+  makeMultiplexedTransport,
+  metrics: publicApi,
+  moduleMetadataIntegration,
+  onLoad,
+  openFeatureIntegration,
+  opera10StackLineParser,
+  opera11StackLineParser,
+  parameterize,
+  registerSpanErrorInstrumentation,
+  registerWebWorker,
+  replayCanvasIntegration,
+  replayIntegration,
+  reportPageLoaded,
+  reportingObserverIntegration,
+  rewriteFramesIntegration,
+  sendFeedback,
+  setActiveSpanInBrowser,
+  setContext,
+  setCurrentClient,
+  setExtra,
+  setExtras,
+  setHttpStatus,
+  setMeasurement,
+  setTag,
+  setTags,
+  setUser,
+  showReportDialog,
+  spanToBaggageHeader,
+  spanToJSON,
+  spanToTraceHeader,
+  spotlightBrowserIntegration,
+  startBrowserTracingNavigationSpan,
+  startBrowserTracingPageLoadSpan,
+  startInactiveSpan,
+  startNewTrace,
+  startSession,
+  startSpan,
+  startSpanManual,
+  statsigIntegration,
+  supabaseIntegration,
+  suppressTracing,
+  thirdPartyErrorFilterIntegration,
+  unleashIntegration,
+  updateSpanName,
+  webWorkerIntegration,
+  winjsStackLineParser,
+  withActiveSpan,
+  withIsolationScope,
+  withScope,
+  zodErrorsIntegration
+}, Symbol.toStringTag, { value: "Module" }));
 function getEnvironment() {
   const hostname = window.location.hostname;
   if (hostname === "www.ordotype.fr") return "production";
@@ -10852,6 +25498,7 @@ function initializeSentry() {
   setTag("environment", environment);
   setTag("hostname", window.location.hostname);
   setTag("source_project", "sessions-project");
+  window.Sentry = Sentry;
   console.log(`Sentry initialized for ${window.location.hostname} in ${environment} (sessions-project)`);
 }
 function setupSentryGlobals() {
@@ -10922,8 +25569,10 @@ const isFormPage = (url) => {
   }
   let memberstackReady = false;
   let domReady = false;
+  let initialized = false;
   async function tryInitialize() {
-    if (memberstackReady && domReady) {
+    if (memberstackReady && domReady && !initialized) {
+      initialized = true;
       console.log("ordo auth init - both events ready");
       await init();
     }
