@@ -521,11 +521,10 @@ function initLoginForm(form) {
   const password = form.querySelector("[data-ms-member='password']");
   if (email) email.type = "email";
   if (password) password.type = "password";
-  form.addEventListener("submit", async (event) => {
-    event.stopImmediatePropagation();
+  form.addEventListener("submit", (event) => {
     event.preventDefault();
-    await formHandler(event, "login");
-    return false;
+    event.stopImmediatePropagation();
+    Promise.resolve().then(() => formHandler(event, "login"));
   }, true);
 }
 function initAuthForms() {
@@ -545,15 +544,15 @@ function initAuthForms() {
   }
   const googleAuth = document.querySelectorAll('[data-ordo-auth-provider="google"]').length ? document.querySelectorAll('[data-ordo-auth-provider="google"]') : document.querySelectorAll('[data-ms-auth-provider="google"]');
   googleAuth.forEach((element) => {
-    element.addEventListener("click", async (event) => {
+    element.addEventListener("click", (event) => {
       const form = element.closest("[data-ordo-form]") || element.closest("[data-ms-form]");
       if (form) {
         event.stopImmediatePropagation();
         event.preventDefault();
         if (form.getAttribute("data-ms-form") === "signup") {
-          await handleSignup(form, { provider: "google" });
+          Promise.resolve().then(() => handleSignup(form, { provider: "google" }));
         } else {
-          await handleLogin(form, { provider: "google" });
+          Promise.resolve().then(() => handleLogin(form, { provider: "google" }));
         }
       }
     }, true);
@@ -696,7 +695,9 @@ document.addEventListener(MemberstackEvents.LOGOUT, async (ev) => {
       userSessionLifetime: sessionLifetime.formatted,
       userSessionLifeTimeHours: sessionLifetime.hours,
       userSessionLifeTimeMinutes: sessionLifetime.minutes,
-      userSessionLifeTimeSeconds: sessionLifetime.seconds
+      userSessionLifeTimeSeconds: sessionLifetime.seconds,
+      userSessionSourceURL: document.referrer,
+      userSessionRef: localStorage.getItem("_ms-mid") || "undefined"
     },
     op: "auth.logout",
     description: "User logged out",
